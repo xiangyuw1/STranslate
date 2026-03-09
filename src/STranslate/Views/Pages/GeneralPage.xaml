@@ -514,7 +514,7 @@
                         </StackPanel>
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Header="{DynamicResource General_WindowAlign}" Visibility="{Binding Settings.WindowScreen, Converter={cnvt:EqualToVisibilityInverseConverter}, ConverterParameter={x:Static core:WindowScreenType.RememberLastLaunchLocation}}">
+                    <ui:SettingsCard Header="{DynamicResource General_WindowAlign}" Visibility="{Binding Settings.IsWindowAlignVisible, Converter={cnvt:BoolToVisibilityConverter}}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.DesktopCursor_20_Regular}" />
                         </ui:SettingsCard.HeaderIcon>

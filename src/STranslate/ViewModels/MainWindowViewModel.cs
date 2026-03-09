@@ -17,6 +17,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Windows.Win32;
 
 namespace STranslate.ViewModels;
 
@@ -1560,6 +1561,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 Settings.MainWindowTop = -18000;
                 return;
             }
+
+            if (Settings.WindowScreen == WindowScreenType.FollowMouseOnHotkey)
+            {
+                UpdatePositionNearCursorForHotkey();
+                return;
+            }
+
             if (Settings.WindowScreen == WindowScreenType.RememberLastLaunchLocation)
             {
                 var previousScreenWidth = Settings.PreviousScreenWidth;
@@ -1617,6 +1625,48 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
     }
 
+    private void UpdatePositionNearCursorForHotkey()
+    {
+        if (!PInvoke.GetCursorPos(out var cursorPosition))
+            return;
+
+        const double horizontalOffset = 16;
+        const double verticalOffset = 20;
+        const double edgePadding = 8;
+
+        var cursorDip = Win32Helper.TransformPixelsToDIP(MainWindow, cursorPosition.X, cursorPosition.Y);
+
+        var screen = MonitorInfo.GetCursorDisplayMonitor();
+        var workAreaTopLeft = Win32Helper.TransformPixelsToDIP(MainWindow, screen.WorkingArea.X, screen.WorkingArea.Y);
+        var workAreaBottomRight = Win32Helper.TransformPixelsToDIP(
+            MainWindow,
+            screen.WorkingArea.X + screen.WorkingArea.Width,
+            screen.WorkingArea.Y + screen.WorkingArea.Height);
+
+        var windowWidth = MainWindow.ActualWidth > 0 ? MainWindow.ActualWidth : Settings.MainWindowWidth;
+        var windowHeight = MainWindow.ActualHeight > 0 ? MainWindow.ActualHeight : MainWindow.MinHeight;
+
+        var left = cursorDip.X + horizontalOffset;
+        var top = cursorDip.Y + verticalOffset;
+
+        if (left + windowWidth > workAreaBottomRight.X - edgePadding)
+            left = cursorDip.X - windowWidth - horizontalOffset;
+
+        if (top + windowHeight > workAreaBottomRight.Y - edgePadding)
+            top = cursorDip.Y - windowHeight - verticalOffset;
+
+        var minLeft = workAreaTopLeft.X + edgePadding;
+        var minTop = workAreaTopLeft.Y + edgePadding;
+        var maxLeft = workAreaBottomRight.X - windowWidth - edgePadding;
+        var maxTop = workAreaBottomRight.Y - windowHeight - edgePadding;
+
+        if (maxLeft < minLeft) maxLeft = minLeft;
+        if (maxTop < minTop) maxTop = minTop;
+
+        Settings.MainWindowLeft = Math.Clamp(left, minLeft, maxLeft);
+        Settings.MainWindowTop = Math.Clamp(top, minTop, maxTop);
+    }
+
     private void AdjustPositionForResolutionChange()
     {
         var screenWidth = SystemParameters.VirtualScreenWidth;
@@ -1667,6 +1717,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         switch (Settings.WindowScreen)
         {
             case WindowScreenType.Cursor:
+            case WindowScreenType.FollowMouseOnHotkey:
                 screen = MonitorInfo.GetCursorDisplayMonitor();
                 break;
             case WindowScreenType.Focus:

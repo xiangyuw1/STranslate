@@ -131,6 +131,10 @@ public partial class Settings : ObservableObject
     public double PreviousScreenHeight { get; set; }
     [ObservableProperty] public partial int CustomScreenNumber { get; set; } = 1;
     [ObservableProperty] public partial WindowScreenType WindowScreen { get; set; } = WindowScreenType.Cursor;
+    public bool IsWindowAlignVisible =>
+        WindowScreen != WindowScreenType.RememberLastLaunchLocation &&
+        WindowScreen != WindowScreenType.FollowMouseOnHotkey;
+    partial void OnWindowScreenChanged(WindowScreenType value) => OnPropertyChanged(nameof(IsWindowAlignVisible));
     [ObservableProperty] public partial WindowAlignType WindowAlign { get; set; } = WindowAlignType.Center;
     [ObservableProperty] public partial double MainWindowLeft { get; set; }
     [ObservableProperty] public partial double MainWindowTop { get; set; }
@@ -706,6 +710,7 @@ public enum WindowScreenType
 {
     RememberLastLaunchLocation,
     Cursor,
+    FollowMouseOnHotkey,
     Focus,
     Primary,
     Custom
