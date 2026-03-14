@@ -34,6 +34,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
     private MainWindowViewModel? _mainWindowViewModel;
     private PluginManager? _pluginManager;
     private Notification? _notification;
+    private AutoUpdateCheckerService? _autoUpdateCheckerService;
     private static bool _disposed;
 
     public bool IsNavigated { get; set; }
@@ -134,6 +135,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
                     services.AddScopedFromNamespace("STranslate.Views.Pages", Assembly.GetExecutingAssembly());
 
                     services.AddSingleton<UpdaterService>();
+                    services.AddSingleton<AutoUpdateCheckerService>();
                     services.AddSingleton<ExternalCallService>();
                     services.AddSingleton<SqlService>();
                 })
@@ -201,6 +203,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         RegisterTaskSchedulerUnhandledException();
 
         _mainWindowViewModel = Ioc.Default.GetRequiredService<MainWindowViewModel>();
+        _autoUpdateCheckerService = Ioc.Default.GetRequiredService<AutoUpdateCheckerService>();
         _mainWindow = new MainWindow();
         Current.MainWindow = _mainWindow;
         Current.MainWindow.Title = Constant.AppName;
@@ -211,6 +214,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
             UpdateToolTip();
             CheckAndShowInfo();
             WebDavBackupOperation();
+            _autoUpdateCheckerService?.Start();
         };
 
         RegisterExitEvents();
@@ -475,6 +479,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         {
             // Dispose needs to be called on the main Windows thread,
             // since some resources owned by the thread need to be disposed.
+            _autoUpdateCheckerService?.Dispose();
             _notification?.Uninstall();
             _mainWindowViewModel?.Dispose();
             _mainWindow?.Dispatcher.Invoke(_mainWindow.Dispose);

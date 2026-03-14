@@ -362,6 +362,8 @@
     <sys:String x:Key="RestoreBackup">バックアップから復元</sys:String>
     <sys:String x:Key="Version">バージョン</sys:String>
     <sys:String x:Key="CheckUpdate">更新を確認</sys:String>
+    <sys:String x:Key="General_AutoCheckUpdate">自動更新チェック</sys:String>
+    <sys:String x:Key="General_AutoCheckUpdateDescription">定期的に新しいバージョンを確認し、見つかった場合はトレイ通知でお知らせします。</sys:String>
     <sys:String x:Key="NoCheckUpdataInDev">開発モードでは更新確認は無効です</sys:String>
     <sys:String x:Key="Donate">寄付</sys:String>
     <sys:String x:Key="OfficialWebsite">公式サイト</sys:String>
@@ -697,6 +699,8 @@
     <sys:String x:Key="NoUpdateInfoFound">更新情報は見つかりませんでした。</sys:String>
     <sys:String x:Key="AlreadyLatestVersion">最新バージョンを使用中です。</sys:String>
     <sys:String x:Key="UpdateAvailable">利用可能な更新があります</sys:String>
+    <sys:String x:Key="UpdateOpenAboutButton">更新ページへ</sys:String>
+    <sys:String x:Key="UpdateAvailableTrayMessage">新バージョン {0} が見つかりました。ボタンから 設定-情報 へ移動して更新できます。</sys:String>
     <sys:String x:Key="NewVersionFound">新バージョン {0} が見つかりました。ダウンロードしますか？</sys:String>
     <sys:String x:Key="PortableDataMoveError">STranslateはユーザー設定データを新バージョンへ移行できませんでした。&#10;設定データフォルダを {0} から {1} へ手動で移動してください。</sys:String>
     <sys:String x:Key="UpdateReady">更新の準備完了</sys:String>

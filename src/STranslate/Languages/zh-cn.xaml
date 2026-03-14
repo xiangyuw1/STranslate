@@ -372,6 +372,8 @@
     <sys:String x:Key="RestoreBackup">恢复备份</sys:String>
     <sys:String x:Key="Version">版本</sys:String>
     <sys:String x:Key="CheckUpdate">检查更新</sys:String>
+    <sys:String x:Key="General_AutoCheckUpdate">自动检查更新</sys:String>
+    <sys:String x:Key="General_AutoCheckUpdateDescription">定时检查新版本，发现后通过托盘通知提醒。</sys:String>
     <sys:String x:Key="NoCheckUpdataInDev">开发模式下禁止检查更新</sys:String>
     <sys:String x:Key="Donate">赞助</sys:String>
     <sys:String x:Key="OfficialWebsite">官网</sys:String>
@@ -723,6 +725,8 @@
     <sys:String x:Key="NoUpdateInfoFound">未找到更新信息。</sys:String>
     <sys:String x:Key="AlreadyLatestVersion">您已是最新版本。</sys:String>
     <sys:String x:Key="UpdateAvailable">有可用更新</sys:String>
+    <sys:String x:Key="UpdateOpenAboutButton">前往更新</sys:String>
+    <sys:String x:Key="UpdateAvailableTrayMessage">发现新版本 {0}，点击按钮可前往 设置-关于 页面更新。</sys:String>
     <sys:String x:Key="NewVersionFound">发现新版本 {0}。是否下载？</sys:String>
     <sys:String x:Key="PortableDataMoveError">STranslate 无法将您的用户配置数据移动到新更新版本。&#10;请手动将您的配置数据文件夹从 {0} 移动到 {1}</sys:String>
     <sys:String x:Key="UpdateReady">更新准备就绪</sys:String>
