@@ -16,6 +16,8 @@
   - `HttpListener` 本地服务，路由外部请求到主窗口命令。
 - `STranslate/Core/UpdaterService.cs`
   - 手动检查更新、后台轮询检查与升级应用流程。
+- `STranslate/Controls/UpdateChangelogDialog.xaml(.cs)`
+  - 手动更新确认弹窗：加载并渲染远程 `CHANGELOG.md`，失败时回退外链。
 - `STranslate/Core/AutoUpdateCheckerService.cs`
   - 自动检查更新调度（首次延迟 + 固定轮询间隔 + 开关判定）。
 - `STranslate/Services/BackupService.cs`
@@ -38,8 +40,13 @@
 ### 从入口到结果：应用更新（手动）
 1. `UpdaterService.UpdateAppAsync()` 使用 `UpdateLock` 防止并发更新。
 2. 通过 Velopack `GithubSource` 检查新版本。
-3. 有新版本时下载更新；便携模式下先把便携目录复制到临时目录，避免覆盖丢失配置。
-4. 用户确认后 `WaitExitThenApplyUpdates()` 并关闭应用。
+3. 非静默检查时弹出 `UpdateChangelogDialog`：
+   - 默认先显示加载动画（`ProgressRing`）。
+   - 通过 `IHttpService` 拉取 `https://raw.githubusercontent.com/STranslate/STranslate/refs/heads/main/CHANGELOG.md` 并用 `MarkdownViewer` 渲染完整更新内容。
+   - 加载失败时显示可点击外链回退文案，用户可在浏览器查看完整更新日志。
+4. 用户点击“下载”后继续下载更新；取消则终止本次更新流程。
+5. 便携模式下先把便携目录复制到临时目录，避免覆盖丢失配置。
+6. 下载完成后，用户确认重启时执行 `WaitExitThenApplyUpdates()` 并关闭应用。
 
 ### 从入口到结果：应用更新（自动检查）
 1. 应用启动后，`App.OnStartup()` 在主窗口 `Loaded` 阶段启动 `AutoUpdateCheckerService`。
@@ -80,6 +87,8 @@
 - `STranslate/ViewModels/Pages/NetworkViewModel.cs`
 - `STranslate/Core/ExternalCallService.cs`
 - `STranslate/Core/UpdaterService.cs`
+- `STranslate/Controls/UpdateChangelogDialog.xaml`
+- `STranslate/Controls/UpdateChangelogDialog.xaml.cs`
 - `STranslate/Core/AutoUpdateCheckerService.cs`
 - `STranslate/Services/BackupService.cs`
 - `STranslate/App.xaml.cs`
