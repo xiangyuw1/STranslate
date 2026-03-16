@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging;
+using iNKORE.UI.WPF.Modern.Controls;
+using STranslate.Controls;
 using STranslate.Helpers;
 using STranslate.Plugin;
 using System.Net;
@@ -62,9 +64,18 @@ public class UpdaterService(
                 return;
             }
 
-            if (MessageBox.Show(string.Format(i18n.GetTranslation("NewVersionFound"), newReleaseVersion),
-                    Constant.AppName,
-                    MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+            if (!silentUpdate)
+            {
+                var dialogResult = await new UpdateChangelogDialog(newReleaseVersion.ToString()).ShowAsync();
+                if (dialogResult != ContentDialogResult.Primary)
+                {
+                    logger.LogInformation("User cancelled the update.");
+                    return;
+                }
+            }
+            else if (MessageBox.Show(string.Format(i18n.GetTranslation("NewVersionFound"), newReleaseVersion),
+                         Constant.AppName,
+                         MessageBoxButton.YesNo) != MessageBoxResult.Yes)
             {
                 logger.LogInformation("User cancelled the update.");
                 return;

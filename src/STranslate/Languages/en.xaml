@@ -733,6 +733,8 @@
     <sys:String x:Key="UpdateReady">Update Ready</sys:String>
     <sys:String x:Key="UpdateFailed">Update Failed</sys:String>
     <sys:String x:Key="UpdateFailedMessage">Failed to update the application. Please check your connection.</sys:String>
+    <sys:String x:Key="UpdateChangelogLoading">Loading release notes...</sys:String>
+    <sys:String x:Key="UpdateChangelogLoadFailedMarkdown">Failed to load release notes. You can [open the full changelog here]({0}).</sys:String>
     <sys:String x:Key="NewVersionTips">New version {0} is available, would you like to restart STranslate to use the update?</sys:String>
 
     <!--  // LLM Service Configurations for plugins //  -->

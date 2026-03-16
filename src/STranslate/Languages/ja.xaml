@@ -708,6 +708,8 @@
     <sys:String x:Key="UpdateReady">更新の準備完了</sys:String>
     <sys:String x:Key="UpdateFailed">更新失敗</sys:String>
     <sys:String x:Key="UpdateFailedMessage">アプリケーションの更新に失敗しました。ネットワーク接続を確認してください。</sys:String>
+    <sys:String x:Key="UpdateChangelogLoading">更新内容を読み込み中...</sys:String>
+    <sys:String x:Key="UpdateChangelogLoadFailedMarkdown">更新内容の読み込みに失敗しました。[ここをクリックして完全な更新ログを表示]({0})。</sys:String>
     <sys:String x:Key="NewVersionTips">新バージョン {0} が利用可能です。STranslateを再起動して更新を適用しますか？</sys:String>
 
     <sys:String x:Key="Url">エンドポイント</sys:String>

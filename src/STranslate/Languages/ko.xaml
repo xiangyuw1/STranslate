@@ -708,6 +708,8 @@
     <sys:String x:Key="UpdateReady">업데이트 준비 완료</sys:String>
     <sys:String x:Key="UpdateFailed">업데이트 실패</sys:String>
     <sys:String x:Key="UpdateFailedMessage">애플리케이션 업데이트에 실패했습니다. 네트워크 연결을 확인하세요.</sys:String>
+    <sys:String x:Key="UpdateChangelogLoading">업데이트 내용을 불러오는 중...</sys:String>
+    <sys:String x:Key="UpdateChangelogLoadFailedMarkdown">업데이트 내용을 불러오지 못했습니다. [여기를 눌러 전체 변경 로그 보기]({0}).</sys:String>
     <sys:String x:Key="NewVersionTips">새 버전 {0}을(를) 사용할 수 있습니다. 업데이트를 적용하기 위해 STranslate를 재시작하시겠습니까?</sys:String>
 
     <sys:String x:Key="Url">엔드포인트</sys:String>

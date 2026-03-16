@@ -734,6 +734,8 @@
     <sys:String x:Key="UpdateReady">更新準備就緒</sys:String>
     <sys:String x:Key="UpdateFailed">更新失敗</sys:String>
     <sys:String x:Key="UpdateFailedMessage">應用程式更新失敗。請檢查您的網路連接。</sys:String>
+    <sys:String x:Key="UpdateChangelogLoading">正在載入更新內容...</sys:String>
+    <sys:String x:Key="UpdateChangelogLoadFailedMarkdown">更新內容載入失敗。你可以[點擊這裡查看完整更新日誌]({0})。</sys:String>
     <sys:String x:Key="NewVersionTips">新版本 {0} 已可用，是否重新啟動 STranslate 以使用更新？</sys:String>
 
     <!--  // LLM Service Configurations for plugins //  -->
