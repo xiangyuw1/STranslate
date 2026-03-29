@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace STranslate.Plugin.Translate.MicrosoftBuiltIn;
 
-公共 class Main : TranslatePluginBase
+public class Main : TranslatePluginBase
 {
     private Control? _settingUi;
     private SettingsViewModel? _viewModel;
@@ -127,8 +127,7 @@ namespace STranslate.Plugin.Translate.MicrosoftBuiltIn;
 
         var token = await Context.HttpService.GetAsync(AuthUrl, new Options(), cancellationToken);
         token = token.Trim().Trim('"');
-        
-        string url = $"https://{ApiEndpoint}/translate?api-version={ApiVersion}&to={targetStr}";
+
         if (!string.IsNullOrEmpty(sourceStr))
         {
             url += $"&from={sourceStr}";
