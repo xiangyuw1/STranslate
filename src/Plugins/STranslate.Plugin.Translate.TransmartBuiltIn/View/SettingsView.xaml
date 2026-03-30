@@ -13,38 +13,10 @@
     mc:Ignorable="d">
 
     <ikw:SimpleStackPanel Spacing="12">
-        <!--  连接验证  -->
-        <ui:SettingsCard Description="{DynamicResource PluginTranslateValidateDescription}" Header="{DynamicResource PluginTranslateValidate}">
+        <ui:SettingsCard Description="{DynamicResource STranslate_Plugin_Translate_Transmart_Content}" Header="{DynamicResource STranslate_Plugin_Translate_Transmart}">
             <ui:SettingsCard.HeaderIcon>
-                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.CheckmarkCircle_24_Regular}" />
+                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Info_20_Regular}" />
             </ui:SettingsCard.HeaderIcon>
-
-            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
-                <Button Command="{Binding ValidateCommand}" Style="{StaticResource AccentButtonStyle}">
-                    <ui:IconAndText Content="{DynamicResource PluginTranslateValidate}" Icon="{x:Static ui:FluentSystemIcons.Play_24_Regular}" />
-                </Button>
-
-                <!--  验证结果显示  -->
-                <Border>
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="4" />
-                            <Setter Property="Padding" Value="8,4" />
-                            <Setter Property="Background" Value="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorAttentionBackgroundBrushKey}}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ValidateResult}" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontSize="{DynamicResource STControlFontSize12}"
-                        Foreground="{DynamicResource SystemFillColorSuccessBrush}"
-                        Text="{Binding ValidateResult}" />
-                </Border>
-            </ikw:SimpleStackPanel>
         </ui:SettingsCard>
     </ikw:SimpleStackPanel>
 </UserControl>

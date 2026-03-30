@@ -15,7 +15,7 @@ public class Main : TranslatePluginBase
 
     public override Control GetSettingUI()
     {
-        _viewModel ??= new SettingsViewModel(Context, this);
+        _viewModel ??= new SettingsViewModel();
         _settingUi ??= new SettingsView { DataContext = _viewModel };
         return _settingUi;
     }

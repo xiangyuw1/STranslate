@@ -1,5 +1,9 @@
 Reference this package to develop a plugin for [STranslate](https://github.com/STranslate/STranslate).
 
+## v1.0.10 - 2026-03-30
+
+- IHttpService 添加 StreamPostAsyncEnumerable 方法 感谢 @SwiftFloatFlow #672
+
 ## v1.0.9 - 2026-03-12
 
 - 添加同步主题能力给插件 @SwiftFloatFlow

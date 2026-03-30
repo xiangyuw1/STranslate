@@ -1,4 +1,4 @@
 {
-  "Name": "Transmart (Built-in)",
-  "Description": "Free Tencent Transmart translation plugin"
+  "Name": "Transmart (Built-in, Deprecated)",
+  "Description": "Tencent Transmart service has been discontinued; this plugin is deprecated."
 }
