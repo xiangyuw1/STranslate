@@ -126,6 +126,7 @@
     <sys:String x:Key="General_ShowBackTranslation">Show back translation button</sys:String>
     <sys:String x:Key="General_ShowPrompt">Show Prompt</sys:String>
     <sys:String x:Key="General_ShowPromptDescription">Whether to display the prompt switch button for AI translation services on the main interface</sys:String>
+    <sys:String x:Key="MarkdownRender">MD Render</sys:String>
     <sys:String x:Key="General_FontFamily">FontFamily</sys:String>
     <sys:String x:Key="General_HistoryCount">History Count</sys:String>
     <sys:String x:Key="General_CopyAfterTranslation">Copy After Translation</sys:String>

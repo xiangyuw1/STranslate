@@ -267,6 +267,11 @@
     <Style x:Key="{x:Static markdig:Styles.DocumentStyleKey}" TargetType="{x:Type FlowDocument}">
         <Setter Property="FontFamily" Value="{DynamicResource {x:Static ui:ThemeKeys.ContentControlThemeFontFamilyKey}}" />
         <Setter Property="TextAlignment" Value="Left" />
+        <Setter Property="FontSize" Value="{DynamicResource STControlFontSize14}" />
+        <Setter Property="PagePadding" Value="0" />
+    </Style>
+    <Style TargetType="{x:Type Paragraph}">
+        <Setter Property="Margin" Value="0" />
     </Style>
     <Style TargetType="{x:Type List}">
         <Setter Property="Margin" Value="40,0,0,0" />
@@ -282,31 +287,34 @@
         <Setter Property="FontFamily" Value="Consolas, Lucida Sans Typewriter, Courier New" />
     </Style>
     <Style x:Key="{x:Static markdig:Styles.Heading1StyleKey}" TargetType="{x:Type Paragraph}">
-        <Setter Property="FontSize" Value="42" />
+        <Setter Property="FontSize" Value="28" />
         <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}" />
         <Setter Property="FontWeight" Value="Bold" />
     </Style>
     <Style x:Key="{x:Static markdig:Styles.Heading2StyleKey}" TargetType="{x:Type Paragraph}">
-        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontSize" Value="24" />
         <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}" />
-        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style x:Key="{x:Static markdig:Styles.Heading3StyleKey}" TargetType="{x:Type Paragraph}">
-        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontSize" Value="20" />
         <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}" />
-        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style x:Key="{x:Static markdig:Styles.Heading4StyleKey}" TargetType="{x:Type Paragraph}">
         <Setter Property="FontSize" Value="18" />
         <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}" />
-        <Setter Property="FontWeight" Value="Light" />
-        <Setter Property="TextDecorations" Value="Underline" />
+        <Setter Property="FontWeight" Value="Medium" />
     </Style>
     <Style x:Key="{x:Static markdig:Styles.Heading5StyleKey}" TargetType="{x:Type Paragraph}">
-        <!--  no changes  -->
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}" />
+        <Setter Property="FontWeight" Value="Medium" />
     </Style>
     <Style x:Key="{x:Static markdig:Styles.Heading6StyleKey}" TargetType="{x:Type Paragraph}">
-        <!--  no changes  -->
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}" />
+        <Setter Property="FontWeight" Value="Medium" />
     </Style>
     <Style x:Key="{x:Static markdig:Styles.HyperlinkStyleKey}" TargetType="{x:Type Hyperlink}">
         <!--  no changes  -->

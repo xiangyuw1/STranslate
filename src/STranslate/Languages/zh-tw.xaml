@@ -126,6 +126,7 @@
     <sys:String x:Key="General_ShowBackTranslation">顯示回譯按鈕</sys:String>
     <sys:String x:Key="General_ShowPrompt">提示詞</sys:String>
     <sys:String x:Key="General_ShowPromptDescription">主介面是否顯示 AI 翻譯服務的提示詞切換按鈕</sys:String>
+    <sys:String x:Key="MarkdownRender">MD渲染</sys:String>
     <sys:String x:Key="General_FontFamily">字體</sys:String>
     <sys:String x:Key="General_HistoryCount">歷史記錄數量</sys:String>
     <sys:String x:Key="General_CopyAfterTranslation">翻譯後複製</sys:String>

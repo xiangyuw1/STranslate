@@ -123,6 +123,7 @@
     <sys:String x:Key="General_ShowBackTranslation">再翻訳ボタンを表示</sys:String>
     <sys:String x:Key="General_ShowPrompt">プロンプト</sys:String>
     <sys:String x:Key="General_ShowPromptDescription">メイン画面にAI翻訳サービスのプロンプト切替ボタンを表示するかどうか。</sys:String>
+    <sys:String x:Key="MarkdownRender">MDレンダリング</sys:String>
     <sys:String x:Key="General_FontFamily">フォント</sys:String>
     <sys:String x:Key="General_HistoryCount">履歴記録数</sys:String>
     <sys:String x:Key="General_CopyAfterTranslation">翻訳後にコピー</sys:String>

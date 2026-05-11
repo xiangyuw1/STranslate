@@ -1620,9 +1620,21 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    private void Copy(string text)
+    private void Copy(object? param)
     {
+        string? text = null;
+        
+        if (param is Service service)
+        {
+            text = (service.Plugin as ITranslatePlugin)?.TransResult?.Text;
+        }
+        else if (param is string str)
+        {
+            text = str;
+        }
+        
         if (string.IsNullOrEmpty(text)) return;
+
         ClipboardHelper.SetText(text);
         _snackbar.ShowSuccess(_i18n.GetTranslation("CopySuccess"));
     }

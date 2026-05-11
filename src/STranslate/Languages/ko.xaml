@@ -123,6 +123,7 @@
     <sys:String x:Key="General_ShowBackTranslation">역번역 버튼 표시</sys:String>
     <sys:String x:Key="General_ShowPrompt">프롬프트</sys:String>
     <sys:String x:Key="General_ShowPromptDescription">메인 화면에 AI 번역 서비스의 프롬프트 전환 버튼 표시 여부.</sys:String>
+    <sys:String x:Key="MarkdownRender">MD 렌더링</sys:String>
     <sys:String x:Key="General_FontFamily">글꼴</sys:String>
     <sys:String x:Key="General_HistoryCount">기록 저장 수</sys:String>
     <sys:String x:Key="General_CopyAfterTranslation">번역 후 복사</sys:String>

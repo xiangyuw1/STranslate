@@ -132,6 +132,7 @@ public partial class TranslationOptions : ObservableObject
     [JsonIgnore]
     public partial bool TemporaryDisplay { get; set; } = false;
     [ObservableProperty] public partial bool AutoBackTranslation { get; set; } = false;
+    [ObservableProperty] public partial bool MarkdownRender { get; set; } = false;
 }
 
 /// <summary>
