@@ -4,6 +4,7 @@ using STranslate.Helpers;
 using STranslate.Plugin;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -24,6 +25,7 @@ public partial class GeneralViewModel : SearchViewModelBase
 
         VisibleHeaderActions.CollectionChanged += OnMainHeaderActionsChanged;
         AvailableHeaderActions.CollectionChanged += OnMainHeaderActionsChanged;
+        Settings.PropertyChanged += OnSettingsPropertyChanged;
     }
 
     private bool _isSyncingMainHeaderActions;
@@ -97,6 +99,73 @@ public partial class GeneralViewModel : SearchViewModelBase
     public DataProvider DataProvider { get; }
 
     public List<I18nPair> Languages { get; }
+
+    public bool IsTextSeparatorMouseHookScopeEnabled
+    {
+        get => IsTextSeparatorScopeEnabled(TextSeparatorHandleScope.MouseHook);
+        set => SetTextSeparatorScope(TextSeparatorHandleScope.MouseHook, value);
+    }
+
+    public bool IsTextSeparatorCrosswordScopeEnabled
+    {
+        get => IsTextSeparatorScopeEnabled(TextSeparatorHandleScope.Crossword);
+        set => SetTextSeparatorScope(TextSeparatorHandleScope.Crossword, value);
+    }
+
+    public bool IsTextSeparatorIncrementalScopeEnabled
+    {
+        get => IsTextSeparatorScopeEnabled(TextSeparatorHandleScope.Incremental);
+        set => SetTextSeparatorScope(TextSeparatorHandleScope.Incremental, value);
+    }
+
+    public bool IsTextSeparatorClipboardMonitorScopeEnabled
+    {
+        get => IsTextSeparatorScopeEnabled(TextSeparatorHandleScope.ClipboardMonitor);
+        set => SetTextSeparatorScope(TextSeparatorHandleScope.ClipboardMonitor, value);
+    }
+
+    public bool IsTextSeparatorScreenshotTranslateScopeEnabled
+    {
+        get => IsTextSeparatorScopeEnabled(TextSeparatorHandleScope.ScreenshotTranslate);
+        set => SetTextSeparatorScope(TextSeparatorHandleScope.ScreenshotTranslate, value);
+    }
+
+    public bool IsTextSeparatorSilentOcrScopeEnabled
+    {
+        get => IsTextSeparatorScopeEnabled(TextSeparatorHandleScope.SilentOcr);
+        set => SetTextSeparatorScope(TextSeparatorHandleScope.SilentOcr, value);
+    }
+
+    private bool IsTextSeparatorScopeEnabled(TextSeparatorHandleScope scope)
+        => (Settings.TextSeparatorHandleScopes & scope) == scope;
+
+    private void SetTextSeparatorScope(TextSeparatorHandleScope scope, bool isEnabled)
+    {
+        var current = Settings.TextSeparatorHandleScopes;
+        var updated = isEnabled ? current | scope : current & ~scope;
+        if (updated == current)
+            return;
+
+        Settings.TextSeparatorHandleScopes = updated;
+    }
+
+    private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Settings.TextSeparatorHandleScopes))
+        {
+            OnTextSeparatorScopePropertiesChanged();
+        }
+    }
+
+    private void OnTextSeparatorScopePropertiesChanged()
+    {
+        OnPropertyChanged(nameof(IsTextSeparatorMouseHookScopeEnabled));
+        OnPropertyChanged(nameof(IsTextSeparatorCrosswordScopeEnabled));
+        OnPropertyChanged(nameof(IsTextSeparatorIncrementalScopeEnabled));
+        OnPropertyChanged(nameof(IsTextSeparatorClipboardMonitorScopeEnabled));
+        OnPropertyChanged(nameof(IsTextSeparatorScreenshotTranslateScopeEnabled));
+        OnPropertyChanged(nameof(IsTextSeparatorSilentOcrScopeEnabled));
+    }
 
     private void InitializeMainHeaderActions()
     {
@@ -192,5 +261,15 @@ public partial class GeneralViewModel : SearchViewModelBase
         }
 
         ReplaceItems(target, source);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            Settings.PropertyChanged -= OnSettingsPropertyChanged;
+        }
+
+        base.Dispose(disposing);
     }
 }

@@ -71,6 +71,10 @@
     <sys:String x:Key="General_AutoTranslateDelayDescription">输入内容等待时间，单位：毫秒。</sys:String>
     <sys:String x:Key="General_LineBreakHandleType">取词换行处理</sys:String>
     <sys:String x:Key="General_LineBreakHandleTypeDescription" xml:space="preserve">包括划词、截图翻译、剪贴板、静默OCR取词场景的换行处理&#10;「移除多余换行」主要针对PDF取词场景，移除多余换行和断句，但是对非PDF取词可能有影响</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleType">取词分隔符处理</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleTypeDescription">将英文/数字标识符中的下划线或中划线转换为空格，默认不处理。</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopes">分隔符处理生效范围</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopesDescription">选择哪些取词入口应用分隔符处理。未选择时保持原文本。</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">取词超时时间</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">模拟复制后轮询剪贴板新文本的超时时间，单位：毫秒。写入成功会立即返回；部分 PDF 软件写入较慢时可适当调高。</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
@@ -546,6 +550,17 @@
     <sys:String x:Key="LineBreakHandleTypeRemoveExtraLineBreak">移除多余换行</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreak">移除所有换行</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreakWithoutSpace">移除所有换行（非空格填充）</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeNone">不处理分隔符</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscore">处理下划线</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeHyphen">处理中划线</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscoreAndHyphen">处理下划线和中划线</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeNone">不启用</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeMouseHook">监听鼠标划词</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeCrossword">划词翻译 / Ctrl+C+C</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeIncremental">增量翻译</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeClipboardMonitor">剪贴板监听</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeScreenshotTranslate">截图翻译</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeSilentOcr">静默OCR</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetInputTranslate">输入翻译</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetShowWindow">显示主界面</sys:String>
 

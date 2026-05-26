@@ -172,6 +172,39 @@ public class Utilities
             _ => text,
         };
 
+    public static string CapturedTextHandler(
+        string text,
+        LineBreakHandleType lineBreakHandleType,
+        TextSeparatorHandleType separatorHandleType,
+        TextSeparatorHandleScope scope,
+        TextSeparatorHandleScope enabledScopes)
+    {
+        var result = LinebreakHandler(text, lineBreakHandleType);
+        return TextSeparatorHandler(result, separatorHandleType, scope, enabledScopes);
+    }
+
+    public static string TextSeparatorHandler(
+        string text,
+        TextSeparatorHandleType type,
+        TextSeparatorHandleScope scope,
+        TextSeparatorHandleScope enabledScopes)
+    {
+        if (type == TextSeparatorHandleType.None ||
+            scope == TextSeparatorHandleScope.None ||
+            (enabledScopes & scope) != scope)
+        {
+            return text;
+        }
+
+        return type switch
+        {
+            TextSeparatorHandleType.Underscore => WordInternalUnderscores.Replace(text, " "),
+            TextSeparatorHandleType.Hyphen => WordInternalHyphens.Replace(text, " "),
+            TextSeparatorHandleType.UnderscoreAndHyphen => WordInternalHyphens.Replace(WordInternalUnderscores.Replace(text, " "), " "),
+            _ => text,
+        };
+    }
+
     /// <summary>
     /// 规范化给定的文本，通过移除或替换某些字符和模式。
     /// <see href="https://github1s.com/CopyTranslator/CopyTranslator/blob/master/src/common/translate/helper.ts#L172"/>
@@ -233,6 +266,8 @@ public class Utilities
     ];
     // 定义一个正则表达式，用于匹配特定标点符号并用换行符替换
     private static readonly Regex SentenceEnds = new(@"#([?？！!.。])#");
+    private static readonly Regex WordInternalUnderscores = new(@"(?<=[A-Za-z0-9])_+(?=[A-Za-z0-9])", RegexOptions.Compiled);
+    private static readonly Regex WordInternalHyphens = new(@"(?<=[A-Za-z])-+(?=[A-Za-z0-9])|(?<=[A-Za-z0-9])-+(?=[A-Za-z])", RegexOptions.Compiled);
 
     #endregion
 

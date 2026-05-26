@@ -68,6 +68,10 @@
     <sys:String x:Key="General_AutoTranslateDelayDescription">입력 후 대기 시간, 단위: 밀리초.</sys:String>
     <sys:String x:Key="General_LineBreakHandleType">단어 선택 줄 바꿈 처리</sys:String>
     <sys:String x:Key="General_LineBreakHandleTypeDescription" xml:space="preserve">드래그 번역, 스크린샷 번역, 클립보드, 정적 OCR 단어 선택 시 줄 바꿈 처리를 포함합니다.&#10;「불필요한 줄 바꿈 제거」는 주로 PDF 단어 선택 시 사용되며, 불필요한 줄 바꿈을 제거하지만 PDF가 아닌 경우 영향을 줄 수 있습니다.</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleType">텍스트 구분자 처리</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleTypeDescription">영문/숫자 식별자 안의 밑줄 또는 하이픈을 공백으로 변환합니다. 기본값은 처리하지 않음입니다.</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopes">구분자 처리 적용 범위</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopesDescription">구분자 처리를 적용할 텍스트 캡처 진입점을 선택합니다. 선택하지 않으면 원문을 유지합니다.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">텍스트 가져오기 시간 초과</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">복사 시뮬레이션 후 새 클립보드 텍스트를 폴링하는 시간 초과 값입니다. 단위: 밀리초. 텍스트가 업데이트되면 즉시 반환되며, 일부 PDF 앱의 업데이트가 느리면 값을 높이세요.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
@@ -531,6 +535,17 @@
     <sys:String x:Key="LineBreakHandleTypeRemoveExtraLineBreak">불필요한 줄 바꿈 제거</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreak">모든 줄 바꿈 제거</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreakWithoutSpace">모든 줄 바꿈 제거 (공백 없음)</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeNone">구분자 처리 안 함</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscore">밑줄 처리</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeHyphen">하이픈 처리</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscoreAndHyphen">밑줄과 하이픈 처리</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeNone">사용 안 함</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeMouseHook">마우스 선택 감시</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeCrossword">선택 번역 / Ctrl+C+C</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeIncremental">증분 번역</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeClipboardMonitor">클립보드 감시</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeScreenshotTranslate">스크린샷 번역</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeSilentOcr">자동 OCR</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetInputTranslate">입력 번역</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetShowWindow">메인 창 표시</sys:String>
 

@@ -71,6 +71,10 @@
     <sys:String x:Key="General_AutoTranslateDelayDescription">Waiting time after inputting content, unit: milliseconds.</sys:String>
     <sys:String x:Key="General_LineBreakHandleType">Line Break Handling</sys:String>
     <sys:String x:Key="General_LineBreakHandleTypeDescription" xml:space="preserve">Includes line break handling for word selection, screenshot translation, clipboard, and silent OCR scenarios.&#10;"Remove extra line breaks" is mainly for PDF text extraction, removing redundant line breaks and sentence breaks, but it may affect non-PDF extraction.</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleType">Text Separator Handling</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleTypeDescription">Converts underscores or hyphens inside English/numeric identifiers to spaces. Disabled by default.</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopes">Separator Handling Scope</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopesDescription">Choose which text capture entry points apply separator handling. No selection keeps original text.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">Text Capture Timeout</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Timeout for polling new clipboard text after simulated copy, in milliseconds. Returns as soon as text is updated; increase this for PDF apps that update slowly.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
@@ -545,6 +549,17 @@
     <sys:String x:Key="LineBreakHandleTypeRemoveExtraLineBreak">Remove extra line breaks</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreak">Remove all line breaks</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreakWithoutSpace">Remove all line breaks (without space filling)</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeNone">Do not process separators</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscore">Process underscores</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeHyphen">Process hyphens</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscoreAndHyphen">Process underscores and hyphens</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeNone">Disabled</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeMouseHook">Mouse selection monitor</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeCrossword">Word selection translation / Ctrl+C+C</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeIncremental">Incremental translation</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeClipboardMonitor">Clipboard monitor</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeScreenshotTranslate">Screenshot translation</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeSilentOcr">Silent OCR</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetInputTranslate">Input Translate</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetShowWindow">Show Main Window</sys:String>
 

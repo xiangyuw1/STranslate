@@ -805,7 +805,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             if (Settings.CopyAfterOcr)
                 ClipboardHelper.SetText(result.Text);
 
-            ExecuteTranslate(Utilities.LinebreakHandler(result.Text, Settings.LineBreakHandleType));
+            ExecuteTranslate(HandleCapturedText(result.Text, TextSeparatorHandleScope.ScreenshotTranslate));
         }
         catch (TaskCanceledException)
         {
@@ -928,7 +928,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             var result = await ocrPlugin.RecognizeAsync(new OcrRequest(data, LangEnum.Auto), cancellationToken);
             if (result.IsSuccess && !string.IsNullOrEmpty(result.Text))
             {
-                ClipboardHelper.SetText(result.Text);
+                ClipboardHelper.SetText(HandleSilentOcrText(result.Text));
             }
         }
         catch (TaskCanceledException)
@@ -1251,7 +1251,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _ = Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            InputText += Utilities.LinebreakHandler(text, Settings.LineBreakHandleType);
+            InputText += HandleCapturedText(text, TextSeparatorHandleScope.Incremental);
         });
     }
 
@@ -1285,7 +1285,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _ = Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.MouseHook));
         });
     }
 
@@ -1299,7 +1299,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
-        ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+        ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.Crossword));
     }
 
     public void CrosswordTranslateByCtrlSameCHandler()
@@ -1313,7 +1313,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.Crossword));
         });
     }
 
@@ -1361,7 +1361,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (string.IsNullOrWhiteSpace(text)) return;
 
         App.Current.Dispatcher.Invoke(() =>
-            ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType)));
+            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.ClipboardMonitor)));
     }
 
     [RelayCommand(IncludeCancelCommand = true)]
@@ -2193,6 +2193,27 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void UpdateCaret()
     {
         MainWindow.PART_Input.SetCaretIndex(InputText.Length);
+    }
+
+    private string HandleCapturedText(string text, TextSeparatorHandleScope scope)
+    {
+        return Utilities.CapturedTextHandler(
+            text,
+            Settings.LineBreakHandleType,
+            Settings.TextSeparatorHandleType,
+            scope,
+            Settings.TextSeparatorHandleScopes);
+    }
+
+    private string HandleSilentOcrText(string text)
+    {
+        if (Settings.TextSeparatorHandleType == TextSeparatorHandleType.None ||
+            (Settings.TextSeparatorHandleScopes & TextSeparatorHandleScope.SilentOcr) != TextSeparatorHandleScope.SilentOcr)
+        {
+            return text;
+        }
+
+        return HandleCapturedText(text, TextSeparatorHandleScope.SilentOcr);
     }
 
     private void ResetAllServices()

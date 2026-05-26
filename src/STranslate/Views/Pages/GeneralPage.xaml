@@ -449,6 +449,74 @@
                         OnContent="{DynamicResource Enable}" />
                 </ui:SettingsCard>
 
+                <ui:SettingsExpander Description="{DynamicResource General_TextSeparatorHandleTypeDescription}" Header="{DynamicResource General_TextSeparatorHandleType}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.TextFont_20_Regular}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ComboBox
+                        MinWidth="160"
+                        DisplayMemberPath="Display"
+                        ItemsSource="{Binding DataProvider.TextSeparatorHandleTypes}"
+                        SelectedValue="{Binding Settings.TextSeparatorHandleType}"
+                        SelectedValuePath="Value" />
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="{DynamicResource TextSeparatorHandleScopeMouseHook}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.KeyboardMouse_16_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <ui:ToggleSwitch
+                                IsOn="{Binding IsTextSeparatorMouseHookScopeEnabled, Mode=TwoWay}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{DynamicResource TextSeparatorHandleScopeCrossword}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.CursorClick_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <ui:ToggleSwitch
+                                IsOn="{Binding IsTextSeparatorCrosswordScopeEnabled, Mode=TwoWay}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{DynamicResource TextSeparatorHandleScopeIncremental}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.TextIndentIncrease_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <ui:ToggleSwitch
+                                IsOn="{Binding IsTextSeparatorIncrementalScopeEnabled, Mode=TwoWay}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{DynamicResource TextSeparatorHandleScopeClipboardMonitor}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ClipboardMore_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <ui:ToggleSwitch
+                                IsOn="{Binding IsTextSeparatorClipboardMonitorScopeEnabled, Mode=TwoWay}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{DynamicResource TextSeparatorHandleScopeScreenshotTranslate}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ScreenCut_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <ui:ToggleSwitch
+                                IsOn="{Binding IsTextSeparatorScreenshotTranslateScopeEnabled, Mode=TwoWay}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{DynamicResource TextSeparatorHandleScopeSilentOcr}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ScanType_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <ui:ToggleSwitch
+                                IsOn="{Binding IsTextSeparatorSilentOcrScopeEnabled, Mode=TwoWay}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
                 <control:CardGroup>
                     <ui:SettingsCard Description="{DynamicResource General_LineBreakHandleTypeDescription}" Header="{DynamicResource General_LineBreakHandleType}">
                         <ui:SettingsCard.HeaderIcon>
