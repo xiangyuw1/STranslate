@@ -120,6 +120,8 @@
     <sys:String x:Key="General_MainHeaderPool">控件池（未顯示）</sys:String>
     <sys:String x:Key="General_MainHeaderShowAll">全部顯示</sys:String>
     <sys:String x:Key="General_MainHeaderHideAll">全部隱藏</sys:String>
+    <sys:String x:Key="General_ShowCloseButton">顯示關閉按鈕</sys:String>
+    <sys:String x:Key="General_ShowCloseButtonDescription">在主介面標題欄設定按鈕右側顯示關閉按鈕，功能等同於 Esc 鍵。</sys:String>
     <sys:String x:Key="General_FontSize">字體大小</sys:String>
     <sys:String x:Key="General_FontSizeDescription">調整除「右鍵選單」外的所有字型大小</sys:String>
     <sys:String x:Key="General_OutputShowingControl">輸出控件顯示控制</sys:String>

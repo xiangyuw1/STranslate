@@ -120,6 +120,8 @@
     <sys:String x:Key="General_MainHeaderPool">Action Pool (Hidden)</sys:String>
     <sys:String x:Key="General_MainHeaderShowAll">Show All</sys:String>
     <sys:String x:Key="General_MainHeaderHideAll">Hide All</sys:String>
+    <sys:String x:Key="General_ShowCloseButton">Show Close Button</sys:String>
+    <sys:String x:Key="General_ShowCloseButtonDescription">Display the close button to the right of the settings button in the main header. It behaves the same as the Esc key.</sys:String>
     <sys:String x:Key="General_FontSize">Font Size</sys:String>
     <sys:String x:Key="General_FontSizeDescription">Adjust font size for all elements except the right-click context menu</sys:String>
     <sys:String x:Key="General_OutputShowingControl">Output Display Control</sys:String>

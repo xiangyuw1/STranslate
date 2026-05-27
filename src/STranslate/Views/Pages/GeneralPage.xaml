@@ -765,6 +765,16 @@
                 </ui:SettingsExpander>
 
                 <control:CardGroup>
+                    <ui:SettingsCard Description="{DynamicResource General_ShowCloseButtonDescription}" Header="{DynamicResource General_ShowCloseButton}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Dismiss_20_Regular}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch
+                            IsOn="{Binding Settings.IsCloseButtonVisible}"
+                            OffContent="{DynamicResource Hide}"
+                            OnContent="{DynamicResource Show}" />
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Description="{DynamicResource General_MainHeaderConfigDescription}" Header="{DynamicResource General_MainHeaderConfig}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PanelBottom_20_Regular}" />

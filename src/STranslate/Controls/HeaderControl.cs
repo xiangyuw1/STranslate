@@ -95,6 +95,58 @@ public class HeaderControl : Control
 
     #endregion
 
+    #region Close
+
+    /// <summary>
+    /// 获取或设置固定关闭按钮触发的命令。
+    /// </summary>
+    public ICommand? CloseCommand
+    {
+        get => (ICommand?)GetValue(CloseCommandProperty);
+        set => SetValue(CloseCommandProperty, value);
+    }
+
+    public static readonly DependencyProperty CloseCommandProperty =
+        DependencyProperty.Register(
+            nameof(CloseCommand),
+            typeof(ICommand),
+            typeof(HeaderControl));
+
+    /// <summary>
+    /// 获取或设置固定关闭按钮传递给命令的参数。
+    /// </summary>
+    public object? CloseCommandParameter
+    {
+        get => GetValue(CloseCommandParameterProperty);
+        set => SetValue(CloseCommandParameterProperty, value);
+    }
+
+    public static readonly DependencyProperty CloseCommandParameterProperty =
+        DependencyProperty.Register(
+            nameof(CloseCommandParameter),
+            typeof(object),
+            typeof(HeaderControl));
+
+    /// <summary>
+    /// 获取或设置固定关闭按钮是否显示。
+    /// </summary>
+    public bool IsCloseVisible
+    {
+        get => (bool)GetValue(IsCloseVisibleProperty);
+        set => SetValue(IsCloseVisibleProperty, value);
+    }
+
+    public static readonly DependencyProperty IsCloseVisibleProperty =
+        DependencyProperty.Register(
+            nameof(IsCloseVisible),
+            typeof(bool),
+            typeof(HeaderControl),
+            new FrameworkPropertyMetadata(
+                true,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+    #endregion
+
     #region HideInput
 
     public bool IsHideInput

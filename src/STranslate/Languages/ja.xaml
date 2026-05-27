@@ -117,6 +117,8 @@
     <sys:String x:Key="General_MainHeaderPool">コントロールプール（非表示）</sys:String>
     <sys:String x:Key="General_MainHeaderShowAll">すべて表示</sys:String>
     <sys:String x:Key="General_MainHeaderHideAll">すべて非表示</sys:String>
+    <sys:String x:Key="General_ShowCloseButton">閉じるボタンを表示</sys:String>
+    <sys:String x:Key="General_ShowCloseButtonDescription">メインヘッダーの設定ボタン右側に閉じるボタンを表示します。Esc キーと同じ動作です。</sys:String>
     <sys:String x:Key="General_FontSize">フォントサイズ</sys:String>
     <sys:String x:Key="General_FontSizeDescription">「右クリックメニュー」以外のすべてのフォントサイズを調整します。</sys:String>
     <sys:String x:Key="General_OutputShowingControl">出力表示コントロール</sys:String>

@@ -117,6 +117,8 @@
     <sys:String x:Key="General_MainHeaderPool">컨트롤 풀(숨김)</sys:String>
     <sys:String x:Key="General_MainHeaderShowAll">모두 표시</sys:String>
     <sys:String x:Key="General_MainHeaderHideAll">모두 숨기기</sys:String>
+    <sys:String x:Key="General_ShowCloseButton">닫기 버튼 표시</sys:String>
+    <sys:String x:Key="General_ShowCloseButtonDescription">메인 헤더의 설정 버튼 오른쪽에 닫기 버튼을 표시합니다. Esc 키와 동일하게 동작합니다.</sys:String>
     <sys:String x:Key="General_FontSize">글꼴 크기</sys:String>
     <sys:String x:Key="General_FontSizeDescription">「우클릭 메뉴」를 제외한 모든 글꼴 크기를 조정합니다.</sys:String>
     <sys:String x:Key="General_OutputShowingControl">출력 표시 제어</sys:String>

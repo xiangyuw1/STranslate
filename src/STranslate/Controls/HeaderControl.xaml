@@ -159,12 +159,20 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <control:IconButton
-                                Grid.Column="2"
-                                Command="{TemplateBinding SettingCommand}"
-                                Icon="{x:Static ui:FluentSystemIcons.Settings_20_Regular}"
-                                ToolTip="{DynamicResource Settings}"
-                                Visibility="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=IsSettingVisible, Converter={cnvt:BoolToVisibilityConverter}}" />
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <control:IconButton
+                                    Command="{TemplateBinding SettingCommand}"
+                                    Icon="{x:Static ui:FluentSystemIcons.Settings_20_Regular}"
+                                    ToolTip="{DynamicResource Settings}"
+                                    Visibility="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=IsSettingVisible, Converter={cnvt:BoolToVisibilityConverter}}" />
+                                <control:IconButton
+                                    Command="{TemplateBinding CloseCommand}"
+                                    CommandParameter="{TemplateBinding CloseCommandParameter}"
+                                    Icon="{x:Static ui:FluentSystemIcons.Dismiss_20_Regular}"
+                                    Margin="3,0,0,0"
+                                    ToolTip="{DynamicResource Close}"
+                                    Visibility="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=IsCloseVisible, Converter={cnvt:BoolToVisibilityConverter}}" />
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </ControlTemplate>

@@ -75,6 +75,7 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool IsClipboardMonitorVisible { get; set; } = true;
     [ObservableProperty] public partial List<string> MainHeaderVisibleActions { get; set; } = [];
+    [ObservableProperty] public partial bool IsCloseButtonVisible { get; set; } = true;
 
     [ObservableProperty] public partial DoubleClickTrayFunction DoubleClickTrayFunction { get; set; }
 
