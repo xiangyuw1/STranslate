@@ -4,6 +4,7 @@
 - 提供截图 OCR、OCR 窗口、图片翻译窗口三条图像文本处理链路。
 - 管理 OCR 服务与图片翻译专用 OCR/翻译服务绑定。
 - 在图片翻译中完成版面分析、文本块合并、翻译回写与结果图生成。
+- 将截图翻译和静默 OCR 结果接入统一取词文本后处理。
 
 ## 关键入口
 - `STranslate/ViewModels/MainWindowViewModel.cs`
@@ -25,7 +26,13 @@
 1. `MainWindowViewModel.ScreenshotTranslateAsync()` 先取可用 OCR 服务。
 2. 通过 `IScreenshot.GetScreenshotAsync()` 获取截图位图（主窗口可见且非置顶时先折叠，避免截到自身）。
 3. `ScreenshotTranslateHandlerAsync()` 调 OCR `RecognizeAsync()`。
-4. OCR 成功后：按设置可复制识别文本，然后调用 `ExecuteTranslate()` 进入主翻译链路。
+4. OCR 成功后：按设置可复制识别文本，再通过 `HandleCapturedText(text, TextSeparatorHandleScope.ScreenshotTranslate)` 处理换行与可选分隔符。
+5. 处理后的文本调用 `ExecuteTranslate()` 进入主翻译链路。
+
+### 从入口到结果：静默 OCR
+1. `SilentOcrAsync()` 截图后调用当前 OCR 服务识别文本。
+2. 识别成功后写入剪贴板。
+3. 若启用了 `TextSeparatorHandleScope.SilentOcr`，写入前会复用 `HandleCapturedText()` 处理换行与 `_` / `-` 分隔符。
 
 ### 从入口到结果：OCR 窗口执行
 1. `OcrWindowViewModel.ExecuteAsync(bitmap)` 设置执行态并清理旧结果。
@@ -49,6 +56,10 @@
 - OCR 专用绑定：`OcrService.ImageTranslateOcrService`，由 `OnSelectedOcrEngineChanged` 写入 `ServiceSettings.ImageTranslateOcrSvcID`。
 - 翻译专用绑定：`TranslateService.ImageTranslateService`，由 `OnSelectedTranslateEngineChanged` 写入 `ServiceSettings.ImageTranslateSvcID`。
 
+### 托盘入口
+- 主窗口托盘菜单可通过 `Settings.ShowImageTranslateItemInNotifyIconMenu` 控制是否显示“图片翻译”入口。
+- 托盘右键触发截图类命令后，需要注意上下文菜单残留；截图入口应在执行前确保菜单状态已收敛。
+
 ## 关键数据结构/配置
 - `OcrResult` / `OcrContent` / `BoxPoint`：OCR 原始与结构化文本块。
 - 版面分析参数（`Settings`）：
@@ -61,7 +72,9 @@
   - `IsImTranShowingAnnotated`
   - `IsImTranShowingTextControl`
   - `ImageQuality`
+  - `ShowImageTranslateItemInNotifyIconMenu`
 - OCR 语言设置：`OcrLanguage`
+- 取词后处理设置：`TextSeparatorHandleType`、`TextSeparatorHandleScopes`
 
 ## 关键文件
 - `STranslate/ViewModels/MainWindowViewModel.cs`
@@ -77,3 +90,4 @@
 - 新增图片翻译后处理：应在翻译回写 `content.Text` 后、`GenerateTranslatedImage` 前插入。
 - 截图行为改造：在 `Screenshot.GetScreenshotAsync()` 处理窗口折叠与等待时机。
 - OCR 服务优先级策略调整：修改 `OcrService.GetImageTranslateOcrServiceOrDefault()` 与对应 VM 的选中逻辑。
+- OCR 结果进入翻译或剪贴板前的文本清洗：优先复用 `MainWindowViewModel.HandleCapturedText()`，避免截图翻译和静默 OCR 行为分叉。

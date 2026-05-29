@@ -5,7 +5,6 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 
 namespace STranslate.Core;
 
@@ -149,18 +148,18 @@ public class ExternalCallService(
             {
                 case ExternalCallAction.translate:
                     if (string.IsNullOrWhiteSpace(content))
-                        viewModel.InputClearCommand.Execute(null);
+                        viewModel.InputClearCommand.Execute(WindowActivationMode.ForceForeground);
                     else
-                        viewModel.ExecuteTranslate(content);
+                        viewModel.ExecuteTranslate(content, activationMode: WindowActivationMode.ForceForeground);
                     break;
                 case ExternalCallAction.translate_force:
                     if (string.IsNullOrWhiteSpace(content))
-                        viewModel.InputClearCommand.Execute(null);
+                        viewModel.InputClearCommand.Execute(WindowActivationMode.ForceForeground);
                     else
-                        viewModel.ExecuteTranslate(content, "force");
+                        viewModel.ExecuteTranslate(content, "force", WindowActivationMode.ForceForeground);
                     break;
                 case ExternalCallAction.translate_input:
-                    viewModel.InputClearCommand.Execute(null);
+                    viewModel.InputClearCommand.Execute(WindowActivationMode.ForceForeground);
                     break;
                 case ExternalCallAction.translate_ocr:
                     if (string.IsNullOrWhiteSpace(content))
@@ -231,13 +230,13 @@ public class ExternalCallService(
                     }
                     break;
                 case ExternalCallAction.open_window:
-                    viewModel.ToggleAppCommand.Execute(null);
+                    viewModel.ToggleAppCommand.Execute(WindowActivationMode.ForceForeground);
                     break;
                 case ExternalCallAction.open_preference:
-                    viewModel.OpenSettingsCommand.Execute(null);
+                    await viewModel.OpenSettingsAndNavigateAsync(null, WindowActivationMode.ForceForeground);
                     break;
                 case ExternalCallAction.open_history:
-                    viewModel.OpenHistoryCommand.Execute(null);
+                    await viewModel.OpenHistoryInternalAsync(WindowActivationMode.ForceForeground);
                     break;
                 case ExternalCallAction.forbiddenhotkey:
                     viewModel.ToggleGlobalHotkey();

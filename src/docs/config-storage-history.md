@@ -5,6 +5,7 @@
 - 提供统一 JSON 存储抽象（应用配置与插件配置）。
 - 统一便携模式/漫游模式路径策略。
 - 负责翻译历史 SQLite 存储模型与读写逻辑。
+- 负责历史记录 CSV 导出、批量/全量删除与历史展示快照字段兼容。
 
 ## 关键入口
 - `STranslate/Core/Settings.cs`
@@ -21,6 +22,10 @@
   - 便携/漫游目录与缓存/日志/数据库路径决策。
 - `STranslate/Core/SqlService.cs`
   - 历史表初始化、读写、分页、游标与相邻记录查询。
+- `STranslate/Helpers/HistoryCsvHelper.cs`
+  - 历史记录 CSV 宽表导出。
+- `STranslate/ViewModels/Pages/HistoryViewModel.cs`
+  - 历史页搜索、加载更多、导出、批量删除与全量删除。
 
 ## 核心流程
 ### 从入口到结果：配置加载、行为应用与自动保存
@@ -39,15 +44,28 @@
 
 ### 从入口到结果：历史数据写入与缓存命中
 1. 首次启动执行 `SqlService.InitializeDB()` 创建 `History` 表。
+   - 旧库会通过 `PRAGMA table_info(History)` 检查并补齐 `EffectiveSourceLang` / `EffectiveTargetLang` 列。
 2. 翻译完成后调用 `InsertOrUpdateDataAsync(history, count)`：
    - 超上限时先删除最旧记录。
    - 同 `(SourceText, SourceLang, TargetLang)` 命中则更新，否则插入。
-3. `HistoryModel.RawData` 负责将 `List<HistoryData>` 与 JSON 字段互转。
-4. 查询路径包括：精准命中、模糊检索、分页、上一条/下一条导航。
+3. `HistoryModel.RawData` 负责将 `List<HistoryData>` 与 JSON 字段互转；`HistoryData.ServiceDisplayName` 保留服务显示名快照。
+4. `HistoryModel.EffectiveSourceLang` / `EffectiveTargetLang` 保存自动识别后实际参与翻译的语言。
+5. 查询路径包括：精准命中、模糊检索、分页、上一条/下一条导航。
+
+### 从入口到结果：历史导出与删除
+1. 历史页选择部分记录时，`ExportHistoryAsync()` 只导出选中项，导出后清空选择。
+2. “导出全部”通过 `SqlService.GetDataAsync()` 读取全部历史，不依赖当前分页加载状态。
+3. `HistoryCsvHelper.BuildCsv()` 输出 UTF-8 with BOM CSV，列结构为基础字段 + 动态翻译引擎列：
+   - 序号、记录 ID、时间、原文语言、目标语言、翻译原文。
+   - 每个服务一组“翻译引擎 N / 翻译结果 N”。
+4. 原始语言为 `Auto` 且存在有效语言时，导出和历史页统一显示为 `Auto(有效语言)`。
+5. “删除选中”逐条删除并汇总成功/失败数量；“删除全部”走 `SqlService.DeleteAllDataAsync()` 后清空当前 UI 集合。
 
 ## 关键数据结构/配置
 - `Settings`
   - UI/主题/语言/窗口位置/自动翻译/网络/插件市场/OCR版面分析/外部调用/自动检查更新等全局配置。
+  - 取词相关：`TextSeparatorHandleType`、`TextSeparatorHandleScopes`、`SelectedTextFetchTimeoutMs`、`CrosswordFetchFailedFallbackTarget`。
+  - 窗口相关：`MainWindowMaxHeightRatio`、`ShowImageTranslateItemInNotifyIconMenu`。
 - `ServiceSettings`
   - `TranSvcDatas/OcrSvcDatas/TtsSvcDatas/VocabularySvcDatas`。
   - `ReplaceSvcID/ImageTranslateSvcID/ImageTranslateOcrSvcID`。
@@ -55,6 +73,8 @@
   - 网络代理与备份目标配置。
 - `HistoryModel` / `HistoryData`
   - 历史记录主表模型与每服务结果载体。
+  - `EffectiveSourceLang` / `EffectiveTargetLang`：自动识别后的实际语言快照。
+  - `ServiceDisplayName`：服务显示名快照，导出和历史页展示优先使用。
 
 ## 关键文件
 - `STranslate/Core/Settings.cs`
@@ -64,6 +84,10 @@
 - `STranslate/Core/PluginStorage.cs`
 - `STranslate/Core/DataLocation.cs`
 - `STranslate/Core/SqlService.cs`
+- `STranslate/Helpers/HistoryCsvHelper.cs`
+- `STranslate/ViewModels/Pages/HistoryViewModel.cs`
+- `STranslate/Converters/HistoryLanguageDisplayConverter.cs`
+- `STranslate/Converters/HistoryServiceDisplayNameConverter.cs`
 - `STranslate/Core/ProxySettings.cs`
 - `STranslate/Core/BackupSettings.cs`
 
@@ -72,6 +96,8 @@
   1. 在 `Settings` 或 `ServiceSettings` 增加属性。
   2. 需要即时行为时补充 `HandlePropertyChanged` 分支。
   3. 在对应 UI 页面绑定并验证序列化兼容。
+  4. 对数值型设置补充归一化逻辑时，确保保存分支覆盖该属性。
 - 调整存储可靠性：优先改 `StorageBase`，避免在业务层重复实现备份恢复。
 - 修改便携策略：改 `DataLocation`，并验证升级流程中的 `TmpConfigDirectory` 回迁逻辑。
-- 历史结构演进：修改 `HistoryData` 时需确认 `RawData` 兼容旧版本 JSON。
+- 历史结构演进：新增表列需在 `SqlService.InitializeDB()` 补迁移逻辑；修改 `HistoryData` 时需确认 `RawData` 兼容旧版本 JSON。
+- 调整历史导出：优先改 `HistoryCsvHelper`，保持历史页展示与导出语言/服务名解析一致。

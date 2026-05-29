@@ -51,9 +51,9 @@
     <sys:String x:Key="General_DefaultSourceLanguage">默认源语言</sys:String>
     <sys:String x:Key="General_DefaultSourceLanguageDescription">当自动检测失败时使用此语言。</sys:String>
     <sys:String x:Key="General_FirstLanguage">第一语言</sys:String>
-    <sys:String x:Key="General_FirstLanguageDescription">当目标语言设为自动且源语言为其他语言（包含第二语言）时目标语言使用第一语言。</sys:String>
+    <sys:String x:Key="General_FirstLanguageDescription">当任意翻译场景（包括图片翻译）的目标语言设为自动，且源语言为其他语言（包含第二语言）时，目标语言使用第一语言。</sys:String>
     <sys:String x:Key="General_SecondLanguage">第二语言</sys:String>
-    <sys:String x:Key="General_SecondLanguageDescription">当目标语言设为自动且源语言为第一语言时目标语言使用第二语言。</sys:String>
+    <sys:String x:Key="General_SecondLanguageDescription">当任意翻译场景（包括图片翻译）的目标语言设为自动，且源语言为第一语言时，目标语言使用第二语言。</sys:String>
     <sys:String x:Key="General_HttpTimeout">超时时间</sys:String>
     <sys:String x:Key="General_HttpTimeoutDescription">请求网络请求的超时时间，单位：秒。</sys:String>
     <sys:String x:Key="General_UseClipboardOutput">文本输出使用剪贴板</sys:String>
@@ -71,6 +71,10 @@
     <sys:String x:Key="General_AutoTranslateDelayDescription">输入内容等待时间，单位：毫秒。</sys:String>
     <sys:String x:Key="General_LineBreakHandleType">取词换行处理</sys:String>
     <sys:String x:Key="General_LineBreakHandleTypeDescription" xml:space="preserve">包括划词、截图翻译、剪贴板、静默OCR取词场景的换行处理&#10;「移除多余换行」主要针对PDF取词场景，移除多余换行和断句，但是对非PDF取词可能有影响</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleType">取词分隔符处理</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleTypeDescription">将英文/数字标识符中的下划线或中划线转换为空格，默认不处理。</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopes">分隔符处理生效范围</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopesDescription">选择哪些取词入口应用分隔符处理。未选择时保持原文本。</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">取词超时时间</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">模拟复制后轮询剪贴板新文本的超时时间，单位：毫秒。写入成功会立即返回；部分 PDF 软件写入较慢时可适当调高。</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
@@ -116,6 +120,8 @@
     <sys:String x:Key="General_MainHeaderPool">控件池（未显示）</sys:String>
     <sys:String x:Key="General_MainHeaderShowAll">全部显示</sys:String>
     <sys:String x:Key="General_MainHeaderHideAll">全部隐藏</sys:String>
+    <sys:String x:Key="General_ShowCloseButton">显示关闭按钮</sys:String>
+    <sys:String x:Key="General_ShowCloseButtonDescription">在主界面标题栏设置按钮右侧显示关闭按钮，功能等同于 Esc 键。</sys:String>
     <sys:String x:Key="General_FontSize">字体大小</sys:String>
     <sys:String x:Key="General_FontSizeDescription">调整除「右键菜单」外的所有字体大小</sys:String>
     <sys:String x:Key="General_OutputShowingControl">输出控件显示控制</sys:String>
@@ -490,6 +496,7 @@
     <sys:String x:Key="HotkeyOverwriteFailed">热键覆盖时解绑失败，已恢复。</sys:String>
     <sys:String x:Key="HotkeyUnavailableUneditable">此热键为「{0}」保留，无法使用。请选择其他热键。</sys:String>
     <sys:String x:Key="HotkeyUnavailableEditable">此热键已被「{0}」使用。如果按「覆盖」，则会将其从「{0}」中删除。</sys:String>
+    <sys:String x:Key="HotkeyReservedClipboardCopy">Ctrl+C 是系统复制和划词取词的保留热键，无法绑定为全局热键。请选择其他热键。</sys:String>
 
     <!--  // Enum //  -->
     <sys:String x:Key="StartModeNormal">正常启动</sys:String>
@@ -531,6 +538,7 @@
     <sys:String x:Key="LangEnumPolish">波兰语</sys:String>
     <sys:String x:Key="LangEnumDutch">荷兰语</sys:String>
     <sys:String x:Key="LangEnumUkrainian">乌克兰语</sys:String>
+    <sys:String x:Key="LangEnumUzbek">乌兹别克语</sys:String>
 
     <sys:String x:Key="LanguageDetectorTypeLocal">本地识别</sys:String>
     <sys:String x:Key="LanguageDetectorTypeBaidu">百度识别</sys:String>
@@ -545,6 +553,17 @@
     <sys:String x:Key="LineBreakHandleTypeRemoveExtraLineBreak">移除多余换行</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreak">移除所有换行</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreakWithoutSpace">移除所有换行（非空格填充）</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeNone">不处理分隔符</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscore">处理下划线</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeHyphen">处理中划线</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscoreAndHyphen">处理下划线和中划线</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeNone">不启用</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeMouseHook">监听鼠标划词</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeCrossword">划词翻译 / Ctrl+C+C</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeIncremental">增量翻译</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeClipboardMonitor">剪贴板监听</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeScreenshotTranslate">截图翻译</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeSilentOcr">静默OCR</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetInputTranslate">输入翻译</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetShowWindow">显示主界面</sys:String>
 
@@ -708,6 +727,7 @@
 
     <sys:String x:Key="RecognizeLanguage">识别语言</sys:String>
     <sys:String x:Key="TranslateLanguage">翻译语言</sys:String>
+    <sys:String x:Key="ImageTranslateLanguageIndependentToolTip">图片翻译窗口的翻译语言与主窗口相互独立，修改这里不会影响主窗口。</sys:String>
     <sys:String x:Key="ImTranSettingsToolTip" xml:space="preserve">直接鼠标左击-&gt;独立窗口配置&#10;Ctrl+鼠标左击-&gt;文本识别配置&#10;Alt+鼠标左击-&gt;文本翻译配置</sys:String>
 
     <!--  // Snackbar Messages //  -->

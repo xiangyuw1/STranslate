@@ -75,6 +75,7 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool IsClipboardMonitorVisible { get; set; } = true;
     [ObservableProperty] public partial List<string> MainHeaderVisibleActions { get; set; } = [];
+    [ObservableProperty] public partial bool IsCloseButtonVisible { get; set; } = false;
 
     [ObservableProperty] public partial DoubleClickTrayFunction DoubleClickTrayFunction { get; set; }
 
@@ -187,6 +188,16 @@ public partial class Settings : ObservableObject
     /// 取词时换行处理
     /// </summary>
     [ObservableProperty] public partial LineBreakHandleType LineBreakHandleType { get; set; } = LineBreakHandleType.RemoveExtraLineBreak;
+
+    /// <summary>
+    /// 取词时分隔符处理
+    /// </summary>
+    [ObservableProperty] public partial TextSeparatorHandleType TextSeparatorHandleType { get; set; } = TextSeparatorHandleType.None;
+
+    /// <summary>
+    /// 取词分隔符处理生效范围
+    /// </summary>
+    [ObservableProperty] public partial TextSeparatorHandleScope TextSeparatorHandleScopes { get; set; } = TextSeparatorHandleScope.Crossword;
 
     /// <summary>
     /// 划词后等待剪贴板写入文本的最长时间（毫秒）。
@@ -322,6 +333,8 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool IsImTranShowingAnnotated { get; set; } = false;
     [ObservableProperty] public partial bool IsImTranShowingTextControl { get; set; } = false;
+    [ObservableProperty] public partial LangEnum ImageTranslateSourceLang { get; set; } = LangEnum.Auto;
+    [ObservableProperty] public partial LangEnum ImageTranslateTargetLang { get; set; } = LangEnum.Auto;
     [ObservableProperty] public partial double ImTranWindowWidth { get; set; } = 600;
     [ObservableProperty] public partial double ImTranWindowHeight { get; set; } = 600;
 
@@ -744,6 +757,26 @@ public enum LineBreakHandleType
     RemoveExtraLineBreak,
     RemoveAllLineBreak,
     RemoveAllLineBreakWithoutSpace,
+}
+
+public enum TextSeparatorHandleType
+{
+    None,
+    Underscore,
+    Hyphen,
+    UnderscoreAndHyphen,
+}
+
+[Flags]
+public enum TextSeparatorHandleScope
+{
+    None = 0,
+    MouseHook = 1,
+    Crossword = 2,
+    Incremental = 4,
+    ClipboardMonitor = 8,
+    ScreenshotTranslate = 16,
+    SilentOcr = 32,
 }
 
 /// <summary>

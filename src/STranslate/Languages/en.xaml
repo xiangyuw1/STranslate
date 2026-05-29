@@ -51,9 +51,9 @@
     <sys:String x:Key="General_DefaultSourceLanguage">Default Source Language</sys:String>
     <sys:String x:Key="General_DefaultSourceLanguageDescription">Use this language when auto detection fails.</sys:String>
     <sys:String x:Key="General_FirstLanguage">First Language</sys:String>
-    <sys:String x:Key="General_FirstLanguageDescription">When the target language is set to Auto and the source language is another language (including the second language), the target language will use the first language.</sys:String>
+    <sys:String x:Key="General_FirstLanguageDescription">When the target language is set to Auto in any translation scenario (including image translation), and the source language is another language (including the second language), the target language uses the first language.</sys:String>
     <sys:String x:Key="General_SecondLanguage">Second Language</sys:String>
-    <sys:String x:Key="General_SecondLanguageDescription">When the target language is set to Auto and the source language is the first language, the target language will use the second language.</sys:String>
+    <sys:String x:Key="General_SecondLanguageDescription">When the target language is set to Auto in any translation scenario (including image translation), and the source language is the first language, the target language uses the second language.</sys:String>
     <sys:String x:Key="General_HttpTimeout">Timeout</sys:String>
     <sys:String x:Key="General_HttpTimeoutDescription">Network request timeout in seconds.</sys:String>
     <sys:String x:Key="General_UseClipboardOutput">Use Clipboard for Text Output</sys:String>
@@ -71,6 +71,10 @@
     <sys:String x:Key="General_AutoTranslateDelayDescription">Waiting time after inputting content, unit: milliseconds.</sys:String>
     <sys:String x:Key="General_LineBreakHandleType">Line Break Handling</sys:String>
     <sys:String x:Key="General_LineBreakHandleTypeDescription" xml:space="preserve">Includes line break handling for word selection, screenshot translation, clipboard, and silent OCR scenarios.&#10;"Remove extra line breaks" is mainly for PDF text extraction, removing redundant line breaks and sentence breaks, but it may affect non-PDF extraction.</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleType">Text Separator Handling</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleTypeDescription">Converts underscores or hyphens inside English/numeric identifiers to spaces. Disabled by default.</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopes">Separator Handling Scope</sys:String>
+    <sys:String x:Key="General_TextSeparatorHandleScopesDescription">Choose which text capture entry points apply separator handling. No selection keeps original text.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">Text Capture Timeout</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Timeout for polling new clipboard text after simulated copy, in milliseconds. Returns as soon as text is updated; increase this for PDF apps that update slowly.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
@@ -116,6 +120,8 @@
     <sys:String x:Key="General_MainHeaderPool">Action Pool (Hidden)</sys:String>
     <sys:String x:Key="General_MainHeaderShowAll">Show All</sys:String>
     <sys:String x:Key="General_MainHeaderHideAll">Hide All</sys:String>
+    <sys:String x:Key="General_ShowCloseButton">Show Close Button</sys:String>
+    <sys:String x:Key="General_ShowCloseButtonDescription">Display the close button to the right of the settings button in the main header. It behaves the same as the Esc key.</sys:String>
     <sys:String x:Key="General_FontSize">Font Size</sys:String>
     <sys:String x:Key="General_FontSizeDescription">Adjust font size for all elements except the right-click context menu</sys:String>
     <sys:String x:Key="General_OutputShowingControl">Output Display Control</sys:String>
@@ -490,6 +496,7 @@
     <sys:String x:Key="HotkeyOverwriteFailed">Failed to unbind hotkey during overwrite, restored.</sys:String>
     <sys:String x:Key="HotkeyUnavailableUneditable">This hotkey is reserved for "{0}" and can't be used. Please choose another hotkey.</sys:String>
     <sys:String x:Key="HotkeyUnavailableEditable">This hotkey is already in use by "{0}". If you press "Overwrite", it will be removed from "{0}".</sys:String>
+    <sys:String x:Key="HotkeyReservedClipboardCopy">Ctrl+C is reserved for system copy and selected-text capture, so it can't be bound as a global hotkey. Please choose another hotkey.</sys:String>
     <!--  // Enum //  -->
     <sys:String x:Key="StartModeNormal">Normal</sys:String>
     <sys:String x:Key="StartModeAdmin">Admin</sys:String>
@@ -530,6 +537,7 @@
     <sys:String x:Key="LangEnumPolish">Polish</sys:String>
     <sys:String x:Key="LangEnumDutch">Dutch</sys:String>
     <sys:String x:Key="LangEnumUkrainian">Ukrainian</sys:String>
+    <sys:String x:Key="LangEnumUzbek">Uzbek</sys:String>
 
     <sys:String x:Key="LanguageDetectorTypeLocal">Local Detection</sys:String>
     <sys:String x:Key="LanguageDetectorTypeBaidu">Baidu Detection</sys:String>
@@ -544,6 +552,17 @@
     <sys:String x:Key="LineBreakHandleTypeRemoveExtraLineBreak">Remove extra line breaks</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreak">Remove all line breaks</sys:String>
     <sys:String x:Key="LineBreakHandleTypeRemoveAllLineBreakWithoutSpace">Remove all line breaks (without space filling)</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeNone">Do not process separators</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscore">Process underscores</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeHyphen">Process hyphens</sys:String>
+    <sys:String x:Key="TextSeparatorHandleTypeUnderscoreAndHyphen">Process underscores and hyphens</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeNone">Disabled</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeMouseHook">Mouse selection monitor</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeCrossword">Word selection translation / Ctrl+C+C</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeIncremental">Incremental translation</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeClipboardMonitor">Clipboard monitor</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeScreenshotTranslate">Screenshot translation</sys:String>
+    <sys:String x:Key="TextSeparatorHandleScopeSilentOcr">Silent OCR</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetInputTranslate">Input Translate</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetShowWindow">Show Main Window</sys:String>
 
@@ -707,6 +726,7 @@
 
     <sys:String x:Key="RecognizeLanguage">Recognize Language</sys:String>
     <sys:String x:Key="TranslateLanguage">Translate Language</sys:String>
+    <sys:String x:Key="ImageTranslateLanguageIndependentToolTip">The translation language in the image translation window is independent from the main window. Changes here will not affect the main window.</sys:String>
     <sys:String x:Key="ImTranSettingsToolTip" xml:space="preserve">Left Click -> Standalone Window Settings&#10;Ctrl+Left Click -> Text Recognition Settings&#10;Alt+Left Click -> Text Translation Settings</sys:String>
 
     <!--  // Snackbar Messages //  -->

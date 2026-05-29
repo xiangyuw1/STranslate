@@ -13,24 +13,25 @@ public static class SingletonWindowOpener
 {
     private static readonly Settings _settings = Ioc.Default.GetRequiredService<Settings>();
 
-    public static T Open<T>(params object[] args) where T : Window
+    public static T Open<T>(WindowActivationMode activationMode = WindowActivationMode.Normal, params object[] args) where T : Window
     {
         var window = Application.Current.Windows.OfType<T>().FirstOrDefault()
                      ?? (T)Activator.CreateInstance(typeof(T), args)!;
 
-        Activate(window);
+        Activate(window, activationMode);
 
         return window;
     }
 
-    public static async Task<T> OpenAsync<T>(params object[] args) where T : Window
+    public static async Task<T> OpenAsync<T>(
+        WindowActivationMode activationMode = WindowActivationMode.Normal,
+        params object[] args) where T : Window
     {
         var window = Application.Current.Windows.OfType<T>().FirstOrDefault();
 
         if (window != null)
         {
-            Win32Helper.SetForegroundWindow(window);
-            Activate(window);
+            Activate(window, activationMode);
             return window;
         }
 
@@ -38,8 +39,7 @@ public static class SingletonWindowOpener
         window = await Application.Current.Dispatcher.InvokeAsync(() =>
         {
             var newWindow = (T)Activator.CreateInstance(typeof(T), args)!;
-            Win32Helper.SetForegroundWindow(newWindow);
-            Activate(newWindow);
+            Activate(newWindow, activationMode);
             return newWindow;
         }, DispatcherPriority.Background);
 
@@ -50,7 +50,8 @@ public static class SingletonWindowOpener
     /// 激活窗口
     /// </summary>
     /// <param name="window"></param>
-    private static void Activate<T>(T window) where T : Window
+    /// <param name="activationMode"></param>
+    private static void Activate<T>(T window, WindowActivationMode activationMode) where T : Window
     {
         // Fix UI bug
         // Add `window.WindowState = WindowState.Normal`
@@ -70,12 +71,13 @@ public static class SingletonWindowOpener
             ThemeManager.SetRequestedTheme(window, _settings.ColorScheme);
             window.Show();
         }
-        else
-        {
-            // 如果窗口已显示，则激活并置于前台
-            window.Activate();
-        }
 
+        if (activationMode == WindowActivationMode.ForceForeground)
+            Win32Helper.ForceSetForegroundWindow(window);
+        else
+            Win32Helper.SetForegroundWindow(window);
+
+        window.Activate();
         window.Focus();
     }
 }

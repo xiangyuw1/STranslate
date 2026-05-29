@@ -27,6 +27,8 @@ public class DataProvider
         DropdownDataGeneric<LanguageDetectorType>.UpdateLabels(LanguageDetectors);
         DropdownDataGeneric<ElementTheme>.UpdateLabels(ColorSchemes);
         DropdownDataGeneric<LineBreakHandleType>.UpdateLabels(LineBreakHandleTypes);
+        DropdownDataGeneric<TextSeparatorHandleType>.UpdateLabels(TextSeparatorHandleTypes);
+        DropdownDataGeneric<TextSeparatorHandleScope>.UpdateLabels(TextSeparatorHandleScopes);
         DropdownDataGeneric<CrosswordFetchFailedFallbackTarget>.UpdateLabels(CrosswordFetchFailedFallbackTargets);
         DropdownDataGeneric<PluginType>.UpdateLabels(PluginTypes);
         DropdownDataGeneric<LayoutAnalysisMode>.UpdateLabels(LayoutAnalysisModes);
@@ -82,6 +84,21 @@ public class DataProvider
     public class LineBreakHandleData : DropdownDataGeneric<LineBreakHandleType> { }
     public List<LineBreakHandleData> LineBreakHandleTypes { get; } =
         DropdownDataGeneric<LineBreakHandleType>.GetValues<LineBreakHandleData>("LineBreakHandleType");
+
+    #endregion
+
+    #region TextSeparatorHandleTypes
+
+    public class TextSeparatorHandleTypeData : DropdownDataGeneric<TextSeparatorHandleType> { }
+    public List<TextSeparatorHandleTypeData> TextSeparatorHandleTypes { get; } =
+        DropdownDataGeneric<TextSeparatorHandleType>.GetValues<TextSeparatorHandleTypeData>("TextSeparatorHandleType");
+
+    public class TextSeparatorHandleScopeData : DropdownDataGeneric<TextSeparatorHandleScope> { }
+    public List<TextSeparatorHandleScopeData> TextSeparatorHandleScopes { get; } =
+        DropdownDataGeneric<TextSeparatorHandleScope>
+            .GetValues<TextSeparatorHandleScopeData>("TextSeparatorHandleScope")
+            .Where(x => x.Value != TextSeparatorHandleScope.None)
+            .ToList();
 
     #endregion
 

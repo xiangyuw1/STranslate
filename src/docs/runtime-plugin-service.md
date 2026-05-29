@@ -14,6 +14,8 @@
   - `AddService()` / `RemoveService()`：服务实例新增删除。
 - `STranslate/Services/BaseService.cs`
   - 统一管理服务集合、服务属性变更落盘、单启用约束、顺序变更。
+- `STranslate/ViewModels/Pages/TranslateViewModel.cs`
+  - 翻译服务配置页命令，如启用项前移排序。
 - `STranslate/Core/PluginContext.cs`
   - 插件上下文能力注入与插件配置读写。
 - `STranslate.Plugin/Service.cs`
@@ -49,6 +51,14 @@
 2. `PluginStorage<T>` 使用 `PluginSettingsDirectoryPath/{serviceId}.json` 作为存储位置。
 3. 插件调用 `context.SaveSettingStorage<T>()` 写盘；服务销毁时 `PluginContext.Dispose()` 会删除当前服务配置并尝试清理空目录。
 
+### 从入口到结果：服务顺序与启用项整理
+1. 服务启用状态、显示名、执行模式与顺序由 `ServiceSettings` 持久化。
+2. 拖拽或命令调整服务集合顺序时，`BaseService` 监听集合变化并写回配置。
+3. 翻译服务配置页提供 `ReorderEnabledServicesCommand`，快捷键 `Ctrl + Shift + R`：
+   - 已启用服务移动到前方。
+   - 未启用服务移动到后方。
+   - 启用组和未启用组内部相对顺序保持不变。
+
 ### 安装、升级、卸载策略
 - 安装：`.spkg` 解压到临时目录，校验 `plugin.json`，按插件 ID 决定目标目录（预装目录或用户目录），加载成功后加入运行集合。
 - 升级：旧目录写 `NeedDelete` 标记，新目录以 `NeedUpgrade` 后缀落位，等待重启生效。
@@ -59,11 +69,13 @@
 - `Service`：运行时服务实例（`ServiceID`、`Plugin`、`Context`、`Options`）。
 - `ServiceData`：可持久化的服务配置项（启用状态、名称、翻译选项）。
 - `PluginInstallResult` / `PluginLoadResult`：安装/加载结果模型。
+- 特殊服务 ID：`ReplaceSvcID`、`ImageTranslateSvcID`、`ImageTranslateOcrSvcID`；对应服务缺失时启动加载会自动重置。
 
 ## 关键文件
 - `STranslate/Core/PluginManager.cs`
 - `STranslate/Core/ServiceManager.cs`
 - `STranslate/Services/BaseService.cs`
+- `STranslate/ViewModels/Pages/TranslateViewModel.cs`
 - `STranslate/Core/PluginContext.cs`
 - `STranslate/Services/PluginInstance.cs`
 - `STranslate.Plugin/PluginMetaData.cs`
@@ -74,3 +86,4 @@
 - 调整安装策略：优先改 `PluginManager.InstallPlugin` 与 `MoveToPluginPath`，不要破坏 `NeedUpgrade` / `NeedDelete` 标记语义。
 - 服务配置丢失排查：先检查 `DataLocation.PluginSettingsDirectory` 的 `SvcID.json` 与 `ServiceSettings` 四类列表是否一致。
 - 插件配置迁移：优先在插件 `Init` 中做版本迁移，再 `SaveSettingStorage`，避免在主程序层硬编码插件私有结构。
+- 调整服务排序工具：优先复用 `ObservableCollection.Move()`，让现有集合监听和持久化逻辑生效。

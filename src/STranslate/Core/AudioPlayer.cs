@@ -14,6 +14,7 @@ public class AudioPlayer : IAudioPlayer
     private MemoryStream? _audioStream;
     private Mp3FileReader? _mp3Reader;
     private CancellationTokenSource? _cancellationTokenSource;
+    private int _stopping;
     private bool _disposed;
     private int _stopping;
 
@@ -75,7 +76,6 @@ public class AudioPlayer : IAudioPlayer
         }
         finally
         {
-            // 统一清理入口：由 finally 唯一负责调用 StopAsync
             await StopAsync();
         }
     }
@@ -114,33 +114,39 @@ public class AudioPlayer : IAudioPlayer
     /// </summary>
     public async Task StopAsync()
     {
-        // 并发门：用 Interlocked 保证只有第一个调用者真正执行，后来的直接返回
         if (Interlocked.CompareExchange(ref _stopping, 1, 0) != 0)
+        {
             return;
+        }
 
         try
         {
-            _cancellationTokenSource?.Cancel();
+            var cancellationTokenSource = _cancellationTokenSource;
+            _cancellationTokenSource = null;
+            cancellationTokenSource?.Cancel();
 
-            if (_waveOut != null)
+            var waveOut = _waveOut;
+            _waveOut = null;
+
+            if (waveOut != null)
             {
-                _waveOut.PlaybackStopped -= OnPlaybackStopped;
-                _waveOut.Stop();
-
-                // 将 Dispose 移到 ThreadPool，避免 UI 线程持 STA 锁时死锁
-                var waveOut = _waveOut;
-                _waveOut = null;
-                await Task.Run(() => waveOut.Dispose());
+                await Task.Run(() =>
+                {
+                    waveOut.PlaybackStopped -= OnPlaybackStopped;
+                    waveOut.Stop();
+                    waveOut.Dispose();
+                });
             }
 
-            _mp3Reader?.Dispose();
+            var mp3Reader = _mp3Reader;
             _mp3Reader = null;
+            mp3Reader?.Dispose();
 
-            _audioStream?.Dispose();
+            var audioStream = _audioStream;
             _audioStream = null;
+            audioStream?.Dispose();
 
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
+            cancellationTokenSource?.Dispose();
 
             OnPlaybackStateChanged(PlaybackState.Stopped);
         }
@@ -150,7 +156,6 @@ public class AudioPlayer : IAudioPlayer
         }
         finally
         {
-            // 重置并发门，允许下次播放
             Interlocked.Exchange(ref _stopping, 0);
         }
     }
@@ -201,7 +206,6 @@ public class AudioPlayer : IAudioPlayer
         catch (OperationCanceledException)
         {
             _logger.LogTrace("音频播放被取消(Monitor)");
-            // 不再调用 StopAsync，由 PlayAsync 的 finally 统一清理
         }
         catch (Exception ex)
         {
@@ -225,9 +229,13 @@ public class AudioPlayer : IAudioPlayer
             _logger.LogTrace("音频播放正常结束");
         }
 
-        // 不再调用 StopAsync，由 PlayAsync 的 finally 统一清理
-        // 只负责取消 CancellationToken 以通知 MonitorPlaybackProgressAsync
-        _cancellationTokenSource?.Cancel();
+        try
+        {
+            _cancellationTokenSource?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     /// <summary>

@@ -124,7 +124,7 @@
 
                     <ui:SettingsCard Description="{DynamicResource Hotkey_CrosswordTranslateDescription}" Header="{DynamicResource Hotkey_CrosswordTranslate}">
                         <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Keyboard_24_Regular}" />
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.CursorClick_20_Regular}" />
                         </ui:SettingsCard.HeaderIcon>
                         <control:HotkeyControl
                             DefaultHotkey="{Binding HotkeySettings.CrosswordTranslateHotkey.Default}"

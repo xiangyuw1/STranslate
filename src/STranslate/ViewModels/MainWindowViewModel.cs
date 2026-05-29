@@ -45,6 +45,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly SqlService _sqlService;
     private readonly DebounceExecutor _debounceExecutor;
     private ClipboardMonitor? _clipboardMonitor;
+    private bool _forceShowInputForInputTranslate;
 
     public Settings Settings { get; }
     public HotkeySettings HotkeySettings { get; }
@@ -142,6 +143,24 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial double MainWindowEffectiveMaxHeight { get; set; } = 800;
 
+    public bool IsInputActuallyHidden
+    {
+        get => Settings.HideInput && !_forceShowInputForInputTranslate;
+        set
+        {
+            if (value == IsInputActuallyHidden)
+                return;
+
+            ExitInputTranslateMode();
+            Settings.HideInput = value;
+        }
+    }
+
+    public bool IsInputBoxVisible => !IsInputActuallyHidden;
+
+    public bool IsLanguageSelectControlVisible =>
+        !IsInputActuallyHidden || !Settings.HideInputWithLangSelectControl;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SingleTranslateCommand))]
     [NotifyCanExecuteChangedFor(nameof(TranslateCommand))]
@@ -188,13 +207,17 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     /// </summary>
     /// <param name="text"></param>
     /// <param name="force">不为空则跳过缓存</param>
-    public void ExecuteTranslate(string text, string? force = null)
+    public void ExecuteTranslate(
+        string text,
+        string? force = null,
+        WindowActivationMode activationMode = WindowActivationMode.Normal)
     {
+        ExitInputTranslateMode();
         CancelAllOperations();
         ResetTranslationLanguageState();
         InputText = text;
         TranslateCommand.Execute(force);
-        Show();
+        Show(activationMode);
         UpdateCaret();
     }
 
@@ -805,7 +828,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             if (Settings.CopyAfterOcr)
                 ClipboardHelper.SetText(result.Text);
 
-            ExecuteTranslate(Utilities.LinebreakHandler(result.Text, Settings.LineBreakHandleType));
+            ExecuteTranslate(HandleCapturedText(result.Text, TextSeparatorHandleScope.ScreenshotTranslate));
         }
         catch (TaskCanceledException)
         {
@@ -928,7 +951,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             var result = await ocrPlugin.RecognizeAsync(new OcrRequest(data, LangEnum.Auto), cancellationToken);
             if (result.IsSuccess && !string.IsNullOrEmpty(result.Text))
             {
-                ClipboardHelper.SetText(result.Text);
+                ClipboardHelper.SetText(HandleSilentOcrText(result.Text));
             }
         }
         catch (TaskCanceledException)
@@ -1251,7 +1274,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _ = Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            InputText += Utilities.LinebreakHandler(text, Settings.LineBreakHandleType);
+            InputText += HandleCapturedText(text, TextSeparatorHandleScope.Incremental);
         });
     }
 
@@ -1285,7 +1308,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _ = Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.MouseHook));
         });
     }
 
@@ -1299,7 +1322,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
-        ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+        ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.Crossword));
     }
 
     public void CrosswordTranslateByCtrlSameCHandler()
@@ -1313,7 +1336,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.Crossword));
         });
     }
 
@@ -1361,7 +1384,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (string.IsNullOrWhiteSpace(text)) return;
 
         App.Current.Dispatcher.Invoke(() =>
-            ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType)));
+            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.ClipboardMonitor)));
     }
 
     [RelayCommand(IncludeCancelCommand = true)]
@@ -1445,7 +1468,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     /// </summary>
     public void InitializeWindowLayoutConstraints() => UpdateMainWindowMaxHeightConstraint();
 
-    public void Show()
+    public void Show(WindowActivationMode activationMode = WindowActivationMode.Normal)
     {
         if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
         {
@@ -1457,15 +1480,25 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         UpdatePosition();
         UpdateMainWindowMaxHeightConstraint();
 
-        Win32Helper.SetForegroundWindow(MainWindow);
+        if (activationMode == WindowActivationMode.ForceForeground)
+            Win32Helper.ForceSetForegroundWindow(MainWindow);
+        else
+            Win32Helper.SetForegroundWindow(MainWindow);
 
         MainWindow.Activate();
 
-        MainWindow.PART_Input.Focus();
-        Keyboard.Focus(MainWindow.PART_Input);
+        if (IsInputBoxVisible)
+        {
+            MainWindow.PART_Input.Focus();
+            Keyboard.Focus(MainWindow.PART_Input);
+        }
     }
 
-    public void Hide() => MainWindow.Visibility = Visibility.Collapsed;
+    public void Hide()
+    {
+        ExitInputTranslateMode();
+        MainWindow.Visibility = Visibility.Collapsed;
+    }
 
     [RelayCommand]
     private void DoubleClick()
@@ -1509,12 +1542,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    private void ToggleApp()
+    private void ToggleApp(WindowActivationMode? activationMode = null)
     {
         if (IsMainWindowVisible && !IsTopmost)
             Hide();
         else
-            Show();
+            Show(activationMode ?? WindowActivationMode.Normal);
     }
 
     [RelayCommand]
@@ -1523,6 +1556,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (!IsMouseHook)
         {
             if (IsTopmost) IsTopmost = false;
+            ExitInputTranslateMode();
             window.Visibility = Visibility.Collapsed;
         }
         CancelAllOperations();
@@ -1531,21 +1565,23 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task OpenSettingsAsync(object? parameter)
     {
-        // 检查设置窗口是否已经打开
-        var isAlreadyOpen = Application.Current.Windows.OfType<SettingsWindow>().Any();
-
-        await OpenSettingsInternalAsync(parameter);
-
-        // 只有窗口是新打开的才导航到 GeneralPage
-        if (isAlreadyOpen) return;
-
-        Application.Current.Windows
-                    .OfType<SettingsWindow>()
-                    .First()
-                    .Navigate(nameof(GeneralPage));
+        await OpenSettingsAndNavigateAsync(parameter);
     }
 
-    internal async Task OpenSettingsInternalAsync(object? parameter)
+    internal async Task OpenSettingsAndNavigateAsync(
+        object? parameter,
+        WindowActivationMode activationMode = WindowActivationMode.Normal)
+    {
+        var isAlreadyOpen = Application.Current.Windows.OfType<SettingsWindow>().Any();
+        var window = await OpenSettingsInternalAsync(parameter, activationMode);
+
+        if (!isAlreadyOpen)
+            window.Navigate(nameof(GeneralPage));
+    }
+
+    internal async Task<SettingsWindow> OpenSettingsInternalAsync(
+        object? parameter,
+        WindowActivationMode activationMode = WindowActivationMode.Normal)
     {
         // 如果由 ContextMenu 触发，等待关闭动画完成
         if (parameter is not null)
@@ -1555,17 +1591,19 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (MainWindow.IsActive && IsMainWindowVisible && !IsTopmost)
             Hide();
 
-        await SingletonWindowOpener.OpenAsync<SettingsWindow>();
+        return await SingletonWindowOpener.OpenAsync<SettingsWindow>(activationMode);
     }
 
     [RelayCommand]
     private async Task OpenHistoryAsync()
     {
-        await OpenSettingsInternalAsync(null);
-        Application.Current.Windows
-                    .OfType<SettingsWindow>()
-                    .First()
-                    .Navigate(nameof(HistoryPage));
+        await OpenHistoryInternalAsync();
+    }
+
+    internal async Task OpenHistoryInternalAsync(WindowActivationMode activationMode = WindowActivationMode.Normal)
+    {
+        var window = await OpenSettingsInternalAsync(null, activationMode);
+        window.Navigate(nameof(HistoryPage));
     }
 
     [RelayCommand]
@@ -1590,7 +1628,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void ToggleTopmost() => IsTopmost = !IsTopmost;
 
     [RelayCommand]
-    private void ToggleHideInput() => Settings.HideInput = !Settings.HideInput;
+    private void ToggleHideInput() => IsInputActuallyHidden = !IsInputActuallyHidden;
 
     [RelayCommand]
     private void ChangeColorScheme()
@@ -1609,14 +1647,15 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     #region Text & Clipboard Manipulation
 
     [RelayCommand]
-    private void InputClear()
+    private void InputClear(WindowActivationMode activationMode = WindowActivationMode.Normal)
     {
         CancelAllOperations();
         ResetTranslationLanguageState();
         InputText = string.Empty;
 
         ResetAllServices();
-        Show();
+        EnterInputTranslateMode();
+        Show(activationMode);
     }
 
     [RelayCommand]
@@ -1676,7 +1715,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             text = text.ToLower();
 
         if (IsTopmost) IsTopmost = false;
-        MainWindow.Visibility = Visibility.Collapsed;
+        Hide();
         await Task.Delay(150);
         InputHelper.PrintText(text);
     }
@@ -1708,6 +1747,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             e.PropertyName == nameof(Settings.TargetLang))
         {
             ResetTranslationLanguageState();
+        }
+
+        if (e.PropertyName == nameof(Settings.HideInput) ||
+            e.PropertyName == nameof(Settings.HideInputWithLangSelectControl))
+        {
+            NotifyInputVisibilityProperties();
         }
 
         if (e.PropertyName != nameof(Settings.MainWindowMaxHeightRatio) &&
@@ -2101,6 +2146,31 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     #region Helpers & Event Handlers
 
+    private void EnterInputTranslateMode()
+    {
+        if (_forceShowInputForInputTranslate)
+            return;
+
+        _forceShowInputForInputTranslate = true;
+        NotifyInputVisibilityProperties();
+    }
+
+    private void ExitInputTranslateMode()
+    {
+        if (!_forceShowInputForInputTranslate)
+            return;
+
+        _forceShowInputForInputTranslate = false;
+        NotifyInputVisibilityProperties();
+    }
+
+    private void NotifyInputVisibilityProperties()
+    {
+        OnPropertyChanged(nameof(IsInputActuallyHidden));
+        OnPropertyChanged(nameof(IsInputBoxVisible));
+        OnPropertyChanged(nameof(IsLanguageSelectControlVisible));
+    }
+
     partial void OnInputTextChanged(string value)
     {
         ResetTranslationLanguageState();
@@ -2205,6 +2275,27 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void UpdateCaret()
     {
         MainWindow.PART_Input.SetCaretIndex(InputText.Length);
+    }
+
+    private string HandleCapturedText(string text, TextSeparatorHandleScope scope)
+    {
+        return Utilities.CapturedTextHandler(
+            text,
+            Settings.LineBreakHandleType,
+            Settings.TextSeparatorHandleType,
+            scope,
+            Settings.TextSeparatorHandleScopes);
+    }
+
+    private string HandleSilentOcrText(string text)
+    {
+        if (Settings.TextSeparatorHandleType == TextSeparatorHandleType.None ||
+            (Settings.TextSeparatorHandleScopes & TextSeparatorHandleScope.SilentOcr) != TextSeparatorHandleScope.SilentOcr)
+        {
+            return text;
+        }
+
+        return HandleCapturedText(text, TextSeparatorHandleScope.SilentOcr);
     }
 
     private void ResetAllServices()
