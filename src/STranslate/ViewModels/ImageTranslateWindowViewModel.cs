@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using iNKORE.UI.WPF.Modern;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using STranslate.Controls;
@@ -675,12 +676,12 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             // 绘制原始图像
             drawingContext.DrawImage(image, new Rect(0, 0, image.PixelWidth, image.PixelHeight));
 
-            var sampleImage = EnsureBgra32(image);
+            var overlayTheme = GetOverlayTheme();
             var measureTextBrush = new SolidColorBrush(Colors.Black);
             measureTextBrush.Freeze();
             var overlays = layoutBlocks
                 .Where(item => item.BoxPoints.Count > 0 && !string.IsNullOrEmpty(item.Text))
-                .Select(item => CreateTranslatedTextOverlay(item, sampleImage, pixelsPerDip, measureTextBrush))
+                .Select(item => CreateTranslatedTextOverlay(item, overlayTheme, pixelsPerDip, measureTextBrush))
                 .Where(item => item != null)
                 .Select(item => item!)
                 .ToList();
@@ -729,7 +730,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     /// <param name="pixelsPerDip">DPI缩放比例</param>
     private TranslatedTextOverlay? CreateTranslatedTextOverlay(
         OcrLayoutBlock content,
-        BitmapSource sampleImage,
+        ImageTranslateOverlayTheme overlayTheme,
         double pixelsPerDip,
         Brush measureTextBrush)
     {
@@ -737,7 +738,6 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
         if (boundingRect.IsEmpty || boundingRect.Width <= 0 || boundingRect.Height <= 0)
             return null;
 
-        var backgroundSample = SampleBackground(sampleImage, content, boundingRect);
         var plan = ImageTranslateTextOverlayLayout.Create(
             content,
             boundingRect,
@@ -749,7 +749,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
                 pixelsPerDip,
                 isMultiLine ? fontSize * 1.28 : 0,
                 isMultiLine ? 0 : 1),
-            backgroundSample);
+            overlayTheme);
 
         var textBrush = new SolidColorBrush(plan.ForegroundColor);
         textBrush.Freeze();
@@ -864,85 +864,10 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
         FormattedText FormattedText,
         Point TextPosition);
 
-    private static BitmapSource EnsureBgra32(BitmapSource image)
-    {
-        if (image.Format == PixelFormats.Bgra32 || image.Format == PixelFormats.Pbgra32)
-            return image;
-
-        var converted = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
-        converted.Freeze();
-        return converted;
-    }
-
-    private static ImageTranslateBackgroundSample SampleBackground(
-        BitmapSource image,
-        OcrLayoutBlock content,
-        Rect boundingRect)
-    {
-        var sampleRects = content.LineBoxPoints
-            .Select(CalculateBoundingRect)
-            .Where(rect => !rect.IsEmpty && rect.Width > 0 && rect.Height > 0)
-            .DefaultIfEmpty(boundingRect)
-            .ToList();
-
-        double luminanceSum = 0;
-        var darkPixelCount = 0;
-        var sampledPixelCount = 0;
-        var bytesPerPixel = Math.Max(1, image.Format.BitsPerPixel / 8);
-
-        foreach (var rect in sampleRects)
-        {
-            var pixelRect = ClipToImage(rect, image.PixelWidth, image.PixelHeight);
-            if (pixelRect.IsEmpty)
-                continue;
-
-            var stride = pixelRect.Width * bytesPerPixel;
-            var pixels = new byte[stride * pixelRect.Height];
-            image.CopyPixels(pixelRect, pixels, stride, 0);
-
-            var stepX = Math.Max(1, pixelRect.Width / 24);
-            var stepY = Math.Max(1, pixelRect.Height / 12);
-            for (var y = 0; y < pixelRect.Height; y += stepY)
-            {
-                for (var x = 0; x < pixelRect.Width; x += stepX)
-                {
-                    var offset = y * stride + x * bytesPerPixel;
-                    var b = pixels[offset];
-                    var g = pixels[offset + 1];
-                    var r = pixels[offset + 2];
-                    var a = bytesPerPixel >= 4 ? pixels[offset + 3] : (byte)255;
-                    if (a < 32)
-                        continue;
-
-                    var luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255d;
-                    luminanceSum += luminance;
-                    if (luminance < 0.38)
-                        darkPixelCount++;
-                    sampledPixelCount++;
-                }
-            }
-        }
-
-        if (sampledPixelCount == 0)
-            return ImageTranslateBackgroundSample.Light;
-
-        return new ImageTranslateBackgroundSample(
-            luminanceSum / sampledPixelCount,
-            darkPixelCount / (double)sampledPixelCount);
-    }
-
-    private static Int32Rect ClipToImage(Rect rect, int imageWidth, int imageHeight)
-    {
-        var left = Math.Clamp((int)Math.Floor(rect.Left), 0, imageWidth);
-        var top = Math.Clamp((int)Math.Floor(rect.Top), 0, imageHeight);
-        var right = Math.Clamp((int)Math.Ceiling(rect.Right), 0, imageWidth);
-        var bottom = Math.Clamp((int)Math.Ceiling(rect.Bottom), 0, imageHeight);
-        var width = right - left;
-        var height = bottom - top;
-        return width <= 0 || height <= 0
-            ? Int32Rect.Empty
-            : new Int32Rect(left, top, width, height);
-    }
+    private ImageTranslateOverlayTheme GetOverlayTheme() =>
+        Settings.ColorScheme == ElementTheme.Dark
+            ? ImageTranslateOverlayTheme.Dark
+            : ImageTranslateOverlayTheme.Light;
 
     private static Color CreateTextShadowColor(Color foregroundColor) =>
         IsLightColor(foregroundColor)

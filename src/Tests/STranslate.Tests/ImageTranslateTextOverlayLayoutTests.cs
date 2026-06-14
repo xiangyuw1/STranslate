@@ -205,7 +205,7 @@ public class ImageTranslateTextOverlayLayoutTests
     }
 
     [Fact]
-    public void LightBackgroundUsesLightOverlayAndBlackText()
+    public void LightThemeUsesLightOverlayAndBlackText()
     {
         var block = Block(
             Box(0, 0, 200, 40),
@@ -215,14 +215,14 @@ public class ImageTranslateTextOverlayLayoutTests
             block,
             new Rect(0, 0, 200, 40),
             (_, _, _) => new Size(10, 10),
-            ImageTranslateBackgroundSample.Light);
+            ImageTranslateOverlayTheme.Light);
 
         Assert.Equal(Color.FromArgb(210, 255, 255, 255), plan.OverlayBackgroundColor);
         Assert.Equal(Colors.Black, plan.ForegroundColor);
     }
 
     [Fact]
-    public void DarkBackgroundUsesDarkOverlayAndWhiteText()
+    public void DarkThemeUsesDarkOverlayAndWhiteText()
     {
         var block = Block(
             Box(0, 0, 200, 40),
@@ -232,27 +232,10 @@ public class ImageTranslateTextOverlayLayoutTests
             block,
             new Rect(0, 0, 200, 40),
             (_, _, _) => new Size(10, 10),
-            ImageTranslateBackgroundSample.Dark);
+            ImageTranslateOverlayTheme.Dark);
 
         Assert.Equal(Color.FromArgb(205, 0, 0, 0), plan.OverlayBackgroundColor);
         Assert.Equal(Colors.White, plan.ForegroundColor);
-    }
-
-    [Fact]
-    public void NeutralBackgroundChoosesHigherContrastOverlay()
-    {
-        var block = Block(
-            Box(0, 0, 200, 40),
-            Box(0, 0, 180, 20));
-
-        var plan = ImageTranslateTextOverlayLayout.Create(
-            block,
-            new Rect(0, 0, 200, 40),
-            (_, _, _) => new Size(10, 10),
-            ImageTranslateBackgroundSample.Neutral);
-
-        Assert.Equal(Color.FromArgb(210, 255, 255, 255), plan.OverlayBackgroundColor);
-        Assert.Equal(Colors.Black, plan.ForegroundColor);
     }
 
     [Fact]
@@ -289,7 +272,7 @@ public class ImageTranslateTextOverlayLayoutTests
             block,
             boundingRect,
             (fontSize, textRect, _) => measureText(fontSize, textRect),
-            ImageTranslateBackgroundSample.Light);
+            ImageTranslateOverlayTheme.Light);
 
     private static void AssertCovers(Rect outer, Rect inner)
     {

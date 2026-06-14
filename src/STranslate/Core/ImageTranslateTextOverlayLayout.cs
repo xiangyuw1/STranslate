@@ -24,11 +24,10 @@ internal sealed record ImageTranslateTextOverlayPlan(
     internal const double MaxFontSize = 48;
 }
 
-internal readonly record struct ImageTranslateBackgroundSample(double AverageLuminance, double DarkPixelRatio)
+internal enum ImageTranslateOverlayTheme
 {
-    internal static readonly ImageTranslateBackgroundSample Light = new(0.92, 0.02);
-    internal static readonly ImageTranslateBackgroundSample Dark = new(0.08, 0.95);
-    internal static readonly ImageTranslateBackgroundSample Neutral = new(0.5, 0.45);
+    Light,
+    Dark
 }
 
 internal static class ImageTranslateTextOverlayLayout
@@ -43,7 +42,7 @@ internal static class ImageTranslateTextOverlayLayout
         OcrLayoutBlock block,
         Rect boundingRect,
         Func<double, Rect, bool, Size> measureText,
-        ImageTranslateBackgroundSample? backgroundSample = null)
+        ImageTranslateOverlayTheme overlayTheme = ImageTranslateOverlayTheme.Light)
     {
         var lineRects = block.LineBoxPoints
             .Select(CalculateBoundingRect)
@@ -73,8 +72,7 @@ internal static class ImageTranslateTextOverlayLayout
             : new Rect(textRect.Left, textClipRect.Top, textRect.Width, textClipRect.Height);
         var (fontSize, shouldTrim) = FitFontSize(fontSizeLimit, fitRect, isMultiLine, measureText);
         var overlayRect = textClipRect;
-        var (overlayBackgroundColor, foregroundColor) = SelectOverlayColors(
-            backgroundSample ?? ImageTranslateBackgroundSample.Light);
+        var (overlayBackgroundColor, foregroundColor) = SelectOverlayColors(overlayTheme);
         var cornerRadius = Math.Clamp(lineHeight * 0.18, 3, 8);
 
         return new ImageTranslateTextOverlayPlan(
@@ -178,33 +176,10 @@ internal static class ImageTranslateTextOverlayLayout
         measured.Width <= textRect.Width + 0.1 &&
         measured.Height <= textRect.Height + 0.1;
 
-    private static (Color Background, Color Foreground) SelectOverlayColors(ImageTranslateBackgroundSample sample)
-    {
-        if (sample.AverageLuminance >= 0.62 && sample.DarkPixelRatio < 0.55)
-            return (LightOverlayBackground, Colors.Black);
-
-        if (sample.AverageLuminance <= 0.32 || sample.DarkPixelRatio >= 0.68)
-            return (DarkOverlayBackground, Colors.White);
-
-        var darkOverlayLuminance = BlendLuminance(sample.AverageLuminance, 0, DarkOverlayBackground.A / 255d);
-        var lightOverlayLuminance = BlendLuminance(sample.AverageLuminance, 1, LightOverlayBackground.A / 255d);
-        var darkOverlayContrast = ContrastRatio(darkOverlayLuminance, 1);
-        var lightOverlayContrast = ContrastRatio(lightOverlayLuminance, 0);
-
-        return darkOverlayContrast >= lightOverlayContrast
+    private static (Color Background, Color Foreground) SelectOverlayColors(ImageTranslateOverlayTheme overlayTheme) =>
+        overlayTheme == ImageTranslateOverlayTheme.Dark
             ? (DarkOverlayBackground, Colors.White)
             : (LightOverlayBackground, Colors.Black);
-    }
-
-    private static double BlendLuminance(double baseLuminance, double overlayLuminance, double overlayAlpha) =>
-        overlayLuminance * overlayAlpha + baseLuminance * (1 - overlayAlpha);
-
-    private static double ContrastRatio(double luminanceA, double luminanceB)
-    {
-        var lighter = Math.Max(luminanceA, luminanceB);
-        var darker = Math.Min(luminanceA, luminanceB);
-        return (lighter + 0.05) / (darker + 0.05);
-    }
 
     private static List<Rect> CreateEraseRects(IReadOnlyList<Rect> lineRects, Rect boundingRect, double lineHeight)
     {
