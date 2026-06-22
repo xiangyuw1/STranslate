@@ -16,7 +16,6 @@ public class AudioPlayer : IAudioPlayer
     private CancellationTokenSource? _cancellationTokenSource;
     private int _stopping;
     private bool _disposed;
-    private int _stopping;
 
     public AudioPlayer(ILogger<AudioPlayer> logger, IHttpService httpService)
     {

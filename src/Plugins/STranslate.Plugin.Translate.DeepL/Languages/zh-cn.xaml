@@ -6,8 +6,10 @@
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey">密钥</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey_Placeholder">请输入您的密钥</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey_Description">输入您的DeepL密钥</sys:String>
-    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_UseProApi">API类别</sys:String>
-    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_UseProApi_Description">选择是否使用专业版API「https://api.deepl.com」，否则使用免费版API「https://api-free.deepl.com」</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiType">API 地址</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiType_Description">选择 DeepL API 基地址，或输入兼容的自定义地址</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_CustomApiUrl_Placeholder">请输入 API 基地址，例如 https://api-us.deepl.com</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_InvalidApiUrl">请输入不含查询参数和片段的有效 HTTP(S) API 基地址</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Usage">使用情况</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query">查询</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query_Success">查询成功</sys:String>

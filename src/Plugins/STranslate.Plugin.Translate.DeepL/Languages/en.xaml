@@ -6,8 +6,10 @@
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey">ApiKey</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey_Placeholder">Please enter your apiKey</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey_Description">Enter your DeepL key</sys:String>
-    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_UseProApi">API Type</sys:String>
-    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_UseProApi_Description">Choose whether to use the Pro API 「https://api.deepl.com」, otherwise use the Free API 「https://api-free.deepl.com」</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiType">API Endpoint</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiType_Description">Select a DeepL API base URL or enter a custom compatible endpoint</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_CustomApiUrl_Placeholder">Enter the API base URL, for example https://api-us.deepl.com</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_InvalidApiUrl">Enter a valid HTTP(S) API base URL without query parameters or fragments</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Usage">Usage Status</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query">Query</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query_Success">Query successful</sys:String>

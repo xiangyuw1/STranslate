@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="STranslate_Plugin_Translate_Transmart">服务状态</sys:String>
-    <sys:String x:Key="STranslate_Plugin_Translate_Transmart_Content">腾讯 Transmart 官方服务已停止。此内置插件仅为兼容性保留，不再建议使用。</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Transmart">介绍</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Transmart_Content">本插件可免费使用腾讯翻译服务</sys:String>
 
 </ResourceDictionary>

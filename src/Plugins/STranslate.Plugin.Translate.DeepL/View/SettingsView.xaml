@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:local="clr-namespace:STranslate.Plugin.Translate.DeepL"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:plugin="clr-namespace:STranslate.Plugin;assembly=STranslate.Plugin"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
@@ -12,6 +13,10 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
 
     <ikw:SimpleStackPanel Spacing="12">
         <ui:SettingsCard Description="{DynamicResource STranslate_Plugin_Translate_DeepL_ApiKey_Description}" Header="{DynamicResource STranslate_Plugin_Translate_DeepL_ApiKey}">
@@ -25,14 +30,25 @@
                 ui:ControlHelper.PlaceholderText="{DynamicResource STranslate_Plugin_Translate_DeepL_ApiKey_Placeholder}" />
         </ui:SettingsCard>
 
-        <ui:SettingsCard Description="{DynamicResource STranslate_Plugin_Translate_DeepL_UseProApi_Description}" Header="{DynamicResource STranslate_Plugin_Translate_DeepL_UseProApi}">
+        <ui:SettingsCard Description="{DynamicResource STranslate_Plugin_Translate_DeepL_ApiType_Description}" Header="{DynamicResource STranslate_Plugin_Translate_DeepL_ApiType}">
             <ui:SettingsCard.HeaderIcon>
                 <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PersonStar_20_Regular}" />
             </ui:SettingsCard.HeaderIcon>
-            <ui:ToggleSwitch
-                IsOn="{Binding UseProApi}"
-                OffContent="{DynamicResource Off}"
-                OnContent="{DynamicResource On}" />
+            <ikw:SimpleStackPanel MinWidth="300" Spacing="6">
+                <ComboBox SelectedValue="{Binding ApiType}" SelectedValuePath="Tag">
+                    <ComboBoxItem Content="api" Tag="{x:Static local:DeepLApiType.Api}" />
+                    <ComboBoxItem Content="api-free" Tag="{x:Static local:DeepLApiType.ApiFree}" />
+                    <ComboBoxItem Content="custom" Tag="{x:Static local:DeepLApiType.Custom}" />
+                </ComboBox>
+                <TextBlock
+                    Text="{Binding ApiUrlPreview}"
+                    TextWrapping="Wrap"
+                    Visibility="{Binding IsPresetApi, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <TextBox
+                    Text="{Binding CustomApiUrl, UpdateSourceTrigger=PropertyChanged}"
+                    ui:ControlHelper.PlaceholderText="{DynamicResource STranslate_Plugin_Translate_DeepL_CustomApiUrl_Placeholder}"
+                    Visibility="{Binding IsCustomApi, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </ikw:SimpleStackPanel>
         </ui:SettingsCard>
 
         <ui:SettingsCard Header="{DynamicResource STranslate_Plugin_Translate_DeepL_Usage}">

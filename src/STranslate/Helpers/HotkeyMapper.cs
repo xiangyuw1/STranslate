@@ -454,7 +454,7 @@ public class HotkeyMapper
             {
                 try
                 {
-                    iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    AppMessageBox.Show(
                         message,
                         Constant.AppName,
                         MessageBoxButton.OK,
@@ -474,28 +474,9 @@ public class HotkeyMapper
     }
 
     /// <summary>
-    /// 检查是否应该跳过热键执行（禁用全局热键或全屏时）
+    /// 检查是否应该跳过热键执行
     /// </summary>
-    private static bool ShouldSkipHotkey()
-    {
-        try
-        {
-            var settings = Ioc.Default.GetRequiredService<Settings>();
-
-            if (settings.DisableGlobalHotkeys)
-                return true;
-
-            if (settings.IgnoreHotkeysOnFullscreen &&
-                Win32Helper.IsForegroundWindowFullscreen())
-                return true;
-        }
-        catch
-        {
-            // 忽略异常
-        }
-
-        return false;
-    }
+    private static bool ShouldSkipHotkey() => HotkeyExecutionGuard.ShouldSkipGlobalHotkey();
 
     #endregion
 }

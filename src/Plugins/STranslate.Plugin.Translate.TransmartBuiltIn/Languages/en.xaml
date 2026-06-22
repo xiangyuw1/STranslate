@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="STranslate_Plugin_Translate_Transmart">Service Status</sys:String>
-    <sys:String x:Key="STranslate_Plugin_Translate_Transmart_Content">The official Tencent Transmart service has been discontinued. This built-in plugin is kept only for compatibility and is no longer recommended.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Transmart">Introduction</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Transmart_Content">This plugin provides free access to Tencent Transmart translation service</sys:String>
 
 </ResourceDictionary>

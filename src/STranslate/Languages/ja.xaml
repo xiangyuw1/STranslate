@@ -10,6 +10,8 @@
 
     <sys:String x:Key="General">一般</sys:String>
     <sys:String x:Key="Services">サービス</sys:String>
+    <sys:String x:Key="ServiceQuickSwitcher">サービスクイック切り替え</sys:String>
+    <sys:String x:Key="NoConfiguredServices">サービスが設定されていません</sys:String>
     <sys:String x:Key="Translate">テキスト翻訳</sys:String>
     <sys:String x:Key="Ocr">文字認識</sys:String>
     <sys:String x:Key="Tts">音声合成</sys:String>
@@ -129,7 +131,6 @@
     <sys:String x:Key="General_ShowBackTranslation">再翻訳ボタンを表示</sys:String>
     <sys:String x:Key="General_ShowPrompt">プロンプト</sys:String>
     <sys:String x:Key="General_ShowPromptDescription">メイン画面にAI翻訳サービスのプロンプト切替ボタンを表示するかどうか。</sys:String>
-    <sys:String x:Key="MarkdownRender">MDレンダリング</sys:String>
     <sys:String x:Key="General_FontFamily">フォント</sys:String>
     <sys:String x:Key="General_HistoryCount">履歴記録数</sys:String>
     <sys:String x:Key="General_CopyAfterTranslation">翻訳後にコピー</sys:String>
@@ -137,6 +138,8 @@
     <sys:String x:Key="General_CopyAfterTranslationNotAutomatic">「自動実行」以外の翻訳後にコピー</sys:String>
     <sys:String x:Key="General_CopyAfterOcr">OCR後にコピー</sys:String>
     <sys:String x:Key="General_CopyAfterOcrDescription">すべての文字認識シーンにおいて、認識後に結果を自動コピーします。</sys:String>
+    <sys:String x:Key="General_FocusInputAfterScreenshotTranslate">スクリーンショット翻訳後に入力欄をアクティブ化</sys:String>
+    <sys:String x:Key="General_FocusInputAfterScreenshotTranslateDescription">オン: スクリーンショット翻訳後にメインウィンドウを表示し、入力欄へフォーカスします。オフ: メインウィンドウが最前面のときは結果だけ更新し、フォーカスを奪いません。最前面でない場合は表示を復元します。</sys:String>
     <sys:String x:Key="General_PluginMarketCdnSource">プラグイン市場CDNソース</sys:String>
     <sys:String x:Key="General_PluginMarketCdnSourceDescription">プラグイン市場データのCDN加速サービスを選択（GitHub直リンクはキャッシュ遅延なし）</sys:String>
     <sys:String x:Key="General_CustomCdnUrl">カスタムCDN URL</sys:String>
@@ -397,6 +400,7 @@
     <sys:String x:Key="Thanks">謝辞</sys:String>
 
     <sys:String x:Key="Add">追加</sys:String>
+    <sys:String x:Key="Clear">クリア</sys:String>
     <sys:String x:Key="Delete">削除</sys:String>
     <sys:String x:Key="Overwrite">上書き</sys:String>
     <sys:String x:Key="Save">保存</sys:String>
@@ -418,11 +422,30 @@
     <sys:String x:Key="On">オン</sys:String>
     <sys:String x:Key="Off">オフ</sys:String>
     <sys:String x:Key="QrCode">QRコード</sys:String>
+    <sys:String x:Key="Wizard">ウィザード</sys:String>
 
     <sys:String x:Key="Previous">前へ</sys:String>
     <sys:String x:Key="Next">次へ</sys:String>
 
     <sys:String x:Key="Document">ドキュメント</sys:String>
+
+    <!--  // Welcome Setup //  -->
+    <sys:String x:Key="WelcomeSetup_Title">STranslate へようこそ</sys:String>
+    <sys:String x:Key="WelcomeSetup_Subtitle">よく使うサービスと主要なホットキーをすばやく設定します。あとで「About」ページから再度開けます。</sys:String>
+    <sys:String x:Key="WelcomeSetup_WelcomeDescription">開始前に言語、よく使うサービス、主要なホットキーを設定できます。今はスキップしてもかまいません。</sys:String>
+    <sys:String x:Key="WelcomeSetup_LanguageDescription">インターフェイスの言語を選択します。変更は既存の言語設定ですぐに反映されます。</sys:String>
+    <sys:String x:Key="WelcomeSetup_Services">サービス設定</sys:String>
+    <sys:String x:Key="WelcomeSetup_TranslateServices">翻訳サービス</sys:String>
+    <sys:String x:Key="WelcomeSetup_OcrTtsServices">OCR / TTS サービス</sys:String>
+    <sys:String x:Key="WelcomeSetup_SpecialServices">専用サービス</sys:String>
+    <sys:String x:Key="WelcomeSetup_Hotkeys">ホットキー</sys:String>
+    <sys:String x:Key="WelcomeSetup_SelectService">サービスを選択</sys:String>
+    <sys:String x:Key="WelcomeSetup_SelectServiceDescription">先にサービスを追加し、設定または有効化するサービスを選択してください。</sys:String>
+    <sys:String x:Key="WelcomeSetup_ImageTranslateServiceDescription">画像翻訳ウィンドウで使用するテキスト翻訳サービス。</sys:String>
+    <sys:String x:Key="WelcomeSetup_ReplaceServiceDescription">置換翻訳で使用するテキスト翻訳サービス。</sys:String>
+    <sys:String x:Key="WelcomeSetup_ImageTranslateOcrServiceDescription">画像翻訳で使用する OCR サービス。クリアすると現在有効な OCR サービスに従います。</sys:String>
+    <sys:String x:Key="WelcomeSetup_Skip">スキップ</sys:String>
+    <sys:String x:Key="WelcomeSetup_Finish">完了</sys:String>
 
     <sys:String x:Key="RemoveLineBreak">改行を削除</sys:String>
     <sys:String x:Key="RemoveSpace">スペースを削除</sys:String>
@@ -723,8 +746,21 @@
     <sys:String x:Key="TtsFailed">音声合成に失敗しました</sys:String>
     <sys:String x:Key="TtsCancelled">読み上げをキャンセルしました</sys:String>
     <sys:String x:Key="TtsServiceNotFound">音声合成サービスが設定されていません。「設定-サービス-音声合成」で設定してください</sys:String>
+    <sys:String x:Key="VocabularyServiceNotFound">単語帳サービスが設定されていません。「設定-サービス-単語帳」で設定してください</sys:String>
     <sys:String x:Key="ImtransFailed">画像翻訳に失敗しました</sys:String>
     <sys:String x:Key="NoTranslateService">利用可能な翻訳サービスが見つかりません</sys:String>
+    <sys:String x:Key="GoToSettings">設定へ移動</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundTitle">画像翻訳サービスを取得できません</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundMessage">画像翻訳サービスが設定または有効化されていません。「設定-サービス-テキスト翻訳」で設定してからこの機能を使用してください。</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundTitle">OCRサービスを取得できません</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundMessage">OCRサービスが設定または有効化されていません。「設定-サービス-文字認識」で設定してからこの機能を使用してください。</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">画像翻訳 OCR サービスを取得できません</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">画像翻訳 OCR サービスが設定されておらず、利用可能な OCR サービスもありません。「設定-サービス-文字認識」で設定してください。</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundTitle">置換翻訳サービスを取得できません</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundMessage">置換翻訳サービスが設定または有効化されていません。「設定-サービス-翻訳」で設定してからこの機能を使用してください。</sys:String>
+    <sys:String x:Key="LanguageDetectionFailed">言語検出に失敗しました</sys:String>
+    <sys:String x:Key="NoTextRecognized">テキストが認識されませんでした</sys:String>
+    <sys:String x:Key="NoTextRecognizedMessage" xml:space="preserve">翻訳するテキストを選択してください。&#10;問題が続く場合は、管理者権限でソフトウェアを再起動してみてください。</sys:String>
     <sys:String x:Key="NavigateFailed">これ以上ありません</sys:String>
     <sys:String x:Key="NoValidPluginFile">SPKGファイルがありません</sys:String>
 

@@ -12,6 +12,8 @@
     <!--  // Navigation //  -->
     <sys:String x:Key="General">常规</sys:String>
     <sys:String x:Key="Services">服务</sys:String>
+    <sys:String x:Key="ServiceQuickSwitcher">服务快捷开关</sys:String>
+    <sys:String x:Key="NoConfiguredServices">未配置任何服务</sys:String>
     <sys:String x:Key="Translate">文本翻译</sys:String>
     <sys:String x:Key="Ocr">文本识别</sys:String>
     <sys:String x:Key="Tts">语音合成</sys:String>
@@ -132,7 +134,6 @@
     <sys:String x:Key="General_ShowBackTranslation">显示回译按钮</sys:String>
     <sys:String x:Key="General_ShowPrompt">提示词</sys:String>
     <sys:String x:Key="General_ShowPromptDescription">主界面是否显示AI翻译服务的提示词切换按钮</sys:String>
-    <sys:String x:Key="MarkdownRender">MD渲染</sys:String>
     <sys:String x:Key="General_FontFamily">字体</sys:String>
     <sys:String x:Key="General_HistoryCount">历史记录数量</sys:String>
     <sys:String x:Key="General_CopyAfterTranslation">翻译后复制</sys:String>
@@ -140,6 +141,8 @@
     <sys:String x:Key="General_CopyAfterTranslationNotAutomatic">非「自动执行」服务翻译后复制</sys:String>
     <sys:String x:Key="General_CopyAfterOcr">OCR后复制</sys:String>
     <sys:String x:Key="General_CopyAfterOcrDescription">针对所有文本识别场景，识别后自动复制识别结果</sys:String>
+    <sys:String x:Key="General_FocusInputAfterScreenshotTranslate">截图翻译后激活输入框</sys:String>
+    <sys:String x:Key="General_FocusInputAfterScreenshotTranslateDescription">开启后，截图翻译完成会显示主窗口并聚焦输入框。关闭后，若主窗口已置顶，则只更新结果、不抢焦点；非置顶时仍会恢复显示。</sys:String>
     <sys:String x:Key="General_PluginMarketCdnSource">插件市场CDN源</sys:String>
     <sys:String x:Key="General_PluginMarketCdnSourceDescription">选择插件市场数据的CDN加速服务（GitHub直链无缓存延迟）</sys:String>
     <sys:String x:Key="General_CustomCdnUrl">自定义CDN URL</sys:String>
@@ -406,6 +409,7 @@
 
     <!--  // Common //  -->
     <sys:String x:Key="Add">添加</sys:String>
+    <sys:String x:Key="Clear">清空</sys:String>
     <sys:String x:Key="Delete">删除</sys:String>
     <sys:String x:Key="Overwrite">覆盖</sys:String>
     <sys:String x:Key="Save">保存</sys:String>
@@ -427,11 +431,30 @@
     <sys:String x:Key="On">开启</sys:String>
     <sys:String x:Key="Off">关闭</sys:String>
     <sys:String x:Key="QrCode">二维码</sys:String>
+    <sys:String x:Key="Wizard">向导</sys:String>
 
     <sys:String x:Key="Previous">上一个</sys:String>
     <sys:String x:Key="Next">下一个</sys:String>
 
     <sys:String x:Key="Document">文档</sys:String>
+
+    <!--  // Welcome Setup //  -->
+    <sys:String x:Key="WelcomeSetup_Title">欢迎使用 STranslate</sys:String>
+    <sys:String x:Key="WelcomeSetup_Subtitle">快速配置常用服务和关键快捷键，之后也可以在「关于」页面重新打开向导。</sys:String>
+    <sys:String x:Key="WelcomeSetup_WelcomeDescription">第一次启动时可以先设置语言、常用服务和关键快捷键；如果暂时不想配置，也可以跳过。</sys:String>
+    <sys:String x:Key="WelcomeSetup_LanguageDescription">选择界面语言，更改会按现有设置立即生效。</sys:String>
+    <sys:String x:Key="WelcomeSetup_Services">服务配置</sys:String>
+    <sys:String x:Key="WelcomeSetup_TranslateServices">翻译服务</sys:String>
+    <sys:String x:Key="WelcomeSetup_OcrTtsServices">OCR / TTS 服务</sys:String>
+    <sys:String x:Key="WelcomeSetup_SpecialServices">专用服务</sys:String>
+    <sys:String x:Key="WelcomeSetup_Hotkeys">快捷键</sys:String>
+    <sys:String x:Key="WelcomeSetup_SelectService">选择服务</sys:String>
+    <sys:String x:Key="WelcomeSetup_SelectServiceDescription">先添加服务，再选择要配置或启用的服务实例。</sys:String>
+    <sys:String x:Key="WelcomeSetup_ImageTranslateServiceDescription">图片翻译窗口使用的文本翻译服务。</sys:String>
+    <sys:String x:Key="WelcomeSetup_ReplaceServiceDescription">替换翻译使用的文本翻译服务。</sys:String>
+    <sys:String x:Key="WelcomeSetup_ImageTranslateOcrServiceDescription">图片翻译使用的 OCR 服务；清空后将跟随当前启用的 OCR 服务。</sys:String>
+    <sys:String x:Key="WelcomeSetup_Skip">跳过</sys:String>
+    <sys:String x:Key="WelcomeSetup_Finish">完成</sys:String>
 
     <!--  // Input Control //  -->
     <sys:String x:Key="RemoveLineBreak">移除换行</sys:String>
@@ -744,8 +767,21 @@
     <sys:String x:Key="TtsFailed">语音合成失败</sys:String>
     <sys:String x:Key="TtsCancelled">朗读已取消</sys:String>
     <sys:String x:Key="TtsServiceNotFound">未配置语音合成服务，请前往「设置-服务-语音合成」配置</sys:String>
+    <sys:String x:Key="VocabularyServiceNotFound">未配置生词本服务，请前往「设置-服务-生词本」配置</sys:String>
     <sys:String x:Key="ImtransFailed">图片翻译失败</sys:String>
     <sys:String x:Key="NoTranslateService">未找到可用的翻译服务</sys:String>
+    <sys:String x:Key="GoToSettings">点击前往</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundTitle">无法获取图片翻译服务</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundMessage">当前未配置启用图片翻译服务，请先前往「设置-服务-文本翻译」配置后使用该功能</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundTitle">无法获取OCR服务</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundMessage">当前未配置或者启用OCR服务，请先前往「设置-服务-文本识别」配置后使用该功能</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">无法获取图片翻译 OCR 服务</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">当前未配置图片翻译 OCR 服务且无可用 OCR 服务，请先前往「设置-服务-文本识别」进行配置</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundTitle">无法获取替换翻译服务</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundMessage">当前未配置启用替换翻译服务，请先前往「设置-服务-文本翻译」配置后使用该功能</sys:String>
+    <sys:String x:Key="LanguageDetectionFailed">语言检测失败</sys:String>
+    <sys:String x:Key="NoTextRecognized">未识别到文本</sys:String>
+    <sys:String x:Key="NoTextRecognizedMessage" xml:space="preserve">请确保选中要翻译的文本&#10;若问题仍然存在请尝试以管理员权限重启软件</sys:String>
     <sys:String x:Key="NavigateFailed">已经到头了</sys:String>
     <sys:String x:Key="NoValidPluginFile">无SPKG文件</sys:String>
 

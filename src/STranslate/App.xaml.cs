@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,6 +29,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
     private static Settings? _settings;
     private readonly HotkeySettings? _hotkeySettings;
     private readonly ServiceSettings? _svcSettings;
+    private readonly bool _shouldShowWelcomeSetup;
 
     private ILogger<App>? _logger;
     private MainWindow? _mainWindow;
@@ -53,16 +55,21 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         try
         {
             var appStorage = new AppStorage<Settings>();
+            var isSettingsConfigMissing = !appStorage.Exists();
             _settings = appStorage.Load();
             _settings.SetStorage(appStorage);
 
             var hotkeyStorage = new AppStorage<HotkeySettings>();
+            var isHotkeyConfigMissing = !hotkeyStorage.Exists();
             _hotkeySettings = hotkeyStorage.Load();
             _hotkeySettings.SetStorage(hotkeyStorage);
 
             var svcStorage = new AppStorage<ServiceSettings>();
+            var isServiceConfigMissing = !svcStorage.Exists();
             _svcSettings = svcStorage.Load();
             _svcSettings.SetStorage(svcStorage);
+
+            _shouldShowWelcomeSetup = isSettingsConfigMissing && isHotkeyConfigMissing && isServiceConfigMissing;
         }
         catch (Exception e)
         {
@@ -127,6 +134,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
                     // 注册ViewModels
                     services.AddSingleton<MainWindowViewModel>();
                     services.AddTransient<SettingsWindowViewModel>();
+                    services.AddTransient<WelcomeSetupViewModel>();
                     services.AddTransient<OcrWindowViewModel>();
                     services.AddTransient<ImageTranslateWindowViewModel>();
 
@@ -202,6 +210,15 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         RegisterDispatcherUnhandledException();
         RegisterTaskSchedulerUnhandledException();
 
+        ShowWelcomeSetupIfNeeded();
+        InitializeMainWindow();
+        RegisterExitEvents();
+
+        _logger.LogInformation("End STranslate startup ----------------------------------------------------");
+    }
+
+    private void InitializeMainWindow()
+    {
         _mainWindowViewModel = Ioc.Default.GetRequiredService<MainWindowViewModel>();
         _autoUpdateCheckerService = Ioc.Default.GetRequiredService<AutoUpdateCheckerService>();
         _mainWindow = new MainWindow();
@@ -209,17 +226,13 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         Current.MainWindow.Title = Constant.AppName;
         _mainWindow.Loaded += (s, e) =>
         {
-            _settings?.LazyInitialize();
+            _settings?.LazyInitialize(initializeLanguage: !_shouldShowWelcomeSetup);
             _hotkeySettings?.LazyInitialize();
             UpdateToolTip();
             CheckAndShowInfo();
             WebDavBackupOperation();
             _autoUpdateCheckerService?.Start();
         };
-
-        RegisterExitEvents();
-
-        _logger.LogInformation("End STranslate startup ----------------------------------------------------");
     }
 
     private void UpdateToolTip()
@@ -287,6 +300,35 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
                 File.Delete(DataLocation.BackupFilePath);
             }
             catch { }
+        }
+    }
+
+    private void ShowWelcomeSetupIfNeeded()
+    {
+        if (!_shouldShowWelcomeSetup)
+            return;
+
+        Ioc.Default.GetRequiredService<Internationalization>()
+            .InitializeLanguage(_settings.NonNull().Language);
+
+        var previousShutdownMode = ShutdownMode;
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        AppRuntimeState.BeginInitialSetup();
+        try
+        {
+            var welcomeWindow = new WelcomeSetupWindow();
+            ThemeManager.SetRequestedTheme(welcomeWindow, _settings.NonNull().ColorScheme);
+            welcomeWindow.ContentRendered += (_, _) =>
+            {
+                Win32Helper.SetForegroundWindow(welcomeWindow);
+                welcomeWindow.Activate();
+            };
+            welcomeWindow.ShowDialog();
+        }
+        finally
+        {
+            ShutdownMode = previousShutdownMode;
+            AppRuntimeState.EndInitialSetup();
         }
     }
 
@@ -389,7 +431,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
     private static void ShowErrorMsgBoxAndFailFast(string message, Exception e)
     {
         // Firstly show users the message
-        iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
+        AppMessageBox.Show(e.ToString(), message, MessageBoxButton.OK, MessageBoxImage.Error);
 
         // Flow cannot construct its App instance, so ensure Flow crashes w/ the exception info.
         Environment.FailFast(message, e);
@@ -454,7 +496,18 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
 
     #region ISingleInstanceApp
 
-    public void OnSecondAppStarted() => _mainWindowViewModel?.Show();
+    public void OnSecondAppStarted()
+    {
+        var welcomeWindow = Current.Windows.OfType<WelcomeSetupWindow>().FirstOrDefault();
+        if (welcomeWindow != null)
+        {
+            Win32Helper.ForceSetForegroundWindow(welcomeWindow);
+            welcomeWindow.Activate();
+            return;
+        }
+
+        _mainWindowViewModel?.Show();
+    }
 
     #endregion
 

@@ -35,6 +35,7 @@
    - 配置落盘（部分高频字段使用 500ms 防抖保存）。
 3. `StorageBase.Save()` 采用临时文件 + 原子替换，降低写入中断导致损坏的风险。
 4. `StorageBase.Load()` 遇到 JSON 异常时回退 `.bak`，再失败则使用默认对象。
+5. 首次欢迎向导不使用额外完成标记：`App` 在 `Load()` 前检查 `Settings.json`、`HotkeySettings.json`、`ServiceSettings.json` 是否都不存在；都不存在才在主窗口创建前自动打开向导。向导跳过、关闭或完成时保存三类配置，生成文件后后续启动不再自动弹出。首页语言选择直接绑定 `Settings.Language`，沿用现有语言切换和保存行为。
 
 ### 从入口到结果：便携/漫游路径策略
 1. `DataLocation.PortableDataLocationInUse()` 判断程序目录下是否存在便携目录。
@@ -69,6 +70,7 @@
 - `ServiceSettings`
   - `TranSvcDatas/OcrSvcDatas/TtsSvcDatas/VocabularySvcDatas`。
   - `ReplaceSvcID/ImageTranslateSvcID/ImageTranslateOcrSvcID`。
+  - 欢迎向导会复用服务页的服务创建逻辑和插件配置 UI，以 5 页流程配置语言、翻译/OCR/TTS 服务、图片翻译/替换翻译专用服务和关键快捷键。
 - `ProxySettings` 与 `BackupSettings`
   - 网络代理与备份目标配置。
 - `HistoryModel` / `HistoryData`
@@ -97,6 +99,7 @@
   2. 需要即时行为时补充 `HandlePropertyChanged` 分支。
   3. 在对应 UI 页面绑定并验证序列化兼容。
   4. 对数值型设置补充归一化逻辑时，确保保存分支覆盖该属性。
+- 调整首次向导时，不要新增“是否完成向导”字段；启动条件以三类配置文件启动前是否存在为准，并保持自动向导先于主窗口显示。
 - 调整存储可靠性：优先改 `StorageBase`，避免在业务层重复实现备份恢复。
 - 修改便携策略：改 `DataLocation`，并验证升级流程中的 `TmpConfigDirectory` 回迁逻辑。
 - 历史结构演进：新增表列需在 `SqlService.InitializeDB()` 补迁移逻辑；修改 `HistoryData` 时需确认 `RawData` 兼容旧版本 JSON。

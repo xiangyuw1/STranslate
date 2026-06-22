@@ -7,6 +7,10 @@
 - 代码标识符、接口名、文件名保持原始英文。
 - 错误说明、改动说明与结论统一用中文。
 
+## 全局开发规则
+- 项目内 MessageBox 必须统一走 `AppMessageBox.Show()`，不要直接调用 iNKORE `MessageBox.Show()`。
+- 从具体窗口或控件触发的 iNKORE `ContentDialog` 必须显式传入 owner，避免依赖活动窗口推断。
+
 ## 最小构建与运行
 ```powershell
 # 最常用：直接运行
@@ -29,6 +33,7 @@
 | 配置、存储与历史 | [docs/config-storage-history.md](docs/config-storage-history.md) | Settings/ServiceSettings、存储抽象、便携/漫游路径、历史记录 |
 | 网络集成与运维 | [docs/integration-network-ops.md](docs/integration-network-ops.md) | HTTP层、代理测试、外部调用、更新、备份恢复 |
 | 插件SDK开发 | [docs/plugin-sdk-development.md](docs/plugin-sdk-development.md) | SDK接口、插件生命周期、`plugin.json` 规范、官方实现范式 |
+| 社区插件开发 | [docs/community-plugin-development.md](docs/community-plugin-development.md) | 社区插件本地开发、断点调试、`.spkg` 打包导入、日志与排障 |
 
 ## 模块检索入口
 
@@ -43,3 +48,4 @@
 | 配置丢失/路径不一致/历史问题 | [docs/config-storage-history.md](docs/config-storage-history.md) |
 | 代理、更新、备份与外部调用 | [docs/integration-network-ops.md](docs/integration-network-ops.md) |
 | 新增或改造插件 | [docs/plugin-sdk-development.md](docs/plugin-sdk-development.md) |
+| 社区插件本地开发/调试/打包导入 | [docs/community-plugin-development.md](docs/community-plugin-development.md) |

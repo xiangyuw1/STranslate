@@ -65,14 +65,38 @@
 3. 若服务需要自动回译但缓存无回译结果，只补做回译，不重做主翻译。
 
 ### 从入口到结果：手动单服务执行（词典/翻译）
-1. `SingleTranslateAsync(service)` 先查当前输入历史。
-2. 若是 `IDictionaryPlugin`：执行 `ExecuteDictAsync()`，失败即返回。
-3. 若是 `ITranslatePlugin`：识别语种后执行 `ExecuteAsync()`，按配置追加 `ExecuteBackAsync()`。
-4. `Settings.CopyAfterTranslationNotAutomatic` 为真时，手动执行完成立即复制结果。
+1. `TemporaryTranslate(service)` / 输出区重试先走服务级 `CanExecute`：不同服务可并发，同一服务已有手动任务时继续提示等待。
+2. `SingleTranslateAsync(service)` / `SingleTransBackAsync(service)` 启动时快照当前输入文本与源/目标语种，并用 `PluginID + ServiceID` 登记本次任务的取消令牌。
+3. 若是 `IDictionaryPlugin`：用快照文本执行 `ExecuteDictAsync()`，失败即返回；词典手动执行仍保持现有历史语义，不额外落盘。
+4. 若是 `ITranslatePlugin`：用快照文本和语种配置识别实际语种后执行 `ExecuteAsync()`，按配置追加 `ExecuteBackAsync()`。
+5. 翻译服务成功后通过串行历史合并重新读取最新历史，只更新当前服务的 `HistoryData`，避免多个手动服务并发完成时互相覆盖。
+6. `Settings.CopyAfterTranslationNotAutomatic` 为真时，手动执行完成立即复制结果；多个并发服务仍按完成顺序更新剪贴板。
+7. ESC / 关闭窗口 / 清空输入 / 新翻译入口会通过 `CancelAllOperations()` 取消所有已登记的手动单服务任务。
 
 ### 复制与历史策略
 - 自动复制：`Settings.CopyAfterTranslation` 支持第 N 个自动服务或最后一个自动服务。
 - 历史持久化：`Settings.HistoryLimit > 0` 时使用 SQLite；否则仅使用内存 `_recentTexts` 缓存最近输入。
+
+## 错误处理与通知策略
+
+### 服务未配置（阻断性错误）
+当替换翻译 / TTS / 生词本等核心服务未配置或全部禁用时，使用 `Helper.PromptConfigureService` 弹出 MessageBox（OK/Cancel）。弹窗底层统一走 `AppMessageBox`：优先挂到当前活动窗口，没有活动窗口时才通过主屏中心的临时透明 owner 显示：
+- 用户点击 **确定** → 自动打开设置窗口并定位到对应配置页。
+- 用户点击 **取消** → 仅关闭弹窗，不跳转。
+
+具体映射：
+| 功能 | 未配置服务 | 跳转页面 | 涉及 ViewModel 方法 |
+|---|---|---|---|
+| 替换翻译 | 替换翻译服务 | `TranslatePage` | `ReplaceTranslateAsync` |
+| 朗读 | TTS | `TtsPage` | `PlayAudioAsync` / `SilentTtsHandlerAsync` |
+| 保存生词本 | 生词本服务 | `VocabularyPage` | `SaveToVocabularyAsync` / `SaveToVocabularyWithNoteAsync` |
+
+### 运行时失败
+执行过程中抛出异常或识别失败时，使用当前窗口内的 **Snackbar** 提示：
+- 替换翻译语言检测失败：`_snackbar.ShowWarning("LanguageDetectionFailed")`。
+- 取词后未识别到文本（如截图翻译无结果）：`_snackbar.ShowWarning("NoTextRecognizedMessage")`。
+- TTS 播放失败 / 取消：`_snackbar.ShowError("TtsFailed")` / `_snackbar.ShowInfo("TtsCancelled")`。
+- 生词本保存失败：`_snackbar.ShowError("OperationFailed")` 或显示服务端返回的错误信息。
 
 ## 关键数据结构/配置
 - `Service.Options`

@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="STranslate_Plugin_Translate_Transmart">サービス状況</sys:String>
-    <sys:String x:Key="STranslate_Plugin_Translate_Transmart_Content">Tencent Transmart 公式サービスは終了しました。この内蔵プラグインは互換性維持のためにのみ残されており、利用は推奨されません。</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Transmart">概要</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Transmart_Content">このプラグインは Tencent Transmart 翻訳サービスを無料で利用します。</sys:String>
 
 </ResourceDictionary>

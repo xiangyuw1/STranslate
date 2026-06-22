@@ -2,8 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using iNKORE.UI.WPF.Modern.Controls;
 using STranslate.Core;
+using STranslate.Helpers;
 using STranslate.Plugin;
 using STranslate.Services;
+using STranslate.Views;
 using System.Diagnostics;
 using System.IO;
 
@@ -46,6 +48,10 @@ public partial class AboutViewModel(
 
     [RelayCommand]
     private void Donate() => Process.Start(new ProcessStartInfo(Constant.Sponsor) { UseShellExecute = true });
+
+    [RelayCommand]
+    private async Task OpenWizardAsync()
+        => await SingletonWindowOpener.OpenAsync<WelcomeSetupWindow>(WindowActivationMode.ForceForeground);
 
     [RelayCommand]
     private void LocateUserData() => Locate(Path.GetDirectoryName(Path.Combine(DataLocation.SettingsDirectory)));

@@ -75,6 +75,7 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool IsClipboardMonitorVisible { get; set; } = true;
     [ObservableProperty] public partial List<string> MainHeaderVisibleActions { get; set; } = [];
+    [ObservableProperty] public partial bool IsServiceSwitcherVisible { get; set; } = true;
     [ObservableProperty] public partial bool IsCloseButtonVisible { get; set; } = false;
 
     [ObservableProperty] public partial DoubleClickTrayFunction DoubleClickTrayFunction { get; set; }
@@ -84,6 +85,8 @@ public partial class Settings : ObservableObject
     [ObservableProperty] public partial bool CopyAfterTranslationNotAutomatic { get; set; }
 
     [ObservableProperty] public partial bool CopyAfterOcr { get; set; }
+
+    [ObservableProperty] public partial bool FocusInputAfterScreenshotTranslate { get; set; } = true;
 
     [ObservableProperty] public partial int HttpTimeout { get; set; } = 30;
 
@@ -433,6 +436,13 @@ public partial class Settings : ObservableObject
         var normalizedActions = MainHeaderActions.Normalize(MainHeaderVisibleActions);
         if (normalizedActions.Count > 0)
         {
+            // 旧版本配置中不存在服务快捷开关；仅在兼容可见状态为 true 时自动加入一次。
+            // 用户后续从标题栏移除后，SyncLegacyMainHeaderVisibility 会持久化 false。
+            if (IsServiceSwitcherVisible && !normalizedActions.Contains(MainHeaderActions.ServiceSwitcher))
+            {
+                normalizedActions.Add(MainHeaderActions.ServiceSwitcher);
+            }
+
             if (!MainHeaderVisibleActions.SequenceEqual(normalizedActions))
             {
                 MainHeaderVisibleActions = [.. normalizedActions];
@@ -452,6 +462,7 @@ public partial class Settings : ObservableObject
         if (IsColorSchemeVisible) migratedActions.Add(MainHeaderActions.ColorScheme);
         if (IsHideInputVisible) migratedActions.Add(MainHeaderActions.HideInput);
         if (IsHistoryNavigationVisible) migratedActions.Add(MainHeaderActions.HistoryNavigation);
+        if (IsServiceSwitcherVisible) migratedActions.Add(MainHeaderActions.ServiceSwitcher);
 
         ApplyMainHeaderVisibleActions(migratedActions);
     }
@@ -481,10 +492,11 @@ public partial class Settings : ObservableObject
         ApplyStartMode();
     }
 
-    public void LazyInitialize()
+    public void LazyInitialize(bool initializeLanguage = true)
     {
         ApplyFontFamily(true);
-        ApplyLanguage(true);
+        if (initializeLanguage)
+            ApplyLanguage(true);
         ApplyFontSize();
         ApplyTheme();
         ApplyDeactived();
@@ -581,6 +593,7 @@ public partial class Settings : ObservableObject
         IsColorSchemeVisible = actionSet.Contains(MainHeaderActions.ColorScheme);
         IsHideInputVisible = actionSet.Contains(MainHeaderActions.HideInput);
         IsHistoryNavigationVisible = actionSet.Contains(MainHeaderActions.HistoryNavigation);
+        IsServiceSwitcherVisible = actionSet.Contains(MainHeaderActions.ServiceSwitcher);
     }
 
     #endregion

@@ -70,16 +70,21 @@ public abstract partial class BaseService : ObservableObject, IDisposable
         {
             if (contentDialog.Result is PluginMetaData metaData)
             {
-                var service = _serviceManager.AddService(metaData, ServiceType);
-                // 非翻译服务默认关闭
-                if (ServiceType != ServiceType.Translation)
-                    service.IsEnabled = false;
-                Services.Add(service);
-                return service;
+                return AddFromPlugin(metaData);
             }
         }
 
         return default;
+    }
+
+    internal Service AddFromPlugin(PluginMetaData metaData)
+    {
+        var service = _serviceManager.AddService(metaData, ServiceType);
+        // 非翻译服务默认关闭
+        if (ServiceType != ServiceType.Translation)
+            service.IsEnabled = false;
+        Services.Add(service);
+        return service;
     }
 
     public virtual async Task<bool> DeleteAsync(Service service)

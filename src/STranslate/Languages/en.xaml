@@ -12,6 +12,8 @@
     <!--  // Navigation //  -->
     <sys:String x:Key="General">General</sys:String>
     <sys:String x:Key="Services">Services</sys:String>
+    <sys:String x:Key="ServiceQuickSwitcher">Quick Service Switcher</sys:String>
+    <sys:String x:Key="NoConfiguredServices">No services configured</sys:String>
     <sys:String x:Key="Translate">Translate</sys:String>
     <sys:String x:Key="Ocr">Ocr</sys:String>
     <sys:String x:Key="Tts">Tts</sys:String>
@@ -132,7 +134,6 @@
     <sys:String x:Key="General_ShowBackTranslation">Show back translation button</sys:String>
     <sys:String x:Key="General_ShowPrompt">Show Prompt</sys:String>
     <sys:String x:Key="General_ShowPromptDescription">Whether to display the prompt switch button for AI translation services on the main interface</sys:String>
-    <sys:String x:Key="MarkdownRender">MD Render</sys:String>
     <sys:String x:Key="General_FontFamily">FontFamily</sys:String>
     <sys:String x:Key="General_HistoryCount">History Count</sys:String>
     <sys:String x:Key="General_CopyAfterTranslation">Copy After Translation</sys:String>
@@ -140,6 +141,8 @@
     <sys:String x:Key="General_CopyAfterTranslationNotAutomatic">Copy after translation for non-"Automatic" services</sys:String>
     <sys:String x:Key="General_CopyAfterOcr">Copy after OCR</sys:String>
     <sys:String x:Key="General_CopyAfterOcrDescription">For all text recognition scenarios, automatically copy the recognition result after OCR.</sys:String>
+    <sys:String x:Key="General_FocusInputAfterScreenshotTranslate">Activate input after screenshot translation</sys:String>
+    <sys:String x:Key="General_FocusInputAfterScreenshotTranslateDescription">On: show the main window and focus the input box after screenshot translation. Off: if the main window is topmost, update results without stealing focus; non-topmost windows still reopen.</sys:String>
     <sys:String x:Key="General_PluginMarketCdnSource">Plugin Market CDN Source</sys:String>
     <sys:String x:Key="General_PluginMarketCdnSourceDescription">Select CDN acceleration service for plugin market data (GitHub direct has no cache delay)</sys:String>
     <sys:String x:Key="General_CustomCdnUrl">Custom CDN URL</sys:String>
@@ -406,6 +409,7 @@
 
     <!--  // Common //  -->
     <sys:String x:Key="Add">Add</sys:String>
+    <sys:String x:Key="Clear">Clear</sys:String>
     <sys:String x:Key="Delete">Delete</sys:String>
     <sys:String x:Key="Overwrite">Overwrite</sys:String>
     <sys:String x:Key="Save">Save</sys:String>
@@ -427,11 +431,30 @@
     <sys:String x:Key="On">On</sys:String>
     <sys:String x:Key="Off">Off</sys:String>
     <sys:String x:Key="QrCode">QrCode</sys:String>
+    <sys:String x:Key="Wizard">Wizard</sys:String>
 
     <sys:String x:Key="Previous">Previous</sys:String>
     <sys:String x:Key="Next">Next</sys:String>
 
     <sys:String x:Key="Document">Document</sys:String>
+
+    <!--  // Welcome Setup //  -->
+    <sys:String x:Key="WelcomeSetup_Title">Welcome to STranslate</sys:String>
+    <sys:String x:Key="WelcomeSetup_Subtitle">Quickly configure common services and key hotkeys. You can reopen the wizard later from the About page.</sys:String>
+    <sys:String x:Key="WelcomeSetup_WelcomeDescription">Set the language, common services, and key hotkeys before you start. You can skip this for now.</sys:String>
+    <sys:String x:Key="WelcomeSetup_LanguageDescription">Choose the interface language. Changes use the existing language setting immediately.</sys:String>
+    <sys:String x:Key="WelcomeSetup_Services">Services</sys:String>
+    <sys:String x:Key="WelcomeSetup_TranslateServices">Translation Service</sys:String>
+    <sys:String x:Key="WelcomeSetup_OcrTtsServices">OCR / TTS Services</sys:String>
+    <sys:String x:Key="WelcomeSetup_SpecialServices">Dedicated Services</sys:String>
+    <sys:String x:Key="WelcomeSetup_Hotkeys">Hotkeys</sys:String>
+    <sys:String x:Key="WelcomeSetup_SelectService">Select Service</sys:String>
+    <sys:String x:Key="WelcomeSetup_SelectServiceDescription">Add a service first, then choose the service instance to configure or enable.</sys:String>
+    <sys:String x:Key="WelcomeSetup_ImageTranslateServiceDescription">Text translation service used by the image translation window.</sys:String>
+    <sys:String x:Key="WelcomeSetup_ReplaceServiceDescription">Text translation service used by replace translation.</sys:String>
+    <sys:String x:Key="WelcomeSetup_ImageTranslateOcrServiceDescription">OCR service used by image translation. Clear it to follow the currently enabled OCR service.</sys:String>
+    <sys:String x:Key="WelcomeSetup_Skip">Skip</sys:String>
+    <sys:String x:Key="WelcomeSetup_Finish">Finish</sys:String>
 
     <!--  // Input Control //  -->
     <sys:String x:Key="RemoveLineBreak">Remove Line Break</sys:String>
@@ -743,8 +766,21 @@
     <sys:String x:Key="TtsFailed">TTS Failed</sys:String>
     <sys:String x:Key="TtsCancelled">Reading cancelled</sys:String>
     <sys:String x:Key="TtsServiceNotFound">No TTS service configured, please go to "Settings-Services-TTS" to configure</sys:String>
+    <sys:String x:Key="VocabularyServiceNotFound">No vocabulary service configured, please go to "Settings-Services-Vocabulary" to configure</sys:String>
     <sys:String x:Key="ImtransFailed">Image translation failed</sys:String>
     <sys:String x:Key="NoTranslateService">No available translation service found</sys:String>
+    <sys:String x:Key="GoToSettings">Go to settings</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundTitle">Unable to get image translation service</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundMessage">Image translation service is not configured or enabled. Go to "Settings-Services-Text Translation" to configure it before using this feature.</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundTitle">Unable to get OCR service</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundMessage">OCR service is not configured or enabled. Go to "Settings-Services-Text Recognition" to configure it before using this feature.</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">Unable to get image translation OCR service</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">Image translation OCR service is not configured and no OCR service is available. Go to "Settings-Services-Text Recognition" to configure one.</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundTitle">Unable to get replace translation service</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundMessage">Replace translation service is not configured or enabled. Go to "Settings-Services-Text Translation" to configure it before using this feature.</sys:String>
+    <sys:String x:Key="LanguageDetectionFailed">Language detection failed</sys:String>
+    <sys:String x:Key="NoTextRecognized">No text recognized</sys:String>
+    <sys:String x:Key="NoTextRecognizedMessage" xml:space="preserve">Please make sure to select the text to translate.&#10;If the problem persists, try restarting the software as administrator.</sys:String>
     <sys:String x:Key="NavigateFailed">Already at the end</sys:String>
     <sys:String x:Key="NoValidPluginFile">No SPKG File</sys:String>
 

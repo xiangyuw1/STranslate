@@ -125,12 +125,12 @@ public partial class HotkeySettings : ObservableObject
                 if (HotkeyMapper.RemoveHotkey(hotkey))
                     onRemoved();
                 else
-                    iNKORE.UI.WPF.Modern.Controls.
-                    MessageBox.Show(Ioc.Default.GetRequiredService<Internationalization>().GetTranslation("HotkeyOverwriteFailed"),
-                    Constant.AppName,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning,
-                    MessageBoxResult.OK);
+                    AppMessageBox.Show(
+                        Ioc.Default.GetRequiredService<Internationalization>().GetTranslation("HotkeyOverwriteFailed"),
+                        Constant.AppName,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning,
+                        MessageBoxResult.OK);
             }
         );
     }
@@ -435,8 +435,7 @@ public partial class HotkeySettings : ObservableObject
     {
         return () =>
         {
-            if (Ioc.Default.GetRequiredService<Settings>().IgnoreHotkeysOnFullscreen &&
-                Win32Helper.IsForegroundWindowFullscreen())
+            if (HotkeyExecutionGuard.ShouldSkipGlobalHotkey())
                 return;
 
             action();
