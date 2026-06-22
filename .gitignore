@@ -19,3 +19,4 @@ target/
 [Nn][Uu][Ll]
 .sisyphus/
 .omo
+build_output.txt
