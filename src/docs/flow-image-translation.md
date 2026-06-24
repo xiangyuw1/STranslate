@@ -64,6 +64,7 @@
 - 必须为文本块返回图片像素坐标 `BoxPoints`。
 - 可以只返回扁平 `OcrResult.OcrContents`，宿主会用 `Smart` 分段。
 - 如果服务商能返回区域/段落/行，插件应填充 `OcrResult.Regions`。
+- 内置百度 OCR 使用 `paragraph=true` 获取 `paragraphs_result.words_result_idx`，再把对应 `words_result` 行组装成 `OcrRegion -> OcrParagraph -> OcrContent`。
 - `OcrResult.OcrContents` 仍是兼容旧插件和旧调用链的扁平结果；结构化插件可以同时填充它，也可以只填充 `Regions`。
 - 如服务商返回归一化坐标，插件需要使用 `OcrRequest.PixelWidth` / `PixelHeight` 换算成图片像素坐标后再写入 `BoxPoints`。
 - 插件不要按屏幕缩放或窗口缩放改写坐标；图片翻译使用图片自身的像素坐标。
