@@ -7,31 +7,33 @@ namespace STranslate.Tests;
 public class ImageTranslateCompactWindowPlacementTests
 {
     [Fact]
-    public void CreateForImageBoundsUsesTargetDpiForToolbarHeight()
+    public void CreateLayoutCentersToolbarWhenNarrowerThanImage()
     {
-        var actual = ImageTranslateCompactWindowPlacement.CreateForImageBounds(
-            new Rectangle(-120, 80, 640, 360),
-            dpiScaleX: 1.25,
-            dpiScaleY: 1.25,
+        // 选区 640x360，100% 缩放，按钮条 DIP 高 64 宽 300。
+        // workArea 足够大，下方放得下。
+        var layout = ImageTranslateCompactWindowPlacement.CreateLayout(
+            imageBounds: new Rectangle(100, 100, 640, 360),
+            workArea: new Rectangle(0, 0, 1920, 1080),
+            dpiScaleX: 1.0,
+            dpiScaleY: 1.0,
             minWidthDip: 1,
             minImageHeightDip: 1,
-            toolbarHeightDip: 64);
+            toolbarWidthDip: 300,
+            toolbarHeightDip: 64,
+            gapHDip: 8,
+            gapVDip: 6,
+            windowMarginDip: 8);
 
-        Assert.Equal(new Rectangle(-120, 80, 640, 440), actual);
-    }
-
-    [Fact]
-    public void CreateForImageBoundsKeepsTinyImageAboveMinimumPhysicalSize()
-    {
-        var actual = ImageTranslateCompactWindowPlacement.CreateForImageBounds(
-            new Rectangle(10, 20, 80, 40),
-            dpiScaleX: 2,
-            dpiScaleY: 1.5,
-            minWidthDip: 120,
-            minImageHeightDip: 60,
-            toolbarHeightDip: 64);
-
-        Assert.Equal(new Rectangle(10, 20, 240, 186), actual);
+        // 窗口顶 = 选区顶；窗口高 = 图片高 + 纵向间距 + 按钮条高 + 底 margin
+        Assert.Equal(new Rectangle(100, 100, 640, 360 + 6 + 64 + 8), layout.WindowBounds);
+        // 图片在窗口内偏移 (0,0)，因为窗口顶左 = 选区顶左
+        Assert.Equal(0, layout.ImageOffsetX);
+        Assert.Equal(0, layout.ImageOffsetY);
+        // 按钮条居中于选区：左 = 100 + (640-300)/2 = 270；下方
+        // ToolbarBounds 是窗口内 DIP 偏移，故左 = (640-300)/2 = 170，顶 = 360+6 = 366
+        Assert.Equal(170, layout.ToolbarX);
+        Assert.Equal(366, layout.ToolbarY);
+        Assert.Equal(ToolbarSide.Below, layout.ToolbarSide);
     }
 
     [Fact]

@@ -7,6 +7,77 @@ namespace STranslate.Core;
 
 internal static class ImageTranslateCompactWindowPlacement
 {
+    /// <summary>
+    /// 按截图选区物理坐标与屏幕工作区计算精简窗口完整布局：
+    /// 窗口矩形、图片在窗口内的偏移、按钮条位置与按钮侧（下方/上方/叠加）。
+    /// 算法在物理像素域计算；输出给 XAML 的偏移/按钮位置换算成 DIP。
+    /// 铁律：图片始终钉在选区物理屏幕位置，任何避让都通过移动按钮条完成。
+    /// </summary>
+    internal static CompactWindowLayout CreateLayout(
+        Rectangle imageBounds,
+        Rectangle workArea,
+        double dpiScaleX,
+        double dpiScaleY,
+        double minWidthDip,
+        double minImageHeightDip,
+        double toolbarWidthDip,
+        double toolbarHeightDip,
+        double gapHDip,
+        double gapVDip,
+        double windowMarginDip)
+    {
+        var toolbarWidth = ToPhysicalPixels(toolbarWidthDip, dpiScaleX);
+        var toolbarHeight = ToPhysicalPixels(toolbarHeightDip, dpiScaleY);
+        var gapH = ToPhysicalPixels(gapHDip, dpiScaleX);
+        var gapV = ToPhysicalPixels(gapVDip, dpiScaleY);
+        var margin = ToPhysicalPixels(windowMarginDip, dpiScaleY);
+        var minWidth = ToPhysicalPixels(minWidthDip, dpiScaleX);
+        var minImageHeight = ToPhysicalPixels(minImageHeightDip, dpiScaleY);
+
+        var imageWidth = Math.Max(minWidth, imageBounds.Width);
+        var imageHeight = Math.Max(minImageHeight, imageBounds.Height);
+
+        // —— 横向 ——
+        int windowLeft, windowRight, toolbarX;
+        if (toolbarWidth <= imageWidth)
+        {
+            // 按钮条窄于选区：居中
+            toolbarX = imageBounds.Left + (imageWidth - toolbarWidth) / 2;
+            windowLeft = imageBounds.Left;
+            windowRight = imageBounds.Left + imageWidth;
+        }
+        else
+        {
+            // 贴左缘向右延展；超出屏幕右缘则镜像向左延展（Task 2 实现）
+            throw new NotImplementedException("narrow image handled in Task 2");
+        }
+
+        // —— 纵向 ——（Task 1 只实现 Below 分支，其余 Task 3/4 实现）
+        var imageBottom = imageBounds.Top + imageHeight;
+        var spaceBelow = workArea.Bottom - imageBottom;
+        if (spaceBelow < toolbarHeight + gapV)
+            throw new NotImplementedException("vertical flip handled in Task 3/4");
+
+        var toolbarY = imageBottom + gapV;
+        var windowTop = imageBounds.Top;
+        var windowBottom = imageBottom + gapV + toolbarHeight + margin;
+
+        var windowWidth = windowRight - windowLeft;
+        var windowHeight = windowBottom - windowTop;
+
+        return new CompactWindowLayout(
+            new Rectangle(windowLeft, windowTop, windowWidth, windowHeight),
+            imageBounds.Left - windowLeft,
+            imageBounds.Top - windowTop,
+            imageWidth,
+            imageHeight,
+            toolbarX - windowLeft,
+            toolbarY - windowTop,
+            toolbarWidth,
+            toolbarHeight,
+            ToolbarSide.Below);
+    }
+
     internal static Rectangle CreateForImageBounds(
         Rectangle imageBounds,
         double dpiScaleX,
@@ -15,11 +86,25 @@ internal static class ImageTranslateCompactWindowPlacement
         double minImageHeightDip,
         double toolbarHeightDip)
     {
-        var width = Math.Max(ToPhysicalPixels(minWidthDip, dpiScaleX), imageBounds.Width);
-        var imageHeight = Math.Max(ToPhysicalPixels(minImageHeightDip, dpiScaleY), imageBounds.Height);
-        var height = imageHeight + ToPhysicalPixels(toolbarHeightDip, dpiScaleY);
-
-        return new Rectangle(imageBounds.Left, imageBounds.Top, width, height);
+        // 临时垫片：转发到 CreateLayout 取窗口矩形。
+        // Task 6 会移除此方法并改用 CreateLayout 的完整结果。
+        var workArea = new Rectangle(
+            0,
+            0,
+            Math.Max(imageBounds.Right, imageBounds.Left + 1) * 4,
+            Math.Max(imageBounds.Bottom, imageBounds.Top + 1) * 4);
+        return CreateLayout(
+            imageBounds,
+            workArea,
+            dpiScaleX,
+            dpiScaleY,
+            minWidthDip,
+            minImageHeightDip,
+            toolbarWidthDip: 300,
+            toolbarHeightDip,
+            gapHDip: 8,
+            gapVDip: 6,
+            windowMarginDip: 8).WindowBounds;
     }
 
     internal static Rectangle CreateCenteredOnWorkArea(
@@ -64,3 +149,17 @@ internal static class ImageTranslateCompactWindowPlacement
     private static int Clamp(int value, int min, int max) =>
         Math.Min(Math.Max(value, min), Math.Max(min, max));
 }
+
+internal enum ToolbarSide { Below, Above, Overlay }
+
+internal sealed record CompactWindowLayout(
+    Rectangle WindowBounds,
+    int ImageOffsetX,
+    int ImageOffsetY,
+    int ImageWidth,
+    int ImageHeight,
+    int ToolbarX,
+    int ToolbarY,
+    int ToolbarWidth,
+    int ToolbarHeight,
+    ToolbarSide ToolbarSide);
