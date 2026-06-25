@@ -32,16 +32,12 @@
                         Command="{Binding Source={StaticResource VmProxy}, Path=Data.ActiveImTranOcrCommand}"
                         CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
                         Header="{DynamicResource AsImTranOcrSvc}">
-                        <MenuItem.Style>
-                            <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-                                <Setter Property="Visibility" Value="Visible" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Source={StaticResource VmProxy}, Path=Data.ActiveImTranOcrCommand}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </MenuItem.Style>
+                        <MenuItem.Visibility>
+                            <MultiBinding Converter="{cnvt:ImTranOcrEligibilityConverter}">
+                                <Binding Path="Data.ActiveImTranOcrCommand" Source="{StaticResource VmProxy}" />
+                                <Binding Path="Data" Source="{StaticResource SvcProxy}" />
+                            </MultiBinding>
+                        </MenuItem.Visibility>
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.DrawImage_20_Regular}" />
                         </MenuItem.Icon>
