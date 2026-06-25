@@ -56,6 +56,29 @@
             <Setter Property="IconSize" Value="16" />
             <Setter Property="ui:ControlHelper.CornerRadius" Value="16" />
         </Style>
+        <Style
+            x:Key="CompactToolbarComboBoxStyle"
+            BasedOn="{StaticResource {x:Type ComboBox}}"
+            TargetType="{x:Type ComboBox}">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="{DynamicResource STControlFontSize12}" />
+            <Setter Property="MaxDropDownHeight" Value="320" />
+        </Style>
+        <DataTemplate x:Key="CompactToolbarServiceComboBoxItemTemplate">
+            <TextBlock
+                FontSize="{DynamicResource STControlFontSize12}"
+                Text="{Binding DisplayName}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+        </DataTemplate>
+        <DataTemplate x:Key="CompactToolbarDropdownDataComboBoxItemTemplate">
+            <TextBlock
+                FontSize="{DynamicResource STControlFontSize12}"
+                Text="{Binding Display}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid Background="Transparent">
@@ -145,6 +168,60 @@
                 HorizontalAlignment="Center"
                 Orientation="Horizontal"
                 Spacing="5">
+                <ComboBox
+                    MaxWidth="140"
+                    DropDownClosed="OnToolbarComboBoxDropDownClosed"
+                    DropDownOpened="OnToolbarComboBoxDropDownOpened"
+                    ItemTemplate="{StaticResource CompactToolbarServiceComboBoxItemTemplate}"
+                    ItemsSource="{Binding OcrEngines}"
+                    SelectedItem="{Binding SelectedOcrEngine}"
+                    Style="{StaticResource CompactToolbarComboBoxStyle}"
+                    ToolTip="{DynamicResource ImTranOcrService}" />
+                <ComboBox
+                    MaxWidth="140"
+                    DropDownClosed="OnToolbarComboBoxDropDownClosed"
+                    DropDownOpened="OnToolbarComboBoxDropDownOpened"
+                    ItemTemplate="{StaticResource CompactToolbarServiceComboBoxItemTemplate}"
+                    ItemsSource="{Binding TransCollectionView}"
+                    SelectedItem="{Binding SelectedTranslateEngine}"
+                    Style="{StaticResource CompactToolbarComboBoxStyle}"
+                    ToolTip="{DynamicResource ImTranService}" />
+                <ComboBox
+                    MaxWidth="100"
+                    DropDownClosed="OnToolbarComboBoxDropDownClosed"
+                    DropDownOpened="OnToolbarComboBoxDropDownOpened"
+                    ItemTemplate="{StaticResource CompactToolbarDropdownDataComboBoxItemTemplate}"
+                    ItemsSource="{Binding DataProvider.LayoutAnalysisModes}"
+                    SelectedValue="{Binding Settings.LayoutAnalysisMode}"
+                    SelectedValuePath="Value"
+                    Style="{StaticResource CompactToolbarComboBoxStyle}"
+                    ToolTip="{DynamicResource ImageTranslateLayoutAnalysisToolTip}" />
+                <ComboBox
+                    MaxWidth="100"
+                    DropDownClosed="OnToolbarComboBoxDropDownClosed"
+                    DropDownOpened="OnToolbarComboBoxDropDownOpened"
+                    ItemTemplate="{StaticResource CompactToolbarDropdownDataComboBoxItemTemplate}"
+                    ItemsSource="{Binding DataProvider.LangEnums}"
+                    SelectedValue="{Binding Settings.ImageTranslateSourceLang}"
+                    SelectedValuePath="Value"
+                    Style="{StaticResource CompactToolbarComboBoxStyle}"
+                    ToolTip="{DynamicResource RecognizeLanguage}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="{DynamicResource STControlFontSize14}"
+                    Foreground="White"
+                    Opacity="0.8"
+                    Text="&gt;" />
+                <ComboBox
+                    MaxWidth="100"
+                    DropDownClosed="OnToolbarComboBoxDropDownClosed"
+                    DropDownOpened="OnToolbarComboBoxDropDownOpened"
+                    ItemTemplate="{StaticResource CompactToolbarDropdownDataComboBoxItemTemplate}"
+                    ItemsSource="{Binding DataProvider.LangEnums}"
+                    SelectedValue="{Binding Settings.ImageTranslateTargetLang}"
+                    SelectedValuePath="Value"
+                    Style="{StaticResource CompactToolbarComboBoxStyle}"
+                    ToolTip="{DynamicResource TranslateLanguage}" />
                 <control:IconButton
                     Command="{Binding CancelCommand}"
                     CommandParameter="{Binding ElementName=STImageTranslateCompactWindow}"
@@ -152,38 +229,29 @@
                     Style="{StaticResource CompactToolbarIconButtonStyle}"
                     ToolTip="{DynamicResource Close}" />
                 <control:IconButton
-                    Command="{Binding CopyImageCommand}"
-                    CommandParameter="{Binding ElementName=PART_ImageZoom}"
-                    Icon="{x:Static ui:FluentSystemIcons.Copy_20_Regular}"
-                    Style="{StaticResource CompactToolbarIconButtonStyle}"
-                    ToolTip="{DynamicResource Copy}" />
-                <control:IconButton
-                    Command="{Binding SelectAllTextCommand}"
-                    CommandParameter="{Binding ElementName=PART_ImageZoom}"
-                    Icon="{x:Static ui:FluentSystemIcons.SelectAllOn_20_Regular}"
-                    Style="{StaticResource CompactToolbarIconButtonStyle}"
-                    ToolTip="{DynamicResource SelectAll}" />
-                <control:IconButton
                     Icon="{x:Static ui:FluentSystemIcons.ImageSplit_20_Regular}"
                     IsOn="{Binding Settings.IsImTranShowingAnnotated}"
                     Style="{StaticResource CompactToolbarIconButtonStyle}"
                     ToolTip="{DynamicResource ShowHideAnnotation}"
                     Type="Toggle" />
                 <control:IconButton
-                    Command="{Binding ImTransOcrCommand}"
-                    Icon="{x:Static ui:FluentSystemIcons.Cut_20_Regular}"
-                    Style="{StaticResource CompactToolbarIconButtonStyle}"
-                    ToolTip="{DynamicResource ReImTransOcr}" />
-                <control:IconButton
-                    Command="{Binding ReExecuteCommand}"
-                    Icon="{x:Static ui:FluentSystemIcons.TextEffectsSparkle_20_Regular}"
-                    Style="{StaticResource CompactToolbarIconButtonStyle}"
-                    ToolTip="{DynamicResource ImageTranslate}" />
-                <control:IconButton
                     Command="{Binding OpenSettingsCommand}"
                     Icon="{x:Static ui:FluentSystemIcons.Settings_20_Regular}"
                     Style="{StaticResource CompactToolbarIconButtonStyle}"
                     ToolTip="{DynamicResource ImTranSettingsToolTip}" />
+                <control:IconButton
+                    Command="{Binding ReExecuteCommand}"
+                    Icon="{x:Static ui:FluentSystemIcons.TextEffectsSparkle_20_Regular}"
+                    Style="{StaticResource CompactToolbarIconButtonStyle}">
+                    <ToolTipService.ToolTip>
+                        <ToolTip>
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource ImageTranslate}" />
+                                <TextBlock Text="{Binding HotkeySettings.ReExecuteOcrHotkey}" />
+                            </StackPanel>
+                        </ToolTip>
+                    </ToolTipService.ToolTip>
+                </control:IconButton>
             </ikw:SimpleStackPanel>
         </Border>
 

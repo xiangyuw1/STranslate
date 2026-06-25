@@ -27,6 +27,7 @@ public partial class ImageTranslateCompactWindow
 
     private readonly ImageTranslateWindowViewModel _viewModel;
     private bool _isContextMenuOpen;
+    private bool _isToolbarDropDownOpen;
     private bool _isClosing;
     private CompactWindowLayout? _layout;
     private DrawingRectangle? _pendingPhysicalBounds;
@@ -66,12 +67,12 @@ public partial class ImageTranslateCompactWindow
     {
         base.OnDeactivated(e);
 
-        if (_isContextMenuOpen || _isClosing)
+        if (_isContextMenuOpen || _isToolbarDropDownOpen || _isClosing)
             return;
 
         Dispatcher.BeginInvoke(() =>
         {
-            if (!_isContextMenuOpen && !_isClosing && IsVisible && !IsActive)
+            if (!_isContextMenuOpen && !_isToolbarDropDownOpen && !_isClosing && IsVisible && !IsActive)
                 Close();
         }, DispatcherPriority.Background);
     }
@@ -280,5 +281,14 @@ public partial class ImageTranslateCompactWindow
     {
         _isContextMenuOpen = false;
         Activate();
+    }
+
+    private void OnToolbarComboBoxDropDownOpened(object sender, EventArgs e) => _isToolbarDropDownOpen = true;
+
+    private void OnToolbarComboBoxDropDownClosed(object sender, EventArgs e)
+    {
+        _isToolbarDropDownOpen = false;
+        if (!_isClosing && IsVisible)
+            Activate();
     }
 }
