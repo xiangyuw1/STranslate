@@ -16,10 +16,11 @@
     Height="400"
     MinWidth="1"
     MinHeight="1"
+    AllowsTransparency="True"
     control:SnackbarBehavior.EnableSnackbar="True"
     d:DataContext="{d:DesignInstance Type=vm:ImageTranslateWindowViewModel,
                                      IsDesignTimeCreatable=False}"
-    Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
+    Background="Transparent"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
     Topmost="True"
@@ -58,14 +59,8 @@
     </Window.Resources>
 
     <Grid Background="Transparent">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="64" />
-        </Grid.RowDefinitions>
-
         <control:ImageZoom
             x:Name="PART_ImageZoom"
-            Grid.Row="0"
             AlwaysHideZoomValueHint="True"
             DisableDoubleClickReset="True"
             IsPanAndZoomEnabled="False"
@@ -129,7 +124,6 @@
         </control:ImageZoom>
 
         <ui:InfoBar
-            Grid.Row="0"
             Title="{DynamicResource NoLocationInfoTitle}"
             MaxWidth="480"
             Margin="12"
@@ -141,12 +135,10 @@
             Severity="Warning" />
 
         <Border
-            Grid.Row="1"
+            x:Name="PART_ToolbarBorder"
             Margin="8,6"
             Padding="8,6"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Panel.ZIndex="10"
+            Panel.ZIndex="20"
             Background="#CC1F1F1F"
             CornerRadius="22">
             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
@@ -193,7 +185,6 @@
         </Border>
 
         <Border
-            Grid.RowSpan="2"
             d:Visibility="Collapsed"
             Background="#B0000000"
             IsHitTestVisible="{Binding IsExecuting}"

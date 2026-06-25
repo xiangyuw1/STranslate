@@ -19,10 +19,15 @@ public partial class ImageTranslateCompactWindow
     private const double FallbackMinWidth = 320;
     private const double FallbackMinHeight = 180;
     private const double ToolbarReservedHeight = 64;
+    private const double ToolbarWidth = 300;
+    private const double GapH = 8;
+    private const double GapV = 6;
+    private const double WindowMargin = 8;
 
     private readonly ImageTranslateWindowViewModel _viewModel;
     private bool _isContextMenuOpen;
     private bool _isClosing;
+    private CompactWindowLayout? _layout;
 
     public ImageTranslateCompactWindow()
     {
@@ -79,15 +84,25 @@ public partial class ImageTranslateCompactWindow
     private void PlaceOnPhysicalBounds(DrawingRectangle bounds)
     {
         var dpiScale = GetDpiScale(bounds);
-        var windowBounds = ImageTranslateCompactWindowPlacement.CreateForImageBounds(
-            bounds,
-            dpiScale.DpiScaleX,
-            dpiScale.DpiScaleY,
-            MinWidth,
-            MinHeight,
-            ToolbarReservedHeight);
+        var workArea = GetPhysicalWorkArea(
+            bounds.Left + bounds.Width / 2,
+            bounds.Top + bounds.Height / 2);
 
-        PlaceOnPhysicalWindowBounds(windowBounds, dpiScale);
+        _layout = ImageTranslateCompactWindowPlacement.CreateLayout(
+            imageBounds: bounds,
+            workArea: workArea,
+            dpiScaleX: dpiScale.DpiScaleX,
+            dpiScaleY: dpiScale.DpiScaleY,
+            minWidthDip: MinWidth,
+            minImageHeightDip: MinHeight,
+            toolbarWidthDip: ToolbarWidth,
+            toolbarHeightDip: ToolbarReservedHeight,
+            gapHDip: GapH,
+            gapVDip: GapV,
+            windowMarginDip: WindowMargin);
+
+        PlaceOnPhysicalWindowBounds(_layout.WindowBounds, dpiScale);
+        ApplyLayoutToVisualTree();
     }
 
     /// <summary>
@@ -166,6 +181,33 @@ public partial class ImageTranslateCompactWindow
         Height = dipBounds.Height;
 
         Win32Helper.SetWindowPhysicalBounds(this, bounds.Left, bounds.Top, bounds.Width, bounds.Height);
+    }
+
+    /// <summary>
+    /// 把布局结果换算成 DIP 并应用到 ImageZoom 与按钮条 Border：
+    /// 固定 Width/Height 保证图片 1:1 显示，左上对齐 + Margin 把图片钉在选区绝对位置、
+    /// 按钮条钉到布局算法算出的位置。按钮条 ZIndex 高于图片（XAML 内 PART_ToolbarBorder Panel.ZIndex=20）。
+    /// </summary>
+    private void ApplyLayoutToVisualTree()
+    {
+        if (_layout is null) return;
+        var dpi = GetDpiScale(_layout.WindowBounds);
+        var sx = dpi.DpiScaleX;
+        var sy = dpi.DpiScaleY;
+
+        // 图片：固定尺寸 + 左上对齐 + Margin 偏移（钉在选区绝对位置）
+        PART_ImageZoom.HorizontalAlignment = HorizontalAlignment.Left;
+        PART_ImageZoom.VerticalAlignment = VerticalAlignment.Top;
+        PART_ImageZoom.Width = _layout.ImageWidth / sx;
+        PART_ImageZoom.Height = _layout.ImageHeight / sy;
+        PART_ImageZoom.Margin = new Thickness(_layout.ImageOffsetX / sx, _layout.ImageOffsetY / sy, 0, 0);
+
+        // 按钮条：固定尺寸 + 左上对齐 + Margin 偏移，ZIndex 高于图片
+        PART_ToolbarBorder.HorizontalAlignment = HorizontalAlignment.Left;
+        PART_ToolbarBorder.VerticalAlignment = VerticalAlignment.Top;
+        PART_ToolbarBorder.Width = _layout.ToolbarWidth / sx;
+        PART_ToolbarBorder.Height = _layout.ToolbarHeight / sy;
+        PART_ToolbarBorder.Margin = new Thickness(_layout.ToolbarX / sx, _layout.ToolbarY / sy, 0, 0);
     }
 
     private static System.Windows.DpiScale GetDpiScale(DrawingRectangle bounds) =>

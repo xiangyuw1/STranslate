@@ -121,35 +121,6 @@ internal static class ImageTranslateCompactWindowPlacement
             side);
     }
 
-    internal static Rectangle CreateForImageBounds(
-        Rectangle imageBounds,
-        double dpiScaleX,
-        double dpiScaleY,
-        double minWidthDip,
-        double minImageHeightDip,
-        double toolbarHeightDip)
-    {
-        // 临时垫片：转发到 CreateLayout 取窗口矩形。
-        // Task 6 会移除此方法并改用 CreateLayout 的完整结果。
-        var workArea = new Rectangle(
-            0,
-            0,
-            Math.Max(imageBounds.Right, imageBounds.Left + 1) * 4,
-            Math.Max(imageBounds.Bottom, imageBounds.Top + 1) * 4);
-        return CreateLayout(
-            imageBounds,
-            workArea,
-            dpiScaleX,
-            dpiScaleY,
-            minWidthDip,
-            minImageHeightDip,
-            toolbarWidthDip: 300,
-            toolbarHeightDip,
-            gapHDip: 8,
-            gapVDip: 6,
-            windowMarginDip: 8).WindowBounds;
-    }
-
     internal static Rectangle CreateCenteredOnWorkArea(
         Rectangle workArea,
         System.Drawing.Size bitmapSize,
