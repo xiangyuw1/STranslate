@@ -423,6 +423,7 @@
     <sys:String x:Key="Exit">離開</sys:String>
     <sys:String x:Key="Reset">重設</sys:String>
     <sys:String x:Key="Retry">重試</sys:String>
+    <sys:String x:Key="Icon">圖標</sys:String>
     <sys:String x:Key="Duplicate">重複</sys:String>
     <sys:String x:Key="ChangeIcon">更換圖標</sys:String>
     <sys:String x:Key="ResetIcon">重置圖標</sys:String>

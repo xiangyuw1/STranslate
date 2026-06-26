@@ -412,6 +412,7 @@
     <sys:String x:Key="Exit">終了</sys:String>
     <sys:String x:Key="Reset">リセット</sys:String>
     <sys:String x:Key="Retry">再試行</sys:String>
+    <sys:String x:Key="Icon">アイコン</sys:String>
     <sys:String x:Key="Duplicate">複製</sys:String>
     <sys:String x:Key="ChangeIcon">アイコン変更</sys:String>
     <sys:String x:Key="ResetIcon">アイコンリセット</sys:String>

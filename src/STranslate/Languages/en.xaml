@@ -421,6 +421,7 @@
     <sys:String x:Key="Exit">Exit</sys:String>
     <sys:String x:Key="Reset">Reset</sys:String>
     <sys:String x:Key="Retry">Retry</sys:String>
+    <sys:String x:Key="Icon">Icon</sys:String>
     <sys:String x:Key="Duplicate">Duplicate</sys:String>
     <sys:String x:Key="ChangeIcon">Change Icon</sys:String>
     <sys:String x:Key="ResetIcon">Reset Icon</sys:String>
