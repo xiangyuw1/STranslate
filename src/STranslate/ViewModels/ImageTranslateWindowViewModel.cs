@@ -263,8 +263,9 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             _lastOcrResult.OcrContents.AddRange(layoutBlocks.Select(x => x.ToOcrContent()));
 
             // 生成翻译结果图像（在原图上覆盖翻译文本）
+            // 复用已缓存并 Freeze 的 _sourceImage，避免对原图重复解码造成额外内存峰值
             var render = ImageTranslateRenderer.GenerateTranslatedImage(
-                layoutBlocks, Utilities.ToBitmapImage(bitmap, Settings.GetImageFormat()), GetOverlayTheme());
+                layoutBlocks, _sourceImage!, GetOverlayTheme());
             _resultImage = render.Image;
             _translatedSelectionWords = render.SelectableWords;
             Result = _lastOcrResult.Text;
