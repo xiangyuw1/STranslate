@@ -84,7 +84,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Image Source="{Binding Service.ImageTranslateOcrService.MetaData.IconPath}" />
+                            <Image Source="{Binding Service.ImageTranslateOcrService.IconPath, Converter={cnvt:ImagePathToSourceConverter}}" />
                             <TextBlock
                                 Grid.Column="1"
                                 Margin="5,0"

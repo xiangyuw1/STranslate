@@ -21,6 +21,8 @@ public class Main : IOcrPlugin
         LangEnum.English,
     ];
 
+    public bool SupportBoxPoints() => true;
+
     public Control GetSettingUI()
     {
         _viewModel ??= new SettingsViewModel(Context, Settings);

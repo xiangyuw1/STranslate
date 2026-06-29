@@ -93,7 +93,7 @@ git remote add origin https://github.com/STranslate/STranslate.Plugin.Translate.
 - **`ExecuteFileName`**：改为自己的插件 dll 文件名。
 
 ### `csproj` 调试改法
-`ThirdPlugins` 下的社区插件会受到主仓库上层 `Directory.Packages.props` 影响，所以插件项目应显式关闭集中包版本管理，并保留自己的 `PackageReference` 版本。以下是 `DeepLX` 项目文件中的实际配置参考，不要遗漏其中的 Debug / Release 输出和内容复制项；`STranslate.Plugin` 推荐使用 [NuGet 上的最新版本](https://www.nuget.org/packages/STranslate.Plugin)，截至 2026-06-11 核对为 `1.0.11`：
+`ThirdPlugins` 下的社区插件会受到主仓库上层 `Directory.Packages.props` 影响，所以插件项目应显式关闭集中包版本管理，并保留自己的 `PackageReference` 版本。以下是 `DeepLX` 项目文件中的实际配置参考，不要遗漏其中的 Debug / Release 输出和内容复制项；`STranslate.Plugin` 推荐使用 [NuGet 上的最新版本](https://www.nuget.org/packages/STranslate.Plugin)，截至 2026-06-25 核对为 `1.0.12`：
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -151,7 +151,7 @@ git remote add origin https://github.com/STranslate/STranslate.Plugin.Translate.
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="STranslate.Plugin" Version="1.0.11" />
+        <PackageReference Include="STranslate.Plugin" Version="1.0.12" />
     </ItemGroup>
 
 </Project>
@@ -255,7 +255,7 @@ Plugins\ThirdPlugins\STranslate.Plugin.Translate.DeepLX\.artifacts\plugins\STran
 | 断点不命中 | 运行中的 `STranslate.exe` 是否加载了你刚构建的目录；dll 旁边是否有 pdb；是否存在同 `PluginID` 的更高版本插件被优先加载。 |
 | 设置保存后重启丢失 | 是否在设置 VM 中调用了 `SaveSettingStorage<T>()`；是否调试了另一个数据目录（便携/漫游目录不一致）。 |
 | ESC 或关闭窗口无法取消请求 | 是否把 `CancellationToken` 传给所有 HTTP、流式读取、下载和音频操作。 |
-| 图片翻译无法选中 OCR 区域 | OCR 结果是否填充了每个 `OcrContent.BoxPoints`；仅返回纯文本无法支持框选和标注。 |
+| 图片翻译无法选中 OCR 区域 | OCR 插件是否 override `SupportBoxPoints()` 并返回 `true`；OCR 结果是否填充图片像素坐标 `OcrContent.BoxPoints` 或结构化 `Regions` 中的行框；仅返回纯文本无法支持框选和标注。 |
 | 日志里有 `ReflectionTypeLoadException` | 依赖 dll 是否随插件输出；依赖版本是否与宿主可加载版本兼容；Release 打包是否遗漏内容文件。 |
 
 ## 发布前检查

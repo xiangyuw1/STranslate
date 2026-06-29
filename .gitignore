@@ -1,6 +1,8 @@
 .vs/
 bin/
 obj/
+*_wpftmp.csproj
+*.wpftmp.csproj
 *.user
 .idea/
 .dist/
@@ -17,6 +19,10 @@ target/
 
 # claude code
 [Nn][Uu][Ll]
+
+# superpowers docs
+docs/superpowers/
+
 .sisyphus/
-.omo
+.omo/
 build_output.txt

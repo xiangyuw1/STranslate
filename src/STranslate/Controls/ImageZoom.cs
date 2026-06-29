@@ -276,6 +276,16 @@ public class ImageZoom : Control
         DependencyProperty.Register(nameof(DisableDoubleClickReset), typeof(bool), typeof(ImageZoom),
             new FrameworkPropertyMetadata(false));
 
+    public bool IsPanAndZoomEnabled
+    {
+        get => (bool)GetValue(IsPanAndZoomEnabledProperty);
+        set => SetValue(IsPanAndZoomEnabledProperty, value);
+    }
+
+    public static readonly DependencyProperty IsPanAndZoomEnabledProperty =
+        DependencyProperty.Register(nameof(IsPanAndZoomEnabled), typeof(bool), typeof(ImageZoom),
+            new FrameworkPropertyMetadata(true));
+
     public Cursor MoveCursor
     {
         get => (Cursor)GetValue(MoveCursorProperty);
@@ -336,15 +346,21 @@ public class ImageZoom : Control
 
     private void UnsubscribeEvents()
     {
-        if (_imageContainer == null) return;
+        if (_imageContainer != null)
+        {
+            _imageContainer.MouseDown -= OnMouseDown;
+            _imageContainer.MouseMove -= OnMouseMove;
+            _imageContainer.MouseUp -= OnMouseUp;
+            _imageContainer.LostMouseCapture -= OnLostMouseCapture;
+            _imageContainer.MouseWheel -= OnMouseWheel;
+            _imageContainer.ManipulationStarting -= OnManipulationStarting;
+            _imageContainer.ManipulationDelta -= OnManipulationDelta;
+        }
 
-        _imageContainer.MouseDown -= OnMouseDown;
-        _imageContainer.MouseMove -= OnMouseMove;
-        _imageContainer.MouseUp -= OnMouseUp;
-        _imageContainer.LostMouseCapture -= OnLostMouseCapture;
-        _imageContainer.MouseWheel -= OnMouseWheel;
-        _imageContainer.ManipulationStarting -= OnManipulationStarting;
-        _imageContainer.ManipulationDelta -= OnManipulationDelta;
+        if (_interactionCanvas != null)
+        {
+            _interactionCanvas.LostMouseCapture -= OnLostMouseCapture;
+        }
     }
 
     private void GetTemplateParts()
@@ -360,15 +376,21 @@ public class ImageZoom : Control
 
     private void SubscribeEvents()
     {
-        if (_imageContainer == null) return;
+        if (_imageContainer != null)
+        {
+            _imageContainer.MouseDown += OnMouseDown;
+            _imageContainer.MouseMove += OnMouseMove;
+            _imageContainer.MouseUp += OnMouseUp;
+            _imageContainer.LostMouseCapture += OnLostMouseCapture;
+            _imageContainer.MouseWheel += OnMouseWheel;
+            _imageContainer.ManipulationStarting += OnManipulationStarting;
+            _imageContainer.ManipulationDelta += OnManipulationDelta;
+        }
 
-        _imageContainer.MouseDown += OnMouseDown;
-        _imageContainer.MouseMove += OnMouseMove;
-        _imageContainer.MouseUp += OnMouseUp;
-        _imageContainer.LostMouseCapture += OnLostMouseCapture;
-        _imageContainer.MouseWheel += OnMouseWheel;
-        _imageContainer.ManipulationStarting += OnManipulationStarting;
-        _imageContainer.ManipulationDelta += OnManipulationDelta;
+        if (_interactionCanvas != null)
+        {
+            _interactionCanvas.LostMouseCapture += OnLostMouseCapture;
+        }
     }
 
     #endregion
@@ -384,6 +406,12 @@ public class ImageZoom : Control
 
         if (HandleTextSelectionMouseDown(e))
             return;
+
+        if (!IsPanAndZoomEnabled)
+        {
+            e.Handled = true;
+            return;
+        }
 
         if (HandleDoubleClick(e))
             return;
@@ -424,12 +452,19 @@ public class ImageZoom : Control
 
     private void OnLostMouseCapture(object sender, MouseEventArgs e)
     {
+        StopTextSelection();
         StopDragging();
         e.Handled = true;
     }
 
     private void OnMouseWheel(object sender, MouseWheelEventArgs e)
     {
+        if (!IsPanAndZoomEnabled)
+        {
+            e.Handled = true;
+            return;
+        }
+
         var isZoomIn = e.Delta > 0;
 
         if (TryZoomAtMousePosition(e, isZoomIn))
@@ -471,6 +506,8 @@ public class ImageZoom : Control
 
     private bool HandleTextSelectionMouseDown(MouseButtonEventArgs e)
     {
+        UpdateMouseOverTextState(e);
+
         if (!_isMouseOverText)
             return false;
 
@@ -525,7 +562,7 @@ public class ImageZoom : Control
 
         foreach (var word in OcrWords)
         {
-            if (word.BoundingBox.Contains(point))
+            if (IsSelectableWord(word) && word.BoundingBox.Contains(point))
                 return true;
         }
 
@@ -544,7 +581,7 @@ public class ImageZoom : Control
 
     private bool HandleDoubleClick(MouseButtonEventArgs e)
     {
-        if (!DisableDoubleClickReset && e.ClickCount == 2)
+        if (IsPanAndZoomEnabled && !DisableDoubleClickReset && e.ClickCount == 2)
         {
             Reset();
             e.Handled = true;
@@ -555,6 +592,9 @@ public class ImageZoom : Control
 
     private void StartDragging(MouseButtonEventArgs e)
     {
+        if (!IsPanAndZoomEnabled)
+            return;
+
         _lastMousePosition = e.GetPosition(_imageContainer);
         _imageContainer?.CaptureMouse();
         _imageContainer?.Cursor = MoveCursor;
@@ -840,12 +880,22 @@ public class ImageZoom : Control
 
         _highlightBrush ??= new SolidColorBrush(Colors.DodgerBlue) { Opacity = HighlightOpacity };
 
+        var highlightGeometry = new GeometryGroup();
         foreach (var word in OcrWords)
         {
-            if (IsWordInSelection(word, selectionStart, selectionEnd))
+            if (IsWordInSelection(word, selectionStart, selectionEnd) && IsSelectableWord(word))
             {
-                AddHighlightRectangle(word);
+                highlightGeometry.Children.Add(new RectangleGeometry(word.BoundingBox));
             }
+        }
+
+        if (highlightGeometry.Children.Count > 0)
+        {
+            _interactionCanvas.Children.Add(new Path
+            {
+                Fill = _highlightBrush,
+                Data = highlightGeometry
+            });
         }
 
         UpdateSelectedText();
@@ -856,19 +906,6 @@ public class ImageZoom : Control
         var wordStart = word.StartIndexInFullText;
         var wordEnd = word.StartIndexInFullText + word.Text.Length - 1;
         return wordStart <= selectionEnd && wordEnd >= selectionStart;
-    }
-
-    private void AddHighlightRectangle(OcrWord word)
-    {
-        var rect = new Rectangle
-        {
-            Width = word.BoundingBox.Width,
-            Height = word.BoundingBox.Height,
-            Fill = _highlightBrush
-        };
-        Canvas.SetLeft(rect, word.BoundingBox.Left);
-        Canvas.SetTop(rect, word.BoundingBox.Top);
-        _interactionCanvas!.Children.Add(rect);
     }
 
     private void UpdateSelectedText()
@@ -906,7 +943,7 @@ public class ImageZoom : Control
         // Try to find word containing the point
         foreach (var word in OcrWords)
         {
-            if (word.BoundingBox.Contains(point))
+            if (IsSelectableWord(word) && word.BoundingBox.Contains(point))
             {
                 return CalculateCharacterIndexInWord(word, point);
             }
@@ -935,6 +972,9 @@ public class ImageZoom : Control
 
         foreach (var word in OcrWords!)
         {
+            if (!IsSelectableWord(word))
+                continue;
+
             var distance = GetDistanceToRect(point, word.BoundingBox);
             if (distance < minDistance)
             {
@@ -1023,6 +1063,9 @@ public class ImageZoom : Control
     #region Utility Methods
 
     private static bool IsPrimaryButton(MouseButtonEventArgs e) => e.ChangedButton == MouseButton.Left;
+
+    private static bool IsSelectableWord(OcrWord word) =>
+        !word.BoundingBox.IsEmpty && word.BoundingBox.Width > 0 && word.BoundingBox.Height > 0;
 
     private static double Clamp(double value, double min, double max)
     {

@@ -46,7 +46,7 @@
 ### 从入口到结果：增量翻译（按住键）
 1. `IncrementalTranslateKey` 变化触发 `ApplyIncrementalTranslate()`。
 2. 注册 `HotkeyMapper.RegisterHoldKey(key, OnIncKeyPressed, OnIncKeyReleased)` 并开启低级键盘钩子。
-3. 按下时 `OnIncKeyPressed()`：置顶窗口 + 开启鼠标划词监听 + 缓存旧文本。
+3. 按下时 `OnIncKeyPressed()`：置顶窗口 + 开启鼠标划词监听 + 缓存旧文本。若 `Settings.IncrementalClearInput`（默认 true）则先清空输入框，本次会话内选中文本仍累积追加；false 时保留旧逻辑不清空。
 4. 松开时 `OnIncKeyReleased()`：关闭划词监听，若文本有变化则执行翻译。
 
 ### 从入口到结果：Ctrl+CC、鼠标划词、剪贴板监听

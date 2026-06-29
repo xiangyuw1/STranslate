@@ -50,9 +50,9 @@
     <sys:String x:Key="General_DefaultSourceLanguage">기본 원본 언어</sys:String>
     <sys:String x:Key="General_DefaultSourceLanguageDescription">자동 감지 실패 시 이 언어를 사용합니다.</sys:String>
     <sys:String x:Key="General_FirstLanguage">제1 언어</sys:String>
-    <sys:String x:Key="General_FirstLanguageDescription">모든 번역 상황(이미지 번역 포함)에서 목표 언어가 자동이고 원본 언어가 다른 언어(제2 언어 포함)일 때, 목표 언어로 제1 언어를 사용합니다.</sys:String>
+    <sys:String x:Key="General_FirstLanguageDescription">모든 번역 상황에서 목표 언어가 자동이고 원본 언어가 다른 언어(제2 언어 포함)일 때, 목표 언어로 제1 언어를 사용합니다.</sys:String>
     <sys:String x:Key="General_SecondLanguage">제2 언어</sys:String>
-    <sys:String x:Key="General_SecondLanguageDescription">모든 번역 상황(이미지 번역 포함)에서 목표 언어가 자동이고 원본 언어가 제1 언어일 때, 목표 언어로 제2 언어를 사용합니다.</sys:String>
+    <sys:String x:Key="General_SecondLanguageDescription">모든 번역 상황에서 목표 언어가 자동이고 원본 언어가 제1 언어일 때, 목표 언어로 제2 언어를 사용합니다.</sys:String>
     <sys:String x:Key="General_HttpTimeout">시간 초과</sys:String>
     <sys:String x:Key="General_HttpTimeoutDescription">네트워크 요청 시간 초과 시간, 단위: 초.</sys:String>
     <sys:String x:Key="General_UseClipboardOutput">텍스트 출력 시 클립보드 사용</sys:String>
@@ -66,6 +66,8 @@
     <sys:String x:Key="General_AutoTranslateButtonVisible">메인 화면에 자동 번역 버튼 표시</sys:String>
     <sys:String x:Key="General_AutoTranslateOnPromptChanged">프롬프트 전환 후 자동 번역</sys:String>
     <sys:String x:Key="General_AutoTranslateOnPromptChangedDescription">AI 번역 서비스의 프롬프트를 전환하면 즉시 번역을 다시 실행합니다.</sys:String>
+    <sys:String x:Key="General_IncrementalClearInput">증분 번역 시 입력 지우기</sys:String>
+    <sys:String x:Key="General_IncrementalClearInputDescription">활성화 시(기본값) 증분 번역이 트리거되면 입력 상자를 지우며, 세션 내 선택 텍스트는 계속 누적됩니다. 비활성화 시 기존 로직을 유지하여 기존 내용을 지우지 않고 바로 추가합니다.</sys:String>
     <sys:String x:Key="General_AutoTranslateDelay">자동 번역 지연</sys:String>
     <sys:String x:Key="General_AutoTranslateDelayDescription">입력 후 대기 시간, 단위: 밀리초.</sys:String>
     <sys:String x:Key="General_LineBreakHandleType">단어 선택 줄 바꿈 처리</sys:String>
@@ -311,16 +313,19 @@
     <sys:String x:Key="Standalone_ImTranShowAnnotatedDescription">번역 결과/텍스트 감지 이미지 표시 전환</sys:String>
     <sys:String x:Key="Standalone_ImTranShowTextControlHeader">텍스트 상자 표시</sys:String>
     <sys:String x:Key="Standalone_ImTranShowTextControlDescription">오른쪽 텍스트 상자 표시/숨기기</sys:String>
-    <sys:String x:Key="Standalone_LayoutAnalysisHeader">레이아웃 분석 설정</sys:String>
-    <sys:String x:Key="Standalone_LayoutAnalysisDescription">인식 결과에 대한 병합 구성</sys:String>
-    <sys:String x:Key="Standalone_VerticalThresholdHeader">수직 인접 감지 임계값 비율</sys:String>
-    <sys:String x:Key="Standalone_VerticalThresholdDescription" xml:space="preserve">상하 인접 텍스트 블록의 병합 민감도 제어&#10;0.1-0.3: 엄격 모드, 매우 가까운 줄만 병합&#10;0.5-0.8: 표준 모드, 문단 내의 줄 병합&#10;1.0-3.0: 느슨한 모드, 거리가 먼 텍스트 블록도 병합&#10;&gt;5.0: 수직으로 분포된 거의 모든 텍스트 병합</sys:String>
-    <sys:String x:Key="Standalone_HorizontalThresholdHeader">수평 인접 감지 임계값 비율</sys:String>
-    <sys:String x:Key="Standalone_HorizontalThresholdDescription" xml:space="preserve">좌우 인접 텍스트 블록의 병합 민감도 제어&#10;0.1-0.3: 엄격 모드, 매우 가까운 단어만 병합&#10;0.5-0.8: 표준 모드, 같은 줄 내의 구문 병합&#10;1.0-2.0: 느슨한 모드, 단 분리 텍스트 병합&#10;&gt;5.0: 수평으로 분포된 거의 모든 텍스트 병합</sys:String>
-    <sys:String x:Key="Standalone_LineSpacingThresholdHeader">줄 바꿈 감지 임계값 비율</sys:String>
-    <sys:String x:Key="Standalone_LineSpacingThresholdDescription" xml:space="preserve">텍스트 병합 시 줄 바꿈 추가 여부 제어&#10;0.1-0.2: 엄격한 줄 바꿈, 아주 작은 거리라도 줄 바꿈&#10;0.3-0.5: 표준 줄 바꿈, 대부분의 문서에 적합&#10;0.8-1.0: 느슨한 줄 바꿈, 거리가 매우 멀어야 줄 바꿈&#10;&gt;2.0: 거의 줄 바꿈 없음, 모든 텍스트를 연결</sys:String>
-    <sys:String x:Key="Standalone_WordSpacingThresholdHeader">단어 간격 감지 임계값 비율</sys:String>
-    <sys:String x:Key="Standalone_WordSpacingThresholdDescription" xml:space="preserve">텍스트 병합 시 공백 추가 여부 제어&#10;0.1-0.2: 표준 공백 간격&#10;0.3-0.5: 느슨한 공백 간격&#10;&gt;1.0: 거의 공백 추가 안 함</sys:String>
+    <sys:String x:Key="Standalone_ImTranWindowModeHeader">이미지 번역 창 모드</sys:String>
+    <sys:String x:Key="Standalone_ImTranWindowModeDescription">이미지 번역 결과를 독립 창 또는 간소화된 플로팅 창으로 표시합니다.</sys:String>
+    <sys:String x:Key="Standalone_LayoutAnalysisHeader">텍스트 분할 설정</sys:String>
+    <sys:String x:Key="Standalone_LayoutAnalysisDescription">인식 결과의 분할 및 병합 방식을 설정합니다.</sys:String>
+    <sys:String x:Key="Standalone_ImTranLanguageDetector">이미지 번역 언어 감지기</sys:String>
+    <sys:String x:Key="Standalone_ImTranLocalDetector">로컬 인식 중영 문자 비율</sys:String>
+    <sys:String x:Key="Standalone_ImTranLocalDetectorDescription">이미지 번역「로컬 인식」의 중영문 경우 영문자가 전체 문자에서 차지하는 비율에만 적용됩니다.</sys:String>
+    <sys:String x:Key="Standalone_ImTranDefaultSourceLanguage">기본 원본 언어</sys:String>
+    <sys:String x:Key="Standalone_ImTranDefaultSourceLanguageDescription">이미지 번역 자동 감지 실패 시 이 언어를 사용합니다.</sys:String>
+    <sys:String x:Key="Standalone_ImTranFirstLanguage">제1 언어</sys:String>
+    <sys:String x:Key="Standalone_ImTranFirstLanguageDescription">이미지 번역 목표 언어가 자동이고 원본 언어가 다른 언어(제2 언어 포함)일 때, 목표 언어로 제1 언어를 사용합니다.</sys:String>
+    <sys:String x:Key="Standalone_ImTranSecondLanguage">제2 언어</sys:String>
+    <sys:String x:Key="Standalone_ImTranSecondLanguageDescription">이미지 번역 목표 언어가 자동이고 원본 언어가 제1 언어일 때, 목표 언어로 제2 언어를 사용합니다.</sys:String>
 
     <sys:String x:Key="Total">총</sys:String>
     <sys:String x:Key="Item">항목</sys:String>
@@ -417,7 +422,10 @@
     <sys:String x:Key="Exit">종료</sys:String>
     <sys:String x:Key="Reset">초기화</sys:String>
     <sys:String x:Key="Retry">재시도</sys:String>
+    <sys:String x:Key="Icon">아이콘</sys:String>
     <sys:String x:Key="Duplicate">복제</sys:String>
+    <sys:String x:Key="ChangeIcon">아이콘 변경</sys:String>
+    <sys:String x:Key="ResetIcon">아이콘 초기화</sys:String>
     <sys:String x:Key="Official">공식</sys:String>
     <sys:String x:Key="IdentifiedLanguageLabel">감지된 언어</sys:String>
     <sys:String x:Key="On">켜기</sys:String>
@@ -437,7 +445,7 @@
     <sys:String x:Key="WelcomeSetup_LanguageDescription">인터페이스 언어를 선택합니다. 변경 사항은 기존 언어 설정을 통해 즉시 적용됩니다.</sys:String>
     <sys:String x:Key="WelcomeSetup_Services">서비스 설정</sys:String>
     <sys:String x:Key="WelcomeSetup_TranslateServices">번역 서비스</sys:String>
-    <sys:String x:Key="WelcomeSetup_OcrTtsServices">OCR / TTS 서비스</sys:String>
+    <sys:String x:Key="WelcomeSetup_OcrServices">OCR 서비스</sys:String>
     <sys:String x:Key="WelcomeSetup_SpecialServices">전용 서비스</sys:String>
     <sys:String x:Key="WelcomeSetup_Hotkeys">단축키</sys:String>
     <sys:String x:Key="WelcomeSetup_SelectService">서비스 선택</sys:String>
@@ -595,12 +603,12 @@
     <sys:String x:Key="ProxyTypeSocks5">Socks5 프록시</sys:String>
     <sys:String x:Key="ProxyTypeNone">프록시 없음</sys:String>
 
-    <sys:String x:Key="LayoutAnalysisModeMergeAll">모두 병합</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeStrictParagraph">엄격한 문단</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeStandardDocument">표준 문서</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeColumnDocument">다단 문서</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeAuto">자동</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeProvider">서비스 제공자 분할</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeSmart">스마트 분할</sys:String>
     <sys:String x:Key="LayoutAnalysisModeNoMerge">병합 안 함</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeUserDefined">사용자 정의</sys:String>
+    <sys:String x:Key="ImageTranslateWindowModeStandalone">독립 창</sys:String>
+    <sys:String x:Key="ImageTranslateWindowModeCompact">간소화 창</sys:String>
 
     <sys:String x:Key="WindowScreenTypeRememberLastLaunchLocation">마지막 실행 위치 기억</sys:String>
     <sys:String x:Key="WindowScreenTypeCursor">마우스 커서가 있는 모니터</sys:String>
@@ -732,6 +740,7 @@
     <sys:String x:Key="RecognizeLanguage">인식 언어</sys:String>
     <sys:String x:Key="TranslateLanguage">번역 언어</sys:String>
     <sys:String x:Key="ImageTranslateLanguageIndependentToolTip">이미지 번역 창의 번역 언어는 기본 창과 독립적입니다. 여기서 변경해도 기본 창에는 영향을 주지 않습니다.</sys:String>
+    <sys:String x:Key="ImageTranslateLayoutAnalysisToolTip">이미지 번역 OCR 텍스트의 분할 및 병합 방식을 선택합니다. 이미지 번역을 다시 실행하면 적용됩니다.</sys:String>
     <sys:String x:Key="ImTranSettingsToolTip" xml:space="preserve">좌클릭 -> 독립 창 설정&#10;Ctrl+좌클릭 -> 텍스트 인식 설정&#10;Alt+좌클릭 -> 텍스트 번역 설정</sys:String>
 
     <sys:String x:Key="CopySuccess">복사 성공</sys:String>

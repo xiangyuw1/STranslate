@@ -39,6 +39,21 @@ public partial class Service : ObservableObject, IDisposable
     }
 
     /// <summary>
+    /// 服务自定义图标绝对路径（为空时回退到插件默认图标）
+    /// </summary>
+    public string IconPath
+    {
+        get => string.IsNullOrEmpty(field) ? MetaData.IconPath : field;
+        // 不使用 SetProperty：图标文件可能在路径不变时被覆盖（同扩展名替换），
+        // 需要始终触发通知让 UI 重新加载。
+        set
+        {
+            field = value;
+            OnPropertyChanged(nameof(IconPath));
+        }
+    }
+
+    /// <summary>
     /// 是否已初始化
     /// </summary>
     public bool IsInitialized { get; private set; }

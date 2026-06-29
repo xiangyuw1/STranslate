@@ -21,6 +21,7 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
     private readonly NotifyCollectionChangedEventHandler _translateServicesChangedHandler;
     private readonly NotifyCollectionChangedEventHandler _ocrServicesChangedHandler;
     private readonly Internationalization _i18n;
+    private bool _disposed;
 
     /// <summary>
     /// Creates wizard state from the existing settings and service managers.
@@ -32,8 +33,7 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
         DataProvider dataProvider,
         Internationalization i18n,
         TranslateService translateService,
-        OcrService ocrService,
-        TtsService ttsService)
+        OcrService ocrService)
     {
         Settings = settings;
         HotkeySettings = hotkeySettings;
@@ -43,7 +43,6 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
         Languages = i18n.LoadAvailableLanguages();
         TranslateService = translateService;
         OcrService = ocrService;
-        TtsService = ttsService;
 
         _translateServicesChangedHandler = (_, _) => RefreshTranslateServiceOptions();
         _ocrServicesChangedHandler = (_, _) => RefreshOcrServiceOptions();
@@ -55,14 +54,11 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
 
         SelectedTranslatePlugin = WelcomeTranslatePlugins.FirstOrDefault();
         SelectedOcrPlugin = WelcomeOcrPlugins.FirstOrDefault();
-        SelectedTtsPlugin = WelcomeTtsPlugins.FirstOrDefault();
 
         SelectedTranslateService = TranslateService.Services.FirstOrDefault(s => s.IsEnabled)
             ?? TranslateService.Services.FirstOrDefault();
         SelectedOcrService = OcrService.Services.FirstOrDefault(s => s.IsEnabled)
             ?? OcrService.Services.FirstOrDefault();
-        SelectedTtsService = TtsService.Services.FirstOrDefault(s => s.IsEnabled)
-            ?? TtsService.Services.FirstOrDefault();
 
         RefreshTranslateServiceOptions();
         RefreshOcrServiceOptions();
@@ -82,8 +78,6 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
 
     public OcrService OcrService { get; }
 
-    public TtsService TtsService { get; }
-
     public ObservableCollection<Service> AvailableTranslateSpecialServices { get; } = [];
 
     public ObservableCollection<Service> AvailableOcrServices { get; } = [];
@@ -91,8 +85,6 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
     public ObservableCollection<PluginMetaData> WelcomeTranslatePlugins { get; } = [];
 
     public ObservableCollection<PluginMetaData> WelcomeOcrPlugins { get; } = [];
-
-    public ObservableCollection<PluginMetaData> WelcomeTtsPlugins { get; } = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StepProgressText))]
@@ -106,19 +98,13 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] public partial PluginMetaData? SelectedOcrPlugin { get; set; }
 
-    [ObservableProperty] public partial PluginMetaData? SelectedTtsPlugin { get; set; }
-
     [ObservableProperty] public partial Service? SelectedTranslateService { get; set; }
 
     [ObservableProperty] public partial Service? SelectedOcrService { get; set; }
 
-    [ObservableProperty] public partial Service? SelectedTtsService { get; set; }
-
     [ObservableProperty] public partial Control? TranslateSettingUI { get; set; }
 
     [ObservableProperty] public partial Control? OcrSettingUI { get; set; }
-
-    [ObservableProperty] public partial Control? TtsSettingUI { get; set; }
 
     public Service? SelectedImageTranslateService
     {
@@ -181,11 +167,6 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
         OcrSettingUI = value?.Plugin.GetSettingUI();
     }
 
-    partial void OnSelectedTtsServiceChanged(Service? value)
-    {
-        TtsSettingUI = value?.Plugin.GetSettingUI();
-    }
-
     [RelayCommand]
     private void AddTranslateService()
     {
@@ -215,19 +196,12 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
         service.IsEnabled = true;
         SelectedOcrService = service;
 
-        if (SelectedImageTranslateOcrService == null)
+        if (SelectedImageTranslateOcrService == null &&
+            OcrService.IsImageTranslateOcrService(service))
+        {
+            RefreshOcrServiceOptions();
             SelectedImageTranslateOcrService = service;
-    }
-
-    [RelayCommand]
-    private void AddTtsService()
-    {
-        if (SelectedTtsPlugin == null)
-            return;
-
-        var service = TtsService.AddFromPlugin(SelectedTtsPlugin);
-        service.IsEnabled = true;
-        SelectedTtsService = service;
+        }
     }
 
     [RelayCommand]
@@ -270,9 +244,22 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
     /// </summary>
     public void Dispose()
     {
-        TranslateService.Services.CollectionChanged -= _translateServicesChangedHandler;
-        OcrService.Services.CollectionChanged -= _ocrServicesChangedHandler;
+        Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+        {
+            TranslateService.Services.CollectionChanged -= _translateServicesChangedHandler;
+            OcrService.Services.CollectionChanged -= _ocrServicesChangedHandler;
+        }
+
+        _disposed = true;
     }
 
     private void SaveAndClose(Window window)
@@ -290,7 +277,7 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
 
     private void RefreshOcrServiceOptions()
     {
-        ReplaceItems(AvailableOcrServices, OcrService.Services);
+        ReplaceItems(AvailableOcrServices, OcrService.GetImageTranslateOcrServices());
         OnPropertyChanged(nameof(SelectedImageTranslateOcrService));
     }
 
@@ -298,7 +285,6 @@ public partial class WelcomeSetupViewModel : ObservableObject, IDisposable
     {
         ReplaceItems(WelcomeTranslatePlugins, SortWelcomePlugins(TranslateService.Plugins));
         ReplaceItems(WelcomeOcrPlugins, SortWelcomePlugins(OcrService.Plugins));
-        ReplaceItems(WelcomeTtsPlugins, SortWelcomePlugins(TtsService.Plugins));
     }
 
     private IEnumerable<PluginMetaData> SortWelcomePlugins(IEnumerable<PluginMetaData> plugins) =>

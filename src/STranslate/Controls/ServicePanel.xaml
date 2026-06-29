@@ -32,19 +32,44 @@
                         Command="{Binding Source={StaticResource VmProxy}, Path=Data.ActiveImTranOcrCommand}"
                         CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
                         Header="{DynamicResource AsImTranOcrSvc}">
-                        <MenuItem.Style>
-                            <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-                                <Setter Property="Visibility" Value="Visible" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Source={StaticResource VmProxy}, Path=Data.ActiveImTranOcrCommand}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </MenuItem.Style>
+                        <MenuItem.Visibility>
+                            <MultiBinding Converter="{cnvt:ImTranOcrEligibilityConverter}">
+                                <Binding Path="Data.ActiveImTranOcrCommand" Source="{StaticResource VmProxy}" />
+                                <Binding Path="Data" Source="{StaticResource SvcProxy}" />
+                            </MultiBinding>
+                        </MenuItem.Visibility>
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.DrawImage_20_Regular}" />
                         </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator>
+                        <Separator.Visibility>
+                            <MultiBinding Converter="{cnvt:ImTranOcrEligibilityConverter}">
+                                <Binding Path="Data.ActiveImTranOcrCommand" Source="{StaticResource VmProxy}" />
+                                <Binding Path="Data" Source="{StaticResource SvcProxy}" />
+                            </MultiBinding>
+                        </Separator.Visibility>
+                    </Separator>
+                    <MenuItem Header="{DynamicResource Icon}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Image_20_Regular}" />
+                        </MenuItem.Icon>
+                        <MenuItem
+                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.ChangeIconCommand}"
+                            CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                            Header="{DynamicResource ChangeIcon}">
+                            <MenuItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Image_20_Regular}" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem
+                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.ResetIconCommand}"
+                            CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                            Header="{DynamicResource ResetIcon}">
+                            <MenuItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ImageArrowBack_20_Regular}" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                     </MenuItem>
                     <MenuItem
                         Command="{Binding Source={StaticResource VmProxy}, Path=Data.DuplicateCommand}"
@@ -71,7 +96,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="40" />
                 </Grid.ColumnDefinitions>
-                <Image Height="{DynamicResource STControlFontSize18}" Source="{Binding MetaData.IconPath}" />
+                <Image Height="{DynamicResource STControlFontSize18}" Source="{Binding IconPath, Converter={cnvt:ImagePathToSourceConverter}}" />
                 <control:EditableTextBlock
                     Grid.Column="1"
                     Margin="5,0,0,0"
@@ -148,6 +173,27 @@
                             IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Pinned}" />
                     </MenuItem>
                     <Separator />
+                    <MenuItem Header="{DynamicResource Icon}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Image_20_Regular}" />
+                        </MenuItem.Icon>
+                        <MenuItem
+                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.ChangeIconCommand}"
+                            CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                            Header="{DynamicResource ChangeIcon}">
+                            <MenuItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Image_20_Regular}" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem
+                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.ResetIconCommand}"
+                            CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                            Header="{DynamicResource ResetIcon}">
+                            <MenuItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ImageArrowBack_20_Regular}" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
                     <MenuItem
                         Command="{Binding Source={StaticResource VmProxy}, Path=Data.DuplicateCommand}"
                         CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
@@ -173,7 +219,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="40" />
                 </Grid.ColumnDefinitions>
-                <Image Height="{DynamicResource STControlFontSize18}" Source="{Binding MetaData.IconPath}" />
+                <Image Height="{DynamicResource STControlFontSize18}" Source="{Binding IconPath, Converter={cnvt:ImagePathToSourceConverter}}" />
                 <control:EditableTextBlock
                     Grid.Column="1"
                     Margin="5,0,0,0"
@@ -312,12 +358,33 @@
                             IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.MarkdownRender, Converter={cnvt:BoolInverseConverter}}" />
                     </MenuItem>
                     <Separator />
+                    <MenuItem Header="{DynamicResource Icon}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Image_20_Regular}" />
+                        </MenuItem.Icon>
+                        <MenuItem
+                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.ChangeIconCommand}"
+                            CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                            Header="{DynamicResource ChangeIcon}">
+                            <MenuItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Image_20_Regular}" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem
+                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.ResetIconCommand}"
+                            CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                            Header="{DynamicResource ResetIcon}">
+                            <MenuItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ImageArrowBack_20_Regular}" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
                     <MenuItem
                         Command="{Binding Source={StaticResource VmProxy}, Path=Data.DuplicateCommand}"
                         CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
                         Header="{DynamicResource Duplicate}">
                         <MenuItem.Icon>
-                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.SaveCopy_20_Regular}" />
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.SaveCopy_24_Regular}" />
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem
@@ -337,7 +404,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="40" />
                 </Grid.ColumnDefinitions>
-                <Image Height="{DynamicResource STControlFontSize18}" Source="{Binding MetaData.IconPath}" />
+                <Image Height="{DynamicResource STControlFontSize18}" Source="{Binding IconPath, Converter={cnvt:ImagePathToSourceConverter}}" />
                 <control:EditableTextBlock
                     Grid.Column="1"
                     Margin="5,0,0,0"

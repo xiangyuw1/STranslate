@@ -1,11 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
 using STranslate.Controls;
 using STranslate.Core;
 using STranslate.Plugin;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 
 namespace STranslate.Services;
 
@@ -116,6 +118,58 @@ public abstract partial class BaseService : ObservableObject, IDisposable
         result.DisplayName = service.DisplayName + "_New";
         Services.Insert(Services.IndexOf(service) + 1, result);
         return result;
+    }
+
+    /// <summary>
+    /// 更换服务图标：将用户选择的图片拷贝到插件设置目录的 icons 子目录，并设置服务图标。
+    /// </summary>
+    public async Task<bool> ChangeIconAsync(Service service)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = _i18n.GetTranslation("ChangeIcon"),
+            Filter = "Image files (*.png;*.jpg;*.jpeg;*.ico;*.bmp;*.svg)|*.png;*.jpg;*.jpeg;*.ico;*.bmp;*.svg"
+        };
+        if (dialog.ShowDialog() != true)
+            return false;
+
+        var sourcePath = dialog.FileName;
+        var iconsDir = Path.Combine(service.MetaData.PluginSettingsDirectoryPath, "icons");
+        Directory.CreateDirectory(iconsDir);
+
+        var destName = $"{service.ServiceID}{Path.GetExtension(sourcePath)}";
+        var destPath = Path.Combine(iconsDir, destName);
+
+        // 若已有旧图标文件（不同扩展名），先删除
+        foreach (var f in Directory.EnumerateFiles(iconsDir, $"{service.ServiceID}.*"))
+            Helper.TryDeleteFile(f);
+
+        File.Copy(sourcePath, destPath, overwrite: true);
+        service.IconPath = destPath;  // setter 始终触发通知，UI 重新加载；同时落盘相对路径
+        return true;
+    }
+
+    /// <summary>
+    /// 重置服务图标为插件默认图标，并删除已拷贝的自定义图标文件。
+    /// </summary>
+    public void ResetIcon(Service service)
+    {
+        // 删除自定义图标文件（若有）
+        if (!string.IsNullOrEmpty(service.IconPath) &&
+            service.IconPath != service.MetaData.IconPath)
+        {
+            var iconsDir = Path.GetDirectoryName(service.IconPath);
+            Helper.TryDeleteFile(service.IconPath);
+
+            // 图标文件删除后若 icons 目录为空，一并清理
+            if (!string.IsNullOrEmpty(iconsDir) &&
+                Directory.Exists(iconsDir) &&
+                !Directory.EnumerateFileSystemEntries(iconsDir).Any())
+            {
+                Helper.TryDeleteDirectory(iconsDir);
+            }
+        }
+        service.IconPath = string.Empty;  // getter 回退 MetaData.IconPath，触发落盘 null
     }
 
     protected virtual void LoadPlugins<T>() where T : IPlugin
@@ -240,6 +294,13 @@ public abstract partial class BaseService : ObservableObject, IDisposable
                 break;
             case nameof(Service.DisplayName):
                 svcSetting.Name = svc.DisplayName;
+                _serviceSettings.Save();
+                break;
+            case nameof(Service.IconPath):
+                // 回退场景（空或等于插件图标）清空持久化值；否则存相对路径
+                svcSetting.IconPath = string.IsNullOrEmpty(svc.IconPath) || svc.IconPath == svc.MetaData.IconPath
+                    ? null
+                    : Helper.ToRelativeIconPath(svc.IconPath, svc.MetaData.PluginSettingsDirectoryPath);
                 _serviceSettings.Save();
                 break;
             case nameof(TranslationOptions.AutoBackTranslation):

@@ -64,13 +64,13 @@
 
 ## 关键数据结构/配置
 - `Settings`
-  - UI/主题/语言/窗口位置/自动翻译/网络/插件市场/OCR版面分析/外部调用/自动检查更新等全局配置。
+  - UI/主题/语言/窗口位置/自动翻译/网络/插件市场/OCR分段逻辑/外部调用/自动检查更新等全局配置。
   - 取词相关：`TextSeparatorHandleType`、`TextSeparatorHandleScopes`、`SelectedTextFetchTimeoutMs`、`CrosswordFetchFailedFallbackTarget`。
-  - 窗口相关：`MainWindowMaxHeightRatio`、`ShowImageTranslateItemInNotifyIconMenu`。
+  - 窗口相关：`MainWindowMaxHeightRatio`、`ShowImageTranslateItemInNotifyIconMenu`、`ImageTranslateWindowMode`。
 - `ServiceSettings`
   - `TranSvcDatas/OcrSvcDatas/TtsSvcDatas/VocabularySvcDatas`。
   - `ReplaceSvcID/ImageTranslateSvcID/ImageTranslateOcrSvcID`。
-  - 欢迎向导会复用服务页的服务创建逻辑和插件配置 UI，以 5 页流程配置语言、翻译/OCR/TTS 服务、图片翻译/替换翻译专用服务和关键快捷键。
+  - 欢迎向导会复用服务页的服务创建逻辑和插件配置 UI，以 5 页流程配置语言、翻译/OCR 服务、图片翻译/替换翻译专用服务和关键快捷键。
 - `ProxySettings` 与 `BackupSettings`
   - 网络代理与备份目标配置。
 - `HistoryModel` / `HistoryData`

@@ -53,9 +53,9 @@
     <sys:String x:Key="General_DefaultSourceLanguage">預設來源語言</sys:String>
     <sys:String x:Key="General_DefaultSourceLanguageDescription">當自動檢測失敗時使用此語言。</sys:String>
     <sys:String x:Key="General_FirstLanguage">第一語言</sys:String>
-    <sys:String x:Key="General_FirstLanguageDescription">當任一翻譯場景（包含圖片翻譯）的目標語言設為自動，且來源語言為其他語言（包含第二語言）時，目標語言使用第一語言。</sys:String>
+    <sys:String x:Key="General_FirstLanguageDescription">當任一翻譯場景的目標語言設為自動，且來源語言為其他語言（包含第二語言）時，目標語言使用第一語言。</sys:String>
     <sys:String x:Key="General_SecondLanguage">第二語言</sys:String>
-    <sys:String x:Key="General_SecondLanguageDescription">當任一翻譯場景（包含圖片翻譯）的目標語言設為自動，且來源語言為第一語言時，目標語言使用第二語言。</sys:String>
+    <sys:String x:Key="General_SecondLanguageDescription">當任一翻譯場景的目標語言設為自動，且來源語言為第一語言時，目標語言使用第二語言。</sys:String>
     <sys:String x:Key="General_HttpTimeout">逾時時間</sys:String>
     <sys:String x:Key="General_HttpTimeoutDescription">網路請求的逾時時間，單位：秒。</sys:String>
     <sys:String x:Key="General_UseClipboardOutput">文字輸出使用剪貼簿</sys:String>
@@ -69,6 +69,8 @@
     <sys:String x:Key="General_AutoTranslateButtonVisible">在主界面上顯示自動翻譯按鈕</sys:String>
     <sys:String x:Key="General_AutoTranslateOnPromptChanged">切換提示詞後自動翻譯</sys:String>
     <sys:String x:Key="General_AutoTranslateOnPromptChangedDescription">切換 AI 翻譯服務的提示詞後，立即重新執行翻譯。</sys:String>
+    <sys:String x:Key="General_IncrementalClearInput">增量翻譯時清空輸入</sys:String>
+    <sys:String x:Key="General_IncrementalClearInputDescription">啟用後（預設）觸發增量翻譯時清空輸入框，本次工作階段內選取文字仍累加附加；停用後保留舊邏輯，不清空原有內容，直接附加。</sys:String>
     <sys:String x:Key="General_AutoTranslateDelay">自動翻譯延時</sys:String>
     <sys:String x:Key="General_AutoTranslateDelayDescription">輸入內容等待時間，單位：毫秒。</sys:String>
     <sys:String x:Key="General_LineBreakHandleType">取詞換行處理</sys:String>
@@ -319,16 +321,19 @@
     <sys:String x:Key="Standalone_ImTranShowAnnotatedDescription">切換翻譯結果／文字偵測圖顯示。</sys:String>
     <sys:String x:Key="Standalone_ImTranShowTextControlHeader">顯示文字框</sys:String>
     <sys:String x:Key="Standalone_ImTranShowTextControlDescription">顯示／隱藏右側文字框。</sys:String>
-    <sys:String x:Key="Standalone_LayoutAnalysisHeader">版面分析設定</sys:String>
-    <sys:String x:Key="Standalone_LayoutAnalysisDescription">設定辨識結果的合併方式。</sys:String>
-    <sys:String x:Key="Standalone_VerticalThresholdHeader">垂直相鄰偵測閾值比例</sys:String>
-    <sys:String x:Key="Standalone_VerticalThresholdDescription" xml:space="preserve">控制上下相鄰文字區塊的合併敏感度。&#10;0.1–0.3：嚴格模式，只合併非常接近的行。&#10;0.5–0.8：標準模式，合併段落內的行。&#10;1.0–3.0：寬鬆模式，合併距離較遠的文字區塊。&#10;&gt;5.0：幾乎合併所有垂直分佈的文字。</sys:String>
-    <sys:String x:Key="Standalone_HorizontalThresholdHeader">水平相鄰偵測閾值比例</sys:String>
-    <sys:String x:Key="Standalone_HorizontalThresholdDescription" xml:space="preserve">控制左右相鄰文字區塊的合併敏感度。&#10;0.1–0.3：嚴格模式，只合併非常接近的詞。&#10;0.5–0.8：標準模式，合併同行內的詞組。&#10;1.0–2.0：寬鬆模式，合併跨欄文字。&#10;&gt;5.0：幾乎合併所有水平分佈的文字。</sys:String>
-    <sys:String x:Key="Standalone_LineSpacingThresholdHeader">換行偵測閾值比例</sys:String>
-    <sys:String x:Key="Standalone_LineSpacingThresholdDescription" xml:space="preserve">控制合併文字時是否加入換行符。&#10;0.1–0.2：嚴格換行，即使很小距離也換行。&#10;0.3–0.5：標準換行，適合大多數文件。&#10;0.8–1.0：寬鬆換行，僅距離很大時換行。&#10;&gt;2.0：幾乎不換行，所有文字連在一起。</sys:String>
-    <sys:String x:Key="Standalone_WordSpacingThresholdHeader">詞間距偵測閾值比例</sys:String>
-    <sys:String x:Key="Standalone_WordSpacingThresholdDescription" xml:space="preserve">控制合併文字時是否加入空格。&#10;0.1–0.2：標準空格間距。&#10;0.3–0.5：寬鬆空格間距。&#10;&gt;1.0：幾乎不加入空格。</sys:String>
+    <sys:String x:Key="Standalone_ImTranWindowModeHeader">圖片翻譯視窗模式</sys:String>
+    <sys:String x:Key="Standalone_ImTranWindowModeDescription">選擇圖片翻譯結果使用獨立視窗或精簡懸浮視窗顯示。</sys:String>
+    <sys:String x:Key="Standalone_LayoutAnalysisHeader">分段邏輯設定</sys:String>
+    <sys:String x:Key="Standalone_LayoutAnalysisDescription">設定辨識結果的分段與合併方式。</sys:String>
+    <sys:String x:Key="Standalone_ImTranLanguageDetector">圖片翻譯語言檢測器</sys:String>
+    <sys:String x:Key="Standalone_ImTranLocalDetector">本地識別中英字元比例</sys:String>
+    <sys:String x:Key="Standalone_ImTranLocalDetectorDescription">僅針對圖片翻譯「本地識別」中英文情況下英文字元佔總字元數的比例</sys:String>
+    <sys:String x:Key="Standalone_ImTranDefaultSourceLanguage">預設來源語言</sys:String>
+    <sys:String x:Key="Standalone_ImTranDefaultSourceLanguageDescription">當圖片翻譯自動檢測失敗時使用此語言。</sys:String>
+    <sys:String x:Key="Standalone_ImTranFirstLanguage">第一語言</sys:String>
+    <sys:String x:Key="Standalone_ImTranFirstLanguageDescription">當圖片翻譯目標語言設為自動，且來源語言為其他語言（包含第二語言）時，目標語言使用第一語言。</sys:String>
+    <sys:String x:Key="Standalone_ImTranSecondLanguage">第二語言</sys:String>
+    <sys:String x:Key="Standalone_ImTranSecondLanguageDescription">當圖片翻譯目標語言設為自動，且來源語言為第一語言時，目標語言使用第二語言。</sys:String>
 
     <!--  History Page  -->
     <sys:String x:Key="Total">共</sys:String>
@@ -428,7 +433,10 @@
     <sys:String x:Key="Exit">離開</sys:String>
     <sys:String x:Key="Reset">重設</sys:String>
     <sys:String x:Key="Retry">重試</sys:String>
+    <sys:String x:Key="Icon">圖標</sys:String>
     <sys:String x:Key="Duplicate">重複</sys:String>
+    <sys:String x:Key="ChangeIcon">更換圖標</sys:String>
+    <sys:String x:Key="ResetIcon">重置圖標</sys:String>
     <sys:String x:Key="Official">官方</sys:String>
     <sys:String x:Key="IdentifiedLanguageLabel">識別為</sys:String>
     <sys:String x:Key="On">開啟</sys:String>
@@ -448,7 +456,7 @@
     <sys:String x:Key="WelcomeSetup_LanguageDescription">選擇介面語言，更改會按現有設定立即生效。</sys:String>
     <sys:String x:Key="WelcomeSetup_Services">服務配置</sys:String>
     <sys:String x:Key="WelcomeSetup_TranslateServices">翻譯服務</sys:String>
-    <sys:String x:Key="WelcomeSetup_OcrTtsServices">OCR / TTS 服務</sys:String>
+    <sys:String x:Key="WelcomeSetup_OcrServices">OCR 服務</sys:String>
     <sys:String x:Key="WelcomeSetup_SpecialServices">專用服務</sys:String>
     <sys:String x:Key="WelcomeSetup_Hotkeys">快速鍵</sys:String>
     <sys:String x:Key="WelcomeSetup_SelectService">選擇服務</sys:String>
@@ -612,12 +620,12 @@
     <sys:String x:Key="ProxyTypeSocks5">Socks5代理</sys:String>
     <sys:String x:Key="ProxyTypeNone">無代理</sys:String>
 
-    <sys:String x:Key="LayoutAnalysisModeMergeAll">合併所有</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeStrictParagraph">嚴格段落</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeStandardDocument">標準文件</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeColumnDocument">多欄文件</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeAuto">自動</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeProvider">服務商分段</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeSmart">智慧分段</sys:String>
     <sys:String x:Key="LayoutAnalysisModeNoMerge">不合併</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeUserDefined">自訂</sys:String>
+    <sys:String x:Key="ImageTranslateWindowModeStandalone">獨立視窗</sys:String>
+    <sys:String x:Key="ImageTranslateWindowModeCompact">精簡視窗</sys:String>
 
     <sys:String x:Key="WindowScreenTypeRememberLastLaunchLocation">記住上次的位置</sys:String>
     <sys:String x:Key="WindowScreenTypeCursor">滑鼠游標所在顯示器</sys:String>
@@ -754,6 +762,7 @@
     <sys:String x:Key="RecognizeLanguage">辨識語言</sys:String>
     <sys:String x:Key="TranslateLanguage">翻譯語言</sys:String>
     <sys:String x:Key="ImageTranslateLanguageIndependentToolTip">圖片翻譯視窗的翻譯語言與主視窗相互獨立，修改這裡不會影響主視窗。</sys:String>
+    <sys:String x:Key="ImageTranslateLayoutAnalysisToolTip">選擇圖片翻譯 OCR 結果的分段與合併方式，重新執行圖片翻譯後生效。</sys:String>
     <sys:String x:Key="ImTranSettingsToolTip" xml:space="preserve">直接滑鼠左擊-&gt;獨立視窗設定&#10;Ctrl+滑鼠左擊-&gt;文字辨識設定&#10;Alt+滑鼠左擊-&gt;文字翻譯配置</sys:String>
 
     <!--  // Snackbar Messages //  -->

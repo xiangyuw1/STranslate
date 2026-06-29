@@ -50,6 +50,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private ClipboardMonitor? _clipboardMonitor;
     private bool _forceShowInputForInputTranslate;
     private bool _skipShowForNextTranslate;
+    private bool _disposed;
     private readonly object _manualTranslationTaskLock = new();
     private readonly Dictionary<string, CancellationTokenSource> _manualTranslationTaskTokens = [];
     private readonly SemaphoreSlim _manualTranslationHistoryLock = new(1, 1);
@@ -1080,7 +1081,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             CursorHelper.Execute();
             var data = Utilities.ToBytes(bitmap, Settings.GetImageFormat());
-            var result = await ocrPlugin.RecognizeAsync(new OcrRequest(data, LangEnum.Auto), cancellationToken);
+            var result = await ocrPlugin.RecognizeAsync(
+                new OcrRequest(data, LangEnum.Auto, bitmap.Width, bitmap.Height),
+                cancellationToken);
+            Utilities.PrepareOcrResult(result);
 
             if (!result.IsSuccess || string.IsNullOrEmpty(result.Text))
                 return;
@@ -1123,12 +1127,19 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
-
-        using var bitmap = await _screenshot.GetScreenshotAsync();
-        await ImageTranslateHandlerAsync(bitmap, ocrPlugin);
+        var existingWindows = Application.Current.Windows
+            .OfType<Window>()
+            .Where(w => w is ImageTranslateWindow or ImageTranslateCompactWindow)
+            .ToList();
+        var ocr = ocrPlugin;
+        await ExecuteWithWindowsHiddenAsync(existingWindows, async () =>
+        {
+            using var captureResult = await _screenshot.GetScreenshotCaptureAsync();
+            await ImageTranslateHandlerAsync(captureResult?.Bitmap, ocr, captureResult?.PhysicalBounds);
+        });
     }
 
-    public async Task ImageTranslateHandlerAsync(Bitmap? bitmap, IOcrPlugin? ocrPlugin = default)
+    public async Task ImageTranslateHandlerAsync(Bitmap? bitmap, IOcrPlugin? ocrPlugin = default, Rectangle? physicalBounds = default)
     {
         if (bitmap == null) return;
 
@@ -1136,8 +1147,22 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (ocrPlugin == null)
             return;
 
-        var window = await SingletonWindowOpener.OpenAsync<ImageTranslateWindow>();
-        await ((ImageTranslateWindowViewModel)window.DataContext).ExecuteCommand.ExecuteAsync(bitmap);
+        if (Settings.ImageTranslateWindowMode == ImageTranslateWindowMode.Compact)
+        {
+            Task? executeTask = null;
+            await SingletonWindowOpener.OpenPreparedAsync<ImageTranslateCompactWindow>(window =>
+            {
+                window.PlaceForCapture(physicalBounds, bitmap.Size);
+                executeTask = ((ImageTranslateWindowViewModel)window.DataContext).ExecuteCommand.ExecuteAsync(bitmap);
+            }, WindowActivationMode.ForceForeground);
+
+            if (executeTask != null)
+                await executeTask;
+            return;
+        }
+
+        var standaloneWindow = await SingletonWindowOpener.OpenAsync<ImageTranslateWindow>();
+        await ((ImageTranslateWindowViewModel)standaloneWindow.DataContext).ExecuteCommand.ExecuteAsync(bitmap);
     }
 
     [RelayCommand]
@@ -1146,8 +1171,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (GetOcrSvcAndNotify() == null)
             return;
 
-        using var bitmap = await _screenshot.GetScreenshotAsync();
-        await OcrHandlerAsync(bitmap);
+        var existingWindow = Application.Current.Windows.OfType<OcrWindow>().FirstOrDefault();
+        await ExecuteWithWindowsHiddenAsync(existingWindow, async () =>
+        {
+            using var bitmap = await _screenshot.GetScreenshotAsync();
+            await OcrHandlerAsync(bitmap);
+        });
     }
 
     public async Task OcrHandlerAsync(Bitmap? bitmap)
@@ -1163,8 +1192,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (GetOcrSvcAndNotify() == null)
             return;
 
-        using var bitmap = await _screenshot.GetScreenshotAsync();
-        await QrCodeHandlerAsync(bitmap);
+        var existingWindow = Application.Current.Windows.OfType<OcrWindow>().FirstOrDefault();
+        await ExecuteWithWindowsHiddenAsync(existingWindow, async () =>
+        {
+            using var bitmap = await _screenshot.GetScreenshotAsync();
+            await QrCodeHandlerAsync(bitmap);
+        });
     }
 
     public async Task QrCodeHandlerAsync(Bitmap? bitmap)
@@ -1196,7 +1229,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             CursorHelper.Execute();
             var data = Utilities.ToBytes(bitmap, Settings.GetImageFormat());
-            var result = await ocrPlugin.RecognizeAsync(new OcrRequest(data, LangEnum.Auto), cancellationToken);
+            var result = await ocrPlugin.RecognizeAsync(
+                new OcrRequest(data, LangEnum.Auto, bitmap.Width, bitmap.Height),
+                cancellationToken);
+            Utilities.PrepareOcrResult(result);
             if (result.IsSuccess && !string.IsNullOrEmpty(result.Text))
             {
                 ClipboardHelper.SetText(HandleSilentOcrText(result.Text));
@@ -1246,6 +1282,33 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         return svc;
+    }
+
+    /// <summary>
+    /// 临时隐藏指定窗口，执行操作后恢复显示（无论成功、失败或用户取消截图）。
+    /// 用于截图前隐藏已开的结果窗口，避免其遮挡截图选区；
+    /// 操作结束后由 <see cref="SingletonWindowOpener"/> 复用同一窗口显示新结果，
+    /// 此处 <see cref="Window.Show()"/> 对已可见窗口为空操作，安全。
+    /// </summary>
+    private static Task ExecuteWithWindowsHiddenAsync(Window? window, Func<Task> action)
+        => ExecuteWithWindowsHiddenAsync(window == null ? [] : new[] { window }, action);
+
+    private static async Task ExecuteWithWindowsHiddenAsync(
+        IEnumerable<Window?> windows,
+        Func<Task> action)
+    {
+        var toHide = windows.Where(w => w != null).Cast<Window>().ToList();
+        foreach (var w in toHide)
+            w.Hide();
+        try
+        {
+            await action();
+        }
+        finally
+        {
+            foreach (var w in toHide)
+                w.Show();
+        }
     }
 
     #endregion
@@ -1480,6 +1543,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         Show();
         IsTopmost = true;
+
+        // 增量翻译触发时清空原本内容（默认开启），false 时保留旧逻辑不清空
+        if (Settings.IncrementalClearInput)
+            InputText = string.Empty;
+
         UpdateCacheText();
 
         _ = MouseKeyHelper.StartMouseTextSelectionAsync(() => Settings.SelectedTextFetchTimeoutMs);
@@ -2633,28 +2701,41 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        MouseKeyHelper.MouseTextSelected -= OnMouseTextSelected;
-        MouseKeyHelper.MouseTextSelected -= OnMouseTextSelectedIncretemental;
-        _clipboardMonitor?.OnClipboardTextChanged -= OnClipboardTextChanged;
-        Settings.PropertyChanged -= OnSettingsPropertyChanged;
-        TranslateService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
-        OcrService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
-        TtsService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
-        VocabularyService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 
-        _debounceExecutor.Dispose();
-        _clipboardMonitor?.Dispose();
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
 
-        // 如果窗口一直没打开过，恢复位置后再退出
-        if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
+        if (disposing)
         {
-            Settings.MainWindowLeft = _cacheLeft;
-            Settings.MainWindowTop = _cacheTop;
-            Settings.Save();
+            MouseKeyHelper.MouseTextSelected -= OnMouseTextSelected;
+            MouseKeyHelper.MouseTextSelected -= OnMouseTextSelectedIncretemental;
+            _clipboardMonitor?.OnClipboardTextChanged -= OnClipboardTextChanged;
+            Settings.PropertyChanged -= OnSettingsPropertyChanged;
+            TranslateService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
+            OcrService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
+            TtsService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
+            VocabularyService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
+
+            _debounceExecutor.Dispose();
+            _clipboardMonitor?.Dispose();
+
+            // 如果窗口一直没打开过，恢复位置后再退出
+            if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
+            {
+                Settings.MainWindowLeft = _cacheLeft;
+                Settings.MainWindowTop = _cacheTop;
+                Settings.Save();
+            }
+
+            _i18n.OnLanguageChanged -= OnLanguageChanged;
         }
 
-        _i18n.OnLanguageChanged -= OnLanguageChanged;
-        GC.SuppressFinalize(this);
+        _disposed = true;
     }
 
     #endregion

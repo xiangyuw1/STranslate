@@ -67,12 +67,14 @@
   - `OnContentRendered()` 决定首次显示或隐藏。
   - `OnDeactivated()` 可按 `HideWhenDeactivated` 自动隐藏，避免 Alt-Tab 残留。
 - `SettingsWindow`：
-  - `Navigate(tag)` 根据页面类型从 DI 取页实例并注入到 `RootFrame.Content`。
+  - `Navigate(tag)` 根据页面类型从 DI 取页实例并注入到 `RootFrame.Content`；页面及页面 VM 为 `Scoped` 注册，统一从窗口独有的 `IServiceScope` 解析。
   - `Ctrl+F` 由 `OnKeyDown` 路由到当前页面的搜索框。
+  - 窗口构造时 `Ioc.Default.CreateScope()` 建立独立 scope；`OnClosed` 先解绑导航事件、清空 `RootFrame.Content`，再经 `ModernWindowLifecycle.Release(this, _serviceScope.Dispose)` 拆除视觉树并释放 scope，触发已解析页面 VM（如 `HistoryViewModel`）的 `Dispose()` 取消全局订阅，避免 root scope 长期跟踪导致泄漏。
+  - `OnClosing` 通过 `ModernWindowLifecycle.DetachModernWindowStyle()` 解除 iNKORE titlebar 的属性描述符监听；`OnClosed` 清空 `DataContext` 和内容树。
 - `WelcomeSetupWindow`：
   - 自动显示只由启动前配置文件是否存在决定，不新增单独的完成标记。
   - 首次自动显示会阻塞主窗口创建，避免新用户先看到主窗口再看到向导；关于页手动打开向导不影响当前主窗口显隐。
-  - 向导为 5 页纵向流程：欢迎和语言选择、翻译服务、OCR/TTS 服务、图片翻译/替换翻译专用服务、关键快捷键。
+  - 向导为 5 页纵向流程：欢迎和语言选择、翻译服务、OCR 服务、图片翻译/替换翻译专用服务、关键快捷键。
   - 上一页/下一页仅切换中间内容区；内容使用 XamlFlair 的轻量入场动画，顶部品牌区、底部按钮和进度文本保持静止。
   - 第 1 页不使用整块强调色背景，只保留紧凑品牌块和语言选择，避免大面积空白。
   - 向导复用现有服务、插件配置 UI 和 `HotkeyControl`；快捷键页只显示打开窗口、输入翻译、划词翻译、截图翻译、OCR、图片翻译、替换翻译。
@@ -97,6 +99,7 @@
 - `STranslate/Core/ISingleInstanceApp.cs`
 - `STranslate/Views/MainWindow.xaml.cs`
 - `STranslate/Views/SettingsWindow.xaml.cs`
+- `STranslate/Helpers/ModernWindowLifecycle.cs`
 - `STranslate/Core/AppMessageBox.cs`
 - `STranslate/Core/DataLocation.cs`
 - `STranslate/Helpers/UACHelper.cs`

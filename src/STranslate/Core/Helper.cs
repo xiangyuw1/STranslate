@@ -11,7 +11,7 @@ namespace STranslate.Core;
 
 public static class Helper
 {
-    private static readonly ILogger _logger = Ioc.Default.GetRequiredService<ILogger>();
+    private static readonly ILogger? _logger = Ioc.Default.GetService<ILogger>();
 
     public static bool ShouldDeleteDirectory(string directory)
         => File.Exists(Path.Combine(directory, Constant.NeedDelete));
@@ -47,7 +47,7 @@ public static class Helper
         }
         catch (Exception e)
         {
-            _logger.LogError(e, $"无法删除目录 <{directory}>");
+            _logger?.LogError(e, $"无法删除目录 <{directory}>");
             return false;
         }
     }
@@ -106,5 +106,35 @@ public static class Helper
         }
 
         return new Version(0, 0, 0);
+    }
+
+    /// <summary>
+    /// 将图标绝对路径转为相对插件设置目录的路径（用于持久化），空则返回 null。
+    /// </summary>
+    public static string? ToRelativeIconPath(string? absPath, string pluginSettingsDir)
+        => string.IsNullOrEmpty(absPath) ? null : Path.GetRelativePath(pluginSettingsDir, absPath);
+
+    /// <summary>
+    /// 将相对插件设置目录的图标路径转为绝对路径（用于运行时加载）。
+    /// </summary>
+    public static string ToAbsoluteIconPath(string relPath, string pluginSettingsDir)
+        => Path.Combine(pluginSettingsDir, relPath);
+
+    /// <summary>
+    /// 安全删除单个文件，失败仅记日志不抛异常。
+    /// </summary>
+    public static bool TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger?.LogError(e, $"无法删除文件 <{path}>");
+            return false;
+        }
     }
 }

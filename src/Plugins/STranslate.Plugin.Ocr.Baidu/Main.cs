@@ -64,6 +64,8 @@ public class Main : ObservableObject, IOcrPlugin
             _ => Enum.GetValues<LangEnum>()
         };
 
+    public bool SupportBoxPoints() => true;
+
     public Control GetSettingUI()
     {
         _viewModel ??= new SettingsViewModel(Context, Settings);
@@ -101,7 +103,7 @@ public class Main : ObservableObject, IOcrPlugin
             { "detect_direction", "false" },
             { "detect_language", "false" },
             { "vertexes_location", "false" },
-            { "paragraph", "false" },
+            { "paragraph", "true" },
             { "probability", "false" }
         };
 
@@ -111,17 +113,9 @@ public class Main : ObservableObject, IOcrPlugin
         // 判断是否出错
         if (parsedData.error_code != 0) return ocrResult.Fail(parsedData.error_msg);
 
-        foreach (var item in parsedData.words_result)
-        {
-            var content = new OcrContent { Text = item.words };
-            Converter(item.location).ForEach(pg =>
-            {
-                //仅位置不全为0时添加
-                if (!pg.X.Equals(pg.Y) || pg.X != 0)
-                    content.BoxPoints.Add(new BoxPoint(pg.X, pg.Y));
-            });
-            ocrResult.OcrContents.Add(content);
-        }
+        var contents = parsedData.words_result.Select(CreateContent).ToList();
+        ocrResult.OcrContents.AddRange(contents);
+        AddStructuredLayout(ocrResult, contents, parsedData.paragraphs_result);
 
         return ocrResult;
     }
@@ -272,6 +266,84 @@ public class Main : ObservableObject, IOcrPlugin
         ];
     }
 
+    private OcrContent CreateContent(Words_resultItem item)
+    {
+        var content = new OcrContent { Text = item.words };
+        foreach (var point in Converter(item.location).Where(point => point.X != 0 || point.Y != 0))
+        {
+            content.BoxPoints.Add(new BoxPoint(point.X, point.Y));
+        }
+
+        return content;
+    }
+
+    private static void AddStructuredLayout(
+        OcrResult ocrResult,
+        IReadOnlyList<OcrContent> contents,
+        IReadOnlyList<Paragraphs_resultItem> paragraphsResult)
+    {
+        if (contents.Count == 0 || paragraphsResult.Count == 0)
+            return;
+
+        var region = new OcrRegion();
+        foreach (var paragraphResult in paragraphsResult)
+        {
+            var paragraph = new OcrParagraph();
+            foreach (var index in paragraphResult.words_result_idx)
+            {
+                if ((uint)index >= (uint)contents.Count)
+                    continue;
+
+                var content = contents[index];
+                if (string.IsNullOrWhiteSpace(content.Text))
+                    continue;
+
+                paragraph.Lines.Add(CloneContent(content));
+            }
+
+            if (paragraph.Lines.Count == 0)
+                continue;
+
+            paragraph.BoxPoints = CreateUnionBoxPoints(paragraph.Lines.Select(line => line.BoxPoints));
+            region.Paragraphs.Add(paragraph);
+        }
+
+        if (region.Paragraphs.Count == 0)
+            return;
+
+        region.BoxPoints = CreateUnionBoxPoints(region.Paragraphs.Select(paragraph => paragraph.BoxPoints));
+        ocrResult.Regions.Add(region);
+    }
+
+    private static OcrContent CloneContent(OcrContent content) => new()
+    {
+        Text = content.Text,
+        BoxPoints = CloneBoxPoints(content.BoxPoints)
+    };
+
+    private static List<BoxPoint> CloneBoxPoints(IEnumerable<BoxPoint> points) =>
+        points.Select(point => new BoxPoint(point.X, point.Y)).ToList();
+
+    private static List<BoxPoint> CreateUnionBoxPoints(IEnumerable<IReadOnlyList<BoxPoint>> boxPointGroups)
+    {
+        var validGroups = boxPointGroups.Where(points => points.Count > 0).ToList();
+        if (validGroups.Count == 0)
+            return [];
+
+        var minX = validGroups.Min(points => points.Min(point => point.X));
+        var minY = validGroups.Min(points => points.Min(point => point.Y));
+        var maxX = validGroups.Max(points => points.Max(point => point.X));
+        var maxY = validGroups.Max(points => points.Max(point => point.Y));
+
+        return
+        [
+            new(minX, minY),
+            new(maxX, minY),
+            new(maxX, maxY),
+            new(minX, maxY)
+        ];
+    }
+
 #pragma warning disable IDE1006 // 命名样式
     public class Location
     {
@@ -303,11 +375,26 @@ public class Main : ObservableObject, IOcrPlugin
         public Location location { get; set; } = new();
     }
 
+    public class Paragraphs_resultItem
+    {
+        /// <summary>
+        /// </summary>
+        public List<int> words_result_idx { get; set; } = [];
+    }
+
     public class Root
     {
         /// <summary>
         /// </summary>
         public List<Words_resultItem> words_result { get; set; } = [];
+
+        /// <summary>
+        /// </summary>
+        public List<Paragraphs_resultItem> paragraphs_result { get; set; } = [];
+
+        /// <summary>
+        /// </summary>
+        public int paragraphs_result_num { get; set; }
 
         /// <summary>
         /// </summary>

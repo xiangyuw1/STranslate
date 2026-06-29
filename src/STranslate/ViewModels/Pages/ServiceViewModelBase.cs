@@ -65,4 +65,16 @@ public abstract partial class ServiceViewModelBase<T>(T service) : ObservableObj
         var service = Service.Duplicate(svc);
         SelectedItem = service;
     }
+
+    [RelayCommand]
+    private async Task ChangeIcon(Service svc)
+    {
+        await Service.ChangeIconAsync(svc);
+    }
+
+    [RelayCommand]
+    private void ResetIcon(Service svc)
+    {
+        Service.ResetIcon(svc);
+    }
 }

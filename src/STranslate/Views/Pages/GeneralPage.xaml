@@ -170,6 +170,10 @@
                         <Setter TargetName="PoolActionIcon" Property="Icon" Value="{x:Static ui:FluentSystemIcons.SlideHide_20_Regular}" />
                         <Setter TargetName="PoolActionText" Property="Text" Value="{DynamicResource General_HideInputBox}" />
                     </DataTrigger>
+                    <DataTrigger Binding="{Binding}" Value="{x:Static core:MainHeaderActions.ServiceSwitcher}">
+                        <Setter TargetName="PoolActionIcon" Property="Icon" Value="{x:Static ui:FluentSystemIcons.Apps_20_Regular}" />
+                        <Setter TargetName="PoolActionText" Property="Text" Value="{DynamicResource ServiceQuickSwitcher}" />
+                    </DataTrigger>
                     <DataTrigger Binding="{Binding}" Value="{x:Static core:MainHeaderActions.HistoryNavigation}">
                         <Setter TargetName="PoolActionIcon" Property="Icon" Value="{x:Static ui:FluentSystemIcons.AppRecent_20_Regular}" />
                         <Setter TargetName="PoolActionText" Property="Text" Value="{DynamicResource General_ShowHistoryNavigation}" />
@@ -450,6 +454,13 @@
                         <ui:SettingsCard Description="{DynamicResource General_AutoTranslateOnPromptChangedDescription}" Header="{DynamicResource General_AutoTranslateOnPromptChanged}">
                             <ui:ToggleSwitch
                                 IsOn="{Binding Settings.AutoTranslateOnPromptChanged}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Description="{DynamicResource General_IncrementalClearInputDescription}" Header="{DynamicResource General_IncrementalClearInput}">
+                            <ui:ToggleSwitch
+                                IsOn="{Binding Settings.IncrementalClearInput}"
                                 OffContent="{DynamicResource Disable}"
                                 OnContent="{DynamicResource Enable}" />
                         </ui:SettingsCard>

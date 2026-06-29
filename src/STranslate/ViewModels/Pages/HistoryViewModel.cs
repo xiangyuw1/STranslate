@@ -22,6 +22,7 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
 
     private CancellationTokenSource? _searchCts;
     private DateTime _lastCursorTime = DateTime.Now;
+    private bool _disposed;
     private bool _isLoading = false;
 
     private bool CanLoadMore =>
@@ -381,8 +382,22 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        _searchDebouncer.Dispose();
-        _searchCts?.Dispose();
-        SelectedItems.CollectionChanged -= OnSelectedItemsCollectionChanged;
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+        {
+            _searchDebouncer.Dispose();
+            _searchCts?.Dispose();
+            SelectedItems.CollectionChanged -= OnSelectedItemsCollectionChanged;
+        }
+
+        _disposed = true;
     }
 }

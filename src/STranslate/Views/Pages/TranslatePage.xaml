@@ -95,7 +95,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Image Source="{Binding Service.ImageTranslateService.MetaData.IconPath}" />
+                            <Image Source="{Binding Service.ImageTranslateService.IconPath, Converter={cnvt:ImagePathToSourceConverter}}" />
                             <TextBlock
                                 Grid.Column="1"
                                 Margin="5,0"
@@ -185,7 +185,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Image Source="{Binding Service.ReplaceService.MetaData.IconPath}" />
+                            <Image Source="{Binding Service.ReplaceService.IconPath, Converter={cnvt:ImagePathToSourceConverter}}" />
                             <TextBlock
                                 Grid.Column="1"
                                 Margin="5,0"

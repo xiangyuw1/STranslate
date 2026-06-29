@@ -113,7 +113,7 @@
                         <Image
                             Width="{DynamicResource STControlFontSize18}"
                             Height="{DynamicResource STControlFontSize18}"
-                            Source="{Binding MetaData.IconPath}" />
+                            Source="{Binding IconPath, Converter={cnvt:ImagePathToSourceConverter}}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontSize="{DynamicResource STControlFontSize12}"
@@ -453,7 +453,7 @@
                         <Image
                             Width="{DynamicResource STControlFontSize18}"
                             Height="{DynamicResource STControlFontSize18}"
-                            Source="{Binding MetaData.IconPath}" />
+                            Source="{Binding IconPath, Converter={cnvt:ImagePathToSourceConverter}}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontSize="{DynamicResource STControlFontSize12}"

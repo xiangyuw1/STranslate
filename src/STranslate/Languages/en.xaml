@@ -53,9 +53,9 @@
     <sys:String x:Key="General_DefaultSourceLanguage">Default Source Language</sys:String>
     <sys:String x:Key="General_DefaultSourceLanguageDescription">Use this language when auto detection fails.</sys:String>
     <sys:String x:Key="General_FirstLanguage">First Language</sys:String>
-    <sys:String x:Key="General_FirstLanguageDescription">When the target language is set to Auto in any translation scenario (including image translation), and the source language is another language (including the second language), the target language uses the first language.</sys:String>
+    <sys:String x:Key="General_FirstLanguageDescription">When the target language is set to Auto in any translation scenario, and the source language is another language (including the second language), the target language uses the first language.</sys:String>
     <sys:String x:Key="General_SecondLanguage">Second Language</sys:String>
-    <sys:String x:Key="General_SecondLanguageDescription">When the target language is set to Auto in any translation scenario (including image translation), and the source language is the first language, the target language uses the second language.</sys:String>
+    <sys:String x:Key="General_SecondLanguageDescription">When the target language is set to Auto in any translation scenario, and the source language is the first language, the target language uses the second language.</sys:String>
     <sys:String x:Key="General_HttpTimeout">Timeout</sys:String>
     <sys:String x:Key="General_HttpTimeoutDescription">Network request timeout in seconds.</sys:String>
     <sys:String x:Key="General_UseClipboardOutput">Use Clipboard for Text Output</sys:String>
@@ -69,6 +69,8 @@
     <sys:String x:Key="General_AutoTranslateButtonVisible">Show automatic translation button on main interface</sys:String>
     <sys:String x:Key="General_AutoTranslateOnPromptChanged">Auto-translate on Prompt Switch</sys:String>
     <sys:String x:Key="General_AutoTranslateOnPromptChangedDescription">Re-run translation immediately after switching prompt for AI translation services.</sys:String>
+    <sys:String x:Key="General_IncrementalClearInput">Clear Input on Incremental Translate</sys:String>
+    <sys:String x:Key="General_IncrementalClearInputDescription">When enabled (default), the input box is cleared when incremental translation is triggered; selections during the session are still appended. When disabled, the previous content is kept and new selections are appended to it.</sys:String>
     <sys:String x:Key="General_AutoTranslateDelay">Auto-Translate Delay</sys:String>
     <sys:String x:Key="General_AutoTranslateDelayDescription">Waiting time after inputting content, unit: milliseconds.</sys:String>
     <sys:String x:Key="General_LineBreakHandleType">Line Break Handling</sys:String>
@@ -134,7 +136,6 @@
     <sys:String x:Key="General_ShowBackTranslation">Show back translation button</sys:String>
     <sys:String x:Key="General_ShowPrompt">Show Prompt</sys:String>
     <sys:String x:Key="General_ShowPromptDescription">Whether to display the prompt switch button for AI translation services on the main interface</sys:String>
-    <sys:String x:Key="MarkdownRender">MD Render</sys:String>
     <sys:String x:Key="General_FontFamily">FontFamily</sys:String>
     <sys:String x:Key="General_HistoryCount">History Count</sys:String>
     <sys:String x:Key="General_CopyAfterTranslation">Copy After Translation</sys:String>
@@ -319,16 +320,19 @@
     <sys:String x:Key="Standalone_ImTranShowAnnotatedDescription">Toggle between the translation result and the text detection overlay.</sys:String>
     <sys:String x:Key="Standalone_ImTranShowTextControlHeader">Show Text Panel</sys:String>
     <sys:String x:Key="Standalone_ImTranShowTextControlDescription">Show or hide the text panel on the right side.</sys:String>
-    <sys:String x:Key="Standalone_LayoutAnalysisHeader">Layout Analysis Settings</sys:String>
-    <sys:String x:Key="Standalone_LayoutAnalysisDescription">Configure how recognized text blocks are merged.</sys:String>
-    <sys:String x:Key="Standalone_VerticalThresholdHeader">Vertical Adjacency Threshold Ratio</sys:String>
-    <sys:String x:Key="Standalone_VerticalThresholdDescription" xml:space="preserve">Controls the merge sensitivity for vertically adjacent text blocks.&#10;0.1–0.3: Strict mode — only merge very close lines.&#10;0.5–0.8: Standard mode — merge lines within a paragraph.&#10;1.0–3.0: Loose mode — merge text blocks that are farther apart.&#10;&gt;5.0: Merge almost all vertically distributed text.</sys:String>
-    <sys:String x:Key="Standalone_HorizontalThresholdHeader">Horizontal Adjacency Threshold Ratio</sys:String>
-    <sys:String x:Key="Standalone_HorizontalThresholdDescription" xml:space="preserve">Controls the merge sensitivity for horizontally adjacent text blocks.&#10;0.1–0.3: Strict mode — merge only very close words.&#10;0.5–0.8: Standard mode — merge words within the same line.&#10;1.0–2.0: Loose mode — merge across columns.&#10;&gt;5.0: Merge almost all horizontally distributed text.</sys:String>
-    <sys:String x:Key="Standalone_LineSpacingThresholdHeader">Line Break Detection Threshold Ratio</sys:String>
-    <sys:String x:Key="Standalone_LineSpacingThresholdDescription" xml:space="preserve">Controls whether to insert line breaks when merging text.&#10;0.1–0.2: Strict line breaks — even small gaps cause new lines.&#10;0.3–0.5: Standard line breaks — suitable for most documents.&#10;0.8–1.0: Loose line breaks — only large gaps cause new lines.&#10;&gt;2.0: Almost no line breaks — text is merged continuously.</sys:String>
-    <sys:String x:Key="Standalone_WordSpacingThresholdHeader">Word Spacing Detection Threshold Ratio</sys:String>
-    <sys:String x:Key="Standalone_WordSpacingThresholdDescription" xml:space="preserve">Controls whether to insert spaces when merging text.&#10;0.1–0.2: Standard spacing.&#10;0.3–0.5: Loose spacing.&#10;&gt;1.0: Almost no spaces added.</sys:String>
+    <sys:String x:Key="Standalone_ImTranWindowModeHeader">Image Translation Window Mode</sys:String>
+    <sys:String x:Key="Standalone_ImTranWindowModeDescription">Choose whether image translation results open in the standalone window or compact floating window.</sys:String>
+    <sys:String x:Key="Standalone_LayoutAnalysisHeader">Text Segmentation Settings</sys:String>
+    <sys:String x:Key="Standalone_LayoutAnalysisDescription">Configure how recognized text blocks are segmented and merged.</sys:String>
+    <sys:String x:Key="Standalone_ImTranLanguageDetector">Image Translate Language Detector</sys:String>
+    <sys:String x:Key="Standalone_ImTranLocalDetector">Local Detection Chinese-English Character Ratio</sys:String>
+    <sys:String x:Key="Standalone_ImTranLocalDetectorDescription">Only applies to image translate "Local Detection" for the proportion of English characters to total characters in Chinese-English text.</sys:String>
+    <sys:String x:Key="Standalone_ImTranDefaultSourceLanguage">Default Source Language</sys:String>
+    <sys:String x:Key="Standalone_ImTranDefaultSourceLanguageDescription">Use this language when image translate auto detection fails.</sys:String>
+    <sys:String x:Key="Standalone_ImTranFirstLanguage">First Language</sys:String>
+    <sys:String x:Key="Standalone_ImTranFirstLanguageDescription">When image translate target language is set to Auto and the source language is another language (including the second language), the target language uses the first language.</sys:String>
+    <sys:String x:Key="Standalone_ImTranSecondLanguage">Second Language</sys:String>
+    <sys:String x:Key="Standalone_ImTranSecondLanguageDescription">When image translate target language is set to Auto and the source language is the first language, the target language uses the second language.</sys:String>
 
     <!--  History Page  -->
     <sys:String x:Key="Total">Total</sys:String>
@@ -426,7 +430,10 @@
     <sys:String x:Key="Exit">Exit</sys:String>
     <sys:String x:Key="Reset">Reset</sys:String>
     <sys:String x:Key="Retry">Retry</sys:String>
+    <sys:String x:Key="Icon">Icon</sys:String>
     <sys:String x:Key="Duplicate">Duplicate</sys:String>
+    <sys:String x:Key="ChangeIcon">Change Icon</sys:String>
+    <sys:String x:Key="ResetIcon">Reset Icon</sys:String>
     <sys:String x:Key="Official">Official</sys:String>
     <sys:String x:Key="IdentifiedLanguageLabel">Identified</sys:String>
     <sys:String x:Key="On">On</sys:String>
@@ -446,7 +453,7 @@
     <sys:String x:Key="WelcomeSetup_LanguageDescription">Choose the interface language. Changes use the existing language setting immediately.</sys:String>
     <sys:String x:Key="WelcomeSetup_Services">Services</sys:String>
     <sys:String x:Key="WelcomeSetup_TranslateServices">Translation Service</sys:String>
-    <sys:String x:Key="WelcomeSetup_OcrTtsServices">OCR / TTS Services</sys:String>
+    <sys:String x:Key="WelcomeSetup_OcrServices">OCR Service</sys:String>
     <sys:String x:Key="WelcomeSetup_SpecialServices">Dedicated Services</sys:String>
     <sys:String x:Key="WelcomeSetup_Hotkeys">Hotkeys</sys:String>
     <sys:String x:Key="WelcomeSetup_SelectService">Select Service</sys:String>
@@ -609,12 +616,12 @@
     <sys:String x:Key="ProxyTypeSocks5">Socks5</sys:String>
     <sys:String x:Key="ProxyTypeNone">None</sys:String>
 
-    <sys:String x:Key="LayoutAnalysisModeMergeAll">MergeAll</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeStrictParagraph">StrictParagraph</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeStandardDocument">StandardDocument</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeColumnDocument">ColumnDocument</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeNoMerge">NoMerge</sys:String>
-    <sys:String x:Key="LayoutAnalysisModeUserDefined">UserDefined</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeAuto">Auto</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeProvider">Provider Segmentation</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeSmart">Smart Segmentation</sys:String>
+    <sys:String x:Key="LayoutAnalysisModeNoMerge">No merge</sys:String>
+    <sys:String x:Key="ImageTranslateWindowModeStandalone">Standalone window</sys:String>
+    <sys:String x:Key="ImageTranslateWindowModeCompact">Compact window</sys:String>
 
     <sys:String x:Key="WindowScreenTypeRememberLastLaunchLocation">RememberLastLaunchLocation</sys:String>
     <sys:String x:Key="WindowScreenTypeCursor">Cursor</sys:String>
@@ -751,6 +758,7 @@
     <sys:String x:Key="RecognizeLanguage">Recognize Language</sys:String>
     <sys:String x:Key="TranslateLanguage">Translate Language</sys:String>
     <sys:String x:Key="ImageTranslateLanguageIndependentToolTip">The translation language in the image translation window is independent from the main window. Changes here will not affect the main window.</sys:String>
+    <sys:String x:Key="ImageTranslateLayoutAnalysisToolTip">Choose how image translation groups and merges OCR text. Rerun image translation to apply it.</sys:String>
     <sys:String x:Key="ImTranSettingsToolTip" xml:space="preserve">Left Click -> Standalone Window Settings&#10;Ctrl+Left Click -> Text Recognition Settings&#10;Alt+Left Click -> Text Translation Settings</sys:String>
 
     <!--  // Snackbar Messages //  -->

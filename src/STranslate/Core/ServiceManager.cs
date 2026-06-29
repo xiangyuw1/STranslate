@@ -158,6 +158,13 @@ public class ServiceManager
     /// <param name="type">服务类型</param>
     public void RemoveService(Service service, ServiceType type)
     {
+        // 清理服务自定义图标文件（不影响插件默认图标）
+        if (!string.IsNullOrEmpty(service.IconPath) &&
+            service.IconPath != service.MetaData.IconPath)
+        {
+            Helper.TryDeleteFile(service.IconPath);
+        }
+
         service.Dispose();
         _services.Remove(service);
 
@@ -192,7 +199,10 @@ public class ServiceManager
             ServiceID = serviceID,
             MetaData = metaDataClone,
             IsEnabled = settings?.IsEnabled ?? false,
-            DisplayName = settings?.Name ?? metaDataClone.Name
+            DisplayName = settings?.Name ?? metaDataClone.Name,
+            IconPath = string.IsNullOrEmpty(settings?.IconPath)
+                ? string.Empty
+                : Helper.ToAbsoluteIconPath(settings.IconPath, metaDataClone.PluginSettingsDirectoryPath)
         };
 
         // 针对翻译/词典插件，设置执行模式和自动回译选项尝试从缓存加载
