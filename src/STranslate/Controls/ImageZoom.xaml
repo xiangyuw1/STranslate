@@ -38,6 +38,12 @@
                                         Source="{TemplateBinding Source}"
                                         Stretch="Fill" />
 
+                                    <!--  图片翻译矢量译文覆盖层，与原图共用像素坐标和 Viewbox 变换  -->
+                                    <control:ImageTranslateOverlay
+                                        ClipToBounds="True"
+                                        Document="{TemplateBinding OverlayDocument}"
+                                        IsHitTestVisible="False" />
+
                                     <!--  // OCR交互画布 //  -->
                                     <Canvas
                                         x:Name="PART_InteractionCanvas"

@@ -23,6 +23,12 @@ public partial class ImageTranslateCompactWindow
     private const double ToolbarReservedHeight = 64;
     // 按钮条宽度初值，仅用于首次 Measure 兜底；实际宽度在 PlaceOnPhysicalBounds 中实测。
     private const double ToolbarWidthFallback = 270;
+    private const double ExecutingTextMinWidth = 180;
+    private const double ExecutingTextMinHeight = 104;
+    private const double ExecutingTextHorizontalPadding = 24;
+    private const double ExecutingProgressRingSize = 60;
+    private const double ExecutingProgressRingMinSize = 12;
+    private const double ExecutingProgressRingTextGap = 16;
     private const double GapH = 8;
     private const double GapV = 6;
     private const double WindowMargin = 8;
@@ -258,6 +264,26 @@ public partial class ImageTranslateCompactWindow
         PART_ExecutingOverlay.Width = imageWidthDip;
         PART_ExecutingOverlay.Height = imageHeightDip;
         PART_ExecutingOverlay.Margin = imageMargin;
+        ApplyExecutingOverlayContentLayout(imageWidthDip, imageHeightDip);
+    }
+
+    private void ApplyExecutingOverlayContentLayout(double imageWidthDip, double imageHeightDip)
+    {
+        var showText = imageWidthDip >= ExecutingTextMinWidth && imageHeightDip >= ExecutingTextMinHeight;
+        var ringSize = showText
+            ? ExecutingProgressRingSize
+            : Math.Max(
+                ExecutingProgressRingMinSize,
+                Math.Min(ExecutingProgressRingSize, Math.Min(imageWidthDip, imageHeightDip) * 0.65));
+
+        PART_ExecutingProgressRing.Width = ringSize;
+        PART_ExecutingProgressRing.Height = ringSize;
+        PART_ExecutingProgressRing.Margin = showText
+            ? new Thickness(0, 0, 0, ExecutingProgressRingTextGap)
+            : new Thickness();
+
+        PART_ExecutingText.Visibility = showText ? Visibility.Visible : Visibility.Collapsed;
+        PART_ExecutingText.MaxWidth = Math.Max(0, imageWidthDip - ExecutingTextHorizontalPadding);
     }
 
     private static System.Windows.DpiScale GetDpiScale(DrawingRectangle bounds) =>

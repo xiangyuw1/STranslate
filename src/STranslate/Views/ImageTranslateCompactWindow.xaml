@@ -89,6 +89,7 @@
             MaxZoomRatio="5.0"
             MinZoomRatio="0.1"
             OcrWords="{Binding OcrWords}"
+            OverlayDocument="{Binding DisplayOverlayDocument}"
             Source="{Binding DisplayImage}">
             <control:ImageZoom.InputBindings>
                 <KeyBinding
@@ -261,24 +262,30 @@
             Background="#B0000000"
             IsHitTestVisible="{Binding IsExecuting}"
             Visibility="{Binding IsExecuting, Converter={cnvt:BoolToVisibilityConverter}}">
-            <StackPanel
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Orientation="Vertical">
-                <ui:ProgressRing
-                    Width="60"
-                    Height="60"
-                    Margin="0,0,0,16"
-                    IsActive="{Binding IsExecuting}" />
-
-                <TextBlock
+            <Grid ClipToBounds="True">
+                <StackPanel
                     HorizontalAlignment="Center"
-                    FontSize="{DynamicResource STControlFontSize15}"
-                    FontWeight="Medium"
-                    Foreground="White"
-                    Text="{Binding ProcessRingText}"
-                    TextAlignment="Center" />
-            </StackPanel>
+                    VerticalAlignment="Center"
+                    Orientation="Vertical">
+                    <ui:ProgressRing
+                        x:Name="PART_ExecutingProgressRing"
+                        Width="60"
+                        Height="60"
+                        Margin="0,0,0,16"
+                        IsActive="{Binding IsExecuting}" />
+
+                    <TextBlock
+                        x:Name="PART_ExecutingText"
+                        HorizontalAlignment="Center"
+                        FontSize="{DynamicResource STControlFontSize15}"
+                        FontWeight="Medium"
+                        Foreground="White"
+                        Text="{Binding ProcessRingText}"
+                        TextAlignment="Center"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap" />
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </Window>

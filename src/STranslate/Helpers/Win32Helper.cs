@@ -87,16 +87,10 @@ public static class Win32Helper
 
     public static bool SetForegroundWindow(nint handle) => SetForegroundWindow(new HWND(handle));
 
-    internal static bool SetForegroundWindow(HWND handle) => PInvoke.SetForegroundWindow(handle);
-
-    public static bool ForceSetForegroundWindow(Window window) => ForceSetForegroundWindow(GetWindowHandle(window));
-
-    public static bool ForceSetForegroundWindow(nint handle) => ForceSetForegroundWindow(new HWND(handle));
-
     /// <summary>
-    /// 外部调用从后台唤起窗口时使用 AttachThreadInput 绕过 Foreground Lockout。
+    /// 强制将窗口带到前台，使用 AttachThreadInput 绕过系统限制。
     /// </summary>
-    internal static bool ForceSetForegroundWindow(HWND handle)
+    internal static bool SetForegroundWindow(HWND handle)
     {
         var foregroundWnd = PInvoke.GetForegroundWindow();
         if (handle == foregroundWnd) return true;
@@ -104,28 +98,27 @@ public static class Win32Helper
         var currentThreadId = PInvoke.GetCurrentThreadId();
         var foregroundThreadId = PInvoke.GetWindowThreadProcessId(foregroundWnd, out _);
 
-        // 如果前台窗口属于不同的线程，尝试挂接输入
-        bool needDetach = false;
-        if (foregroundThreadId != currentThreadId && foregroundThreadId != 0)
-        {
-            // 挂接当前线程到前台窗口线程
-            needDetach = PInvoke.AttachThreadInput(foregroundThreadId, currentThreadId, true);
-        }
-
-        // 尝试设置前台窗口
-        // 注意：在挂接状态下，这通常会成功
+        // 第一次：不挂接，按系统规则尝试
+        // 这样在前台权限不足时不会强制抢走焦点，避免打断其他应用的文本编辑
         var result = PInvoke.SetForegroundWindow(handle);
+
+        // 失败后挂接前台线程，强制设置
+        if (!result && foregroundThreadId != currentThreadId && foregroundThreadId != 0)
+        {
+            bool needDetach = PInvoke.AttachThreadInput(foregroundThreadId, currentThreadId, true);
+
+            result = PInvoke.SetForegroundWindow(handle);
+
+            if (needDetach)
+            {
+                PInvoke.AttachThreadInput(foregroundThreadId, currentThreadId, false);
+            }
+        }
 
         // 尝试恢复窗口（如果是最小化）
         if (PInvoke.IsIconic(handle))
         {
             PInvoke.ShowWindow(handle, SHOW_WINDOW_CMD.SW_RESTORE);
-        }
-
-        if (needDetach)
-        {
-            // 解除挂接
-            PInvoke.AttachThreadInput(foregroundThreadId, currentThreadId, false);
         }
 
         // 再次尝试 BringWindowToTop 作为兜底

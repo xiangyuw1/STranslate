@@ -1,7 +1,7 @@
 # 图片翻译链路
 
 ## 模块职责
-- 管理图片翻译独立窗口/精简窗口的导入、截图、重试、标注图和结果图显示。
+- 管理图片翻译独立窗口/精简窗口的导入、截图、重试、标注图和矢量译文覆盖显示。
 - 维护图片翻译专用 OCR 服务与翻译服务绑定，避免普通 OCR 服务误入需要坐标的流程。
 - 对 OCR 结果执行结构化投影、分段逻辑、翻译分发、文字覆盖回写和图片级文本选中。
 - 约束 OCR 插件坐标框支持声明、结构化分段返回方式和本地 `Smart` 分段回退策略。
@@ -10,8 +10,8 @@
 - `STranslate/ViewModels/ImageTranslateWindowViewModel.cs`
   - `ExecuteAsync(Bitmap)`：图片翻译窗口主执行命令。
   - `ApplyLayoutAnalysis(OcrResult)`：按分段模式生成 `OcrLayoutBlock`。
-  - `GenerateTranslatedImage(IReadOnlyList<OcrLayoutBlock>, BitmapSource?)`：擦除原文并覆盖译文。
-  - `RefreshSelectableOcrWords()`：在原文标注图和译文结果图之间切换图片文本选中数据源。
+  - `ImageTranslateRenderer.CreateTranslatedOverlay(...)`：生成译文矢量绘制文档和原图坐标系中的选择框。
+  - `RefreshSelectableOcrWords()`：在原文标注图和矢量译文视图之间切换图片文本选中数据源。
 - `STranslate/Views/ImageTranslateWindow.xaml` / `ImageTranslateCompactWindow.xaml`
   - `Standalone`：原独立窗口，保留服务、语言、文本框和完整工具栏。
   - `Compact`：无标题精简窗口，图片区贴回截图选区，底部预留悬浮核心按钮区。
@@ -45,8 +45,9 @@
 10. `ApplyLayoutAnalysis()` 生成 `OcrLayoutBlock`，并把分析后的块投影回 `OcrResult.OcrContents`，供标注图、复制和结果文本复用。
 11. 获取 `TranslateService.ImageTranslateService`，该服务必须是 `ITranslatePlugin`，词典类服务不会进入图片翻译翻译列表。
 12. 对每个 `OcrLayoutBlock.Text` 并发执行语言检测和翻译；翻译成功后用 `ImageTranslateTextOverlayLayout.NormalizeOverlayText()` 收敛空白，再回写到对应 block。
-13. 使用翻译后的分段块生成结果图：优先按每个 block 的 `LineBoxPoints` 擦除原文，再按覆盖策略绘制译文。
-14. `Settings.IsImTranShowingAnnotated` 控制显示标注图还是结果图；图片文本选中同步切换为原文块或译文块。
+13. 使用翻译后的分段块生成 `ImageTranslateOverlayDocument`：每个绘制项保存覆盖背景、裁剪范围、阴影和 `FormattedText`；选择框保持原图像素坐标，不再创建超采样结果位图。
+14. `ImageZoom` 在同一个 Viewbox 内按“原图 → 矢量译文 Overlay → 文字选择高亮”绘制，图片缩放、拖动和 DPI 变换会同步作用于三层。
+15. `Settings.IsImTranShowingAnnotated` 控制显示标注图还是原图加译文 Overlay；图片文本选中同步切换为原文块或译文块。
 
 ## 窗口模式
 - `Standalone` 是默认模式，保留当前可缩放、可调整大小的独立窗口。
@@ -76,6 +77,7 @@
 5. `AnalyzeRegion()` 在 region 内合并 paragraph；普通段落、PDF 连续行、多列正文和英文断词续行继续使用原段落合并规则。
 6. 表格/网格 region 会被识别为 `TableLike`：至少多行、多列、多个视觉行有横向 peers，并且列左边缘或中心点在多行重复对齐。
 7. `TableLike` region 内禁止跨视觉行继续追加为同一 paragraph，所以功能列表、表格单元格默认按每个视觉行/单元项独立翻译。
+8. 单个 OCR 块内如果包含从首行开始、连续递增的编号列表（如 `1.`、`2.`、`3.`），会按编号恢复为独立条目；条目自身的换行续文仍保留在同一分段。普通多行正文和不连续数字行不会触发该拆分。
 
 ## 结构化 OCR 与插件契约
 图片翻译对 OCR 插件的要求比普通 OCR 更高：
@@ -92,6 +94,7 @@
 `Auto` 模式下，结构化 OCR 的 Provider 段落优先级高于本地 `Smart`，所以插件返回的 `Regions` 会直接影响分段粒度。插件侧应尽量让 `Paragraphs` 表示真实语义段落或表格单元项，而不是把整列/整表合成一个 paragraph。
 
 ## 译文覆盖策略
+- 结果视图保留原始截图作为 `ImageZoom.Source`，由单个 retained-mode `ImageTranslateOverlay` 控件绘制全部译文；不为每个文本块创建独立 WPF 控件，也不生成常驻结果位图。
 - 覆盖层不直接使用截图背景采样颜色，而是跟随软件主题：
   - 浅色主题：浅色覆盖层 + 黑字。
   - 深色主题：深色覆盖层 + 白字。
@@ -106,7 +109,9 @@
 ## 图片文本选中
 - `ImageZoom` 使用 `OcrWords` 模拟图片上的文本选中。
 - 标注图显示时，`OcrWords` 来自原始 OCR 坐标和原文文本。
-- 结果图显示时，`OcrWords` 来自翻译后的 `OcrLayoutBlock`，复制时拿到的是译文。
+- 结果视图显示时，`OcrWords` 来自矢量文档中的译文字符框，复制所选内容时拿到的是译文。
+- 鼠标拖动可按字符选中；在文字上双击会选中当前视觉行，自动换行的译文只选中点击所在行。
+- 未选择文字时复制图片以及“保存图片”继续使用原图，不会临时栅格化译文 Overlay。
 - 缺少坐标框时显示无位置信息提示，图片上无法可靠模拟选区。
 
 ## 服务绑定与配置
@@ -115,7 +120,7 @@
 - 服务缺失或插件被删除时，启动加载会重置失效的图片翻译服务 ID。
 - `Settings.ImageTranslateWindowMode` 控制图片翻译结果使用独立窗口或精简窗口，默认 `Standalone`。
 - `Settings.LayoutAnalysisMode` 是分段模式配置，默认 `Auto`，序列化支持 `auto`、`provider`、`smart`、`noMerge`；旧未知值归一为 `Auto`。
-- `Settings.IsImTranShowingAnnotated` 控制标注图/结果图显示。
+- `Settings.IsImTranShowingAnnotated` 控制标注图/原图加矢量译文 Overlay 显示。
 - `Settings.IsImTranShowingTextControl` 控制图片翻译窗口文本区域显示。
 - `Settings.ImageTranslateSourceLang` / `ImageTranslateTargetLang` 控制图片翻译语言。
 - `Settings.ShowImageTranslateItemInNotifyIconMenu` 控制托盘菜单是否显示图片翻译入口。
@@ -146,8 +151,10 @@
   - `SettingsWindowViewModel` 未实现 `IDisposable`，但其各页面与页面 VM（如 `HistoryViewModel`）为 `Scoped` 注册，从 root provider 解析会被 root scope 跟踪、`Dispose()` 永不触发；改用独立 scope 后关闭窗口即可释放已解析的页面 VM，触发其 `Dispose()` 取消全局订阅。
   - `SettingsWindow.OnClosed` 在释放 scope 前还会清空 `RootFrame.Content` 并解绑导航事件，避免长期页面通过 `Frame` 反向持有已关闭窗口。
 
-- **渲染峰值优化（顺带）**：
-  - `ExecuteAsync` 生成结果图时复用已缓存并 `Freeze` 的 `_sourceImage`，取消对原图的第二次 `ToBitmapImage` 解码。
+- **译文矢量覆盖（已优化）**：
+  - 结果视图直接复用已缓存并 `Freeze` 的 `_sourceImage`，译文由 `ImageTranslateOverlay` 按原图坐标执行 retained-mode 矢量绘制。
+  - 旧版按图片尺寸进行 2–4 倍超采样并生成 `RenderTargetBitmap`；该结果位图和对应常驻原生帧缓冲已移除。标注图仍只按原始分辨率生成。
+  - Overlay 文档随 ViewModel 清理，窗口关闭时再由现有视觉树与 DI scope 释放链断开引用。
 
 - **回归测试**：`SnackbarLifecycleTests` 覆盖 `NoticeBar.IsOpen` 可见性、容器重复释放、显示/隐藏动画最终状态，以及 `NoticeBar`/`SnackbarContainer` 在重复创建释放后可被 GC 回收；`ModernWindowLifecycleTests` 验证 modern 窗口关闭后 `WindowStyle` / `ResizeMode` 的属性描述符 tracker 已移除，并验证视觉树引用被清空。
 
@@ -159,7 +166,9 @@
 - `STranslate/Views/ImageTranslateCompactWindow.xaml`
 - `STranslate/Controls/NoticeBar.xaml`
 - `STranslate/Controls/SnackbarContainer.xaml`
+- `STranslate/Controls/ImageTranslateOverlay.cs`
 - `STranslate/Core/Snackbar.cs`
+- `STranslate/Core/ImageTranslateOverlayDocument.cs`
 - `STranslate/Helpers/ImageTranslateRenderer.cs`
 - `STranslate/Helpers/ModernWindowLifecycle.cs`
 - `STranslate/Core/Screenshot.cs`
@@ -172,6 +181,7 @@
 - `STranslate.Plugin/IOcrPlugin.cs`
 - `Tests/STranslate.Tests/OcrLayoutAnalyzerTests.cs`
 - `Tests/STranslate.Tests/ImageTranslateTextOverlayLayoutTests.cs`
+- `Tests/STranslate.Tests/ImageTranslateOverlayTests.cs`
 - `Tests/STranslate.Tests/ModernWindowLifecycleTests.cs`
 - `Tests/STranslate.Tests/SnackbarLifecycleTests.cs`
 

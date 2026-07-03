@@ -513,12 +513,76 @@ internal static class OcrLayoutAnalyzer
         return centerDelta <= Math.Min(lineBounds.Height, itemBounds.Height) * 0.45;
     }
 
-    private static List<LayoutItem> CreateLayoutItems(IReadOnlyList<OcrContent> contents) =>
-        contents
-            .Select((content, index) => LayoutItem.TryCreate(content, index))
-            .Where(x => x != null)
-            .Select(x => x!)
-            .ToList();
+    private static List<LayoutItem> CreateLayoutItems(IReadOnlyList<OcrContent> contents)
+    {
+        var items = new List<LayoutItem>();
+
+        for (var index = 0; index < contents.Count; index++)
+        {
+            var item = LayoutItem.TryCreate(contents[index], index);
+            if (item == null)
+                continue;
+
+            items.AddRange(SplitEmbeddedNumberedList(item, index) ?? [item]);
+        }
+
+        return items;
+    }
+
+    private static List<LayoutItem>? SplitEmbeddedNumberedList(LayoutItem item, int sourceIndex)
+    {
+        var lines = item.Text
+            .Replace("\r\n", "\n")
+            .Replace('\r', '\n')
+            .Split('\n');
+        if (lines.Length < 2)
+            return null;
+
+        var firstTextLine = Array.FindIndex(lines, line => !string.IsNullOrWhiteSpace(line));
+        var listStarts = new List<(int LineIndex, int Number)>();
+        for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+        {
+            if (TryGetOrderedListNumber(lines[lineIndex], out var number))
+                listStarts.Add((lineIndex, number));
+        }
+
+        if (listStarts.Count < 2 || listStarts[0].LineIndex != firstTextLine)
+            return null;
+
+        for (var i = 1; i < listStarts.Count; i++)
+        {
+            if (listStarts[i].Number != listStarts[i - 1].Number + 1)
+                return null;
+        }
+
+        var splitItems = new List<LayoutItem>(listStarts.Count);
+        for (var i = 0; i < listStarts.Count; i++)
+        {
+            var startLine = listStarts[i].LineIndex;
+            var endLine = i + 1 < listStarts.Count ? listStarts[i + 1].LineIndex : lines.Length;
+            var itemLines = lines[startLine..endLine]
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .Select(line => line.Trim())
+                .ToList();
+            // OCR 只提供整个文本块的坐标，按原始行占比分配子区域能让各编号项独立覆盖，
+            // 同时避免凭字符宽度猜测换行位置。
+            var bounds = new Bounds(
+                item.Bounds.Left,
+                item.Bounds.Top + item.Bounds.Height * startLine / lines.Length,
+                item.Bounds.Right,
+                item.Bounds.Top + item.Bounds.Height * endLine / lines.Length);
+            var content = new OcrContent
+            {
+                Text = JoinTextWithSpacing(itemLines),
+                BoxPoints = CreateBoxPoints(bounds)
+            };
+            var splitItem = LayoutItem.TryCreate(content, sourceIndex);
+            if (splitItem != null)
+                splitItems.Add(splitItem);
+        }
+
+        return splitItems;
+    }
 
     private static List<BoxPoint> CreateBoxPoints(Bounds bounds) =>
     [
@@ -678,14 +742,22 @@ internal static class OcrLayoutAnalyzer
         if (trimmed[0] is '-' or '*' or '+' or '•' or '·' or '●' or '▪')
             return trimmed.Length == 1 || char.IsWhiteSpace(trimmed[1]);
 
-        var i = 0;
-        while (i < trimmed.Length && char.IsDigit(trimmed[i]))
-            i++;
+        return TryGetOrderedListNumber(trimmed, out _);
+    }
 
-        return i > 0 &&
-               i < trimmed.Length - 1 &&
-               trimmed[i] is '.' or ')' or '、' &&
-               char.IsWhiteSpace(trimmed[i + 1]);
+    private static bool TryGetOrderedListNumber(string text, out int number)
+    {
+        number = 0;
+        var trimmed = text.TrimStart();
+        var digitCount = 0;
+        while (digitCount < trimmed.Length && char.IsDigit(trimmed[digitCount]))
+            digitCount++;
+
+        return digitCount > 0 &&
+               digitCount < trimmed.Length - 1 &&
+               trimmed[digitCount] is '.' or ')' or '、' &&
+               char.IsWhiteSpace(trimmed[digitCount + 1]) &&
+               int.TryParse(trimmed.AsSpan(0, digitCount), out number);
     }
 
     private static bool HasSentenceEnding(string text) =>

@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Extensions.Logging;
@@ -9,7 +8,6 @@ using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.Services;
 using STranslate.Plugin;
-using STranslate.ViewModels.Pages;
 using STranslate.Views;
 using STranslate.Views.Pages;
 using System.Collections.ObjectModel;
@@ -101,6 +99,9 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     public partial BitmapSource? DisplayImage { get; set; }
 
     [ObservableProperty]
+    public partial ImageTranslateOverlayDocument? DisplayOverlayDocument { get; set; }
+
+    [ObservableProperty]
     public partial bool IsShowingFitToWindow { get; set; } = false;
 
     [ObservableProperty]
@@ -132,9 +133,9 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     private BitmapSource? _annotatedImage;
 
     /// <summary>
-    /// 结果图像（显示翻译文本）
+    /// 译文矢量覆盖文档。
     /// </summary>
-    private BitmapSource? _resultImage;
+    private ImageTranslateOverlayDocument? _resultOverlayDocument;
 
     private OcrResult? _lastOcrResult;
     private ObservableCollection<OcrWord> _originalSelectionWords = [];
@@ -263,16 +264,14 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             _lastOcrResult.OcrContents.Clear();
             _lastOcrResult.OcrContents.AddRange(layoutBlocks.Select(x => x.ToOcrContent()));
 
-            // 生成翻译结果图像（在原图上覆盖翻译文本）
-            // 复用已缓存并 Freeze 的 _sourceImage，避免对原图重复解码造成额外内存峰值
-            var render = ImageTranslateRenderer.GenerateTranslatedImage(
-                layoutBlocks, _sourceImage!, GetOverlayTheme());
-            _resultImage = render.Image;
-            _translatedSelectionWords = render.SelectableWords;
+            // 生成原图坐标系中的矢量译文覆盖文档，不再创建超采样结果位图。
+            _resultOverlayDocument = ImageTranslateRenderer.CreateTranslatedOverlay(
+                layoutBlocks, GetOverlayTheme());
+            _translatedSelectionWords = new ObservableCollection<OcrWord>(
+                _resultOverlayDocument.SelectableWords);
             Result = _lastOcrResult.Text;
 
-            DisplayImage = Settings.IsImTranShowingAnnotated ? _annotatedImage : _resultImage;
-            RefreshSelectableOcrWords();
+            RefreshDisplayState();
         }
         catch (TaskCanceledException)
         {
@@ -306,35 +305,18 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     [RelayCommand]
     private async Task OpenSettingsAsync()
     {
-        await _mainWindowViewModel.OpenSettingsInternalAsync(null);
+        var window = await _mainWindowViewModel.OpenSettingsInternalAsync(null);
 
         if (Keyboard.Modifiers == ModifierKeys.Control)
         {
-            Application.Current.Windows
-                .OfType<SettingsWindow>()
-                .First()
-                .Navigate(nameof(OcrPage));
-
-            if (SelectedOcrEngine != null)
-                Ioc.Default.GetRequiredService<OcrViewModel>()
-                    .SelectedItem = SelectedOcrEngine;
+            window.Navigate(nameof(OcrPage), selectedService: SelectedOcrEngine);
         }
         else if (Keyboard.Modifiers == ModifierKeys.Alt)
         {
-            Application.Current.Windows
-                .OfType<SettingsWindow>()
-                .First()
-                .Navigate(nameof(TranslatePage));
-
-            if (SelectedTranslateEngine != null)
-                Ioc.Default.GetRequiredService<TranslateViewModel>()
-                    .SelectedItem = SelectedTranslateEngine;
+            window.Navigate(nameof(TranslatePage), selectedService: SelectedTranslateEngine);
         }
         else
-            Application.Current.Windows
-                .OfType<SettingsWindow>()
-                .First()
-                .Navigate(nameof(StandalonePage));
+            window.Navigate(nameof(StandalonePage));
     }
 
     [RelayCommand]
@@ -647,8 +629,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
                         : (Settings.ImTranWindowWidth + WidthAdjustment) / WidthMultiplier;
                 break;
             case nameof(Settings.IsImTranShowingAnnotated):
-                DisplayImage = Settings.IsImTranShowingAnnotated ? _annotatedImage : _resultImage;
-                RefreshSelectableOcrWords();
+                RefreshDisplayState();
                 break;
         }
     }
@@ -662,8 +643,9 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
         Result = string.Empty;
         _sourceImage = null;
         _annotatedImage = null;
-        _resultImage = null;
+        _resultOverlayDocument = null;
         DisplayImage = null;
+        DisplayOverlayDocument = null;
         _lastOcrResult = null;
         IsShowingFitToWindow = false;
         IsNoLocationInfoVisible = false;
@@ -674,9 +656,25 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
     private void RefreshSelectableOcrWords()
     {
-        OcrWords = Settings.IsImTranShowingAnnotated || _resultImage == null
+        OcrWords = Settings.IsImTranShowingAnnotated || _resultOverlayDocument == null
             ? _originalSelectionWords
             : _translatedSelectionWords;
+    }
+
+    private void RefreshDisplayState()
+    {
+        if (Settings.IsImTranShowingAnnotated)
+        {
+            DisplayImage = _annotatedImage ?? _sourceImage;
+            DisplayOverlayDocument = null;
+        }
+        else
+        {
+            DisplayImage = _sourceImage;
+            DisplayOverlayDocument = _resultOverlayDocument;
+        }
+
+        RefreshSelectableOcrWords();
     }
 
     private ImageTranslateOverlayTheme GetOverlayTheme() =>

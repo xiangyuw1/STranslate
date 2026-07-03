@@ -104,6 +104,19 @@ public class ImageZoom : Control
         DependencyProperty.Register(nameof(Source), typeof(ImageSource), typeof(ImageZoom),
             new FrameworkPropertyMetadata(null, OnSourceChanged));
 
+    public ImageTranslateOverlayDocument? OverlayDocument
+    {
+        get => (ImageTranslateOverlayDocument?)GetValue(OverlayDocumentProperty);
+        set => SetValue(OverlayDocumentProperty, value);
+    }
+
+    public static readonly DependencyProperty OverlayDocumentProperty =
+        DependencyProperty.Register(
+            nameof(OverlayDocument),
+            typeof(ImageTranslateOverlayDocument),
+            typeof(ImageZoom),
+            new FrameworkPropertyMetadata(null));
+
     private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (ImageZoom)d;
@@ -511,10 +524,16 @@ public class ImageZoom : Control
         if (!_isMouseOverText)
             return false;
 
+        var mousePos = e.GetPosition(_interactionCanvas);
+        if (e.ClickCount == 2 && SelectVisualLineAtPoint(mousePos))
+        {
+            e.Handled = true;
+            return true;
+        }
+
         ResetSelection();
         _isSelecting = true;
 
-        var mousePos = e.GetPosition(_interactionCanvas);
         _interactionCanvas?.CaptureMouse();
         _selectionStartIndex = GetCharacterIndexAtPoint(mousePos);
 
@@ -555,18 +574,25 @@ public class ImageZoom : Control
         }
     }
 
-    private bool IsPointOverAnyWord(Point point)
-    {
-        if (OcrWords == null || OcrWords.Count == 0)
-            return false;
+    private bool IsPointOverAnyWord(Point point) => FindWordAtPoint(point) != null;
 
-        foreach (var word in OcrWords)
+    private bool SelectVisualLineAtPoint(Point point)
+    {
+        var anchorWord = FindWordAtPoint(point);
+        if (!OcrWordSelection.TryGetVisualLineRange(
+                OcrWords,
+                anchorWord,
+                out var selectionStartIndex,
+                out var selectionEndIndex))
         {
-            if (IsSelectableWord(word) && word.BoundingBox.Contains(point))
-                return true;
+            return false;
         }
 
-        return false;
+        _isSelecting = false;
+        _selectionStartIndex = selectionStartIndex;
+        _selectionEndIndex = selectionEndIndex;
+        UpdateSelectionHighlight();
+        return true;
     }
 
     private void StopTextSelection()
@@ -937,17 +963,9 @@ public class ImageZoom : Control
 
     private int? GetCharacterIndexAtPoint(Point point)
     {
-        if (OcrWords == null || OcrWords.Count == 0)
-            return null;
-
-        // Try to find word containing the point
-        foreach (var word in OcrWords)
-        {
-            if (IsSelectableWord(word) && word.BoundingBox.Contains(point))
-            {
-                return CalculateCharacterIndexInWord(word, point);
-            }
-        }
+        var wordAtPoint = FindWordAtPoint(point);
+        if (wordAtPoint != null)
+            return CalculateCharacterIndexInWord(wordAtPoint, point);
 
         // Find nearest word
         var nearestWord = FindNearestWord(point);
@@ -955,6 +973,20 @@ public class ImageZoom : Control
             return 0;
 
         return CalculateCharacterIndexNearWord(nearestWord, point);
+    }
+
+    private OcrWord? FindWordAtPoint(Point point)
+    {
+        if (OcrWords == null || OcrWords.Count == 0)
+            return null;
+
+        foreach (var word in OcrWords)
+        {
+            if (IsSelectableWord(word) && word.BoundingBox.Contains(point))
+                return word;
+        }
+
+        return null;
     }
 
     private int CalculateCharacterIndexInWord(OcrWord word, Point point)

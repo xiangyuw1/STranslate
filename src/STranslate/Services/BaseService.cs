@@ -114,8 +114,10 @@ public abstract partial class BaseService : ObservableObject, IDisposable
 
     public Service? Duplicate(Service service)
     {
-        var result = _serviceManager.AddService(service.MetaData, ServiceType);
-        result.DisplayName = service.DisplayName + "_New";
+        var result = _serviceManager.DuplicateService(service, ServiceType);
+        if (result == null)
+            return null;
+
         Services.Insert(Services.IndexOf(service) + 1, result);
         return result;
     }

@@ -1,6 +1,5 @@
 using STranslate.Core;
 using STranslate.Plugin;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -8,61 +7,28 @@ using System.Windows.Media.Imaging;
 namespace STranslate.Helpers;
 
 /// <summary>
-/// 图片翻译的译文覆盖图与 OCR 标注图渲染。
+/// 图片翻译的矢量译文覆盖文档与 OCR 标注图生成。
 /// 从 <see cref="ViewModels.ImageTranslateWindowViewModel"/> 抽离的纯绘制逻辑，无 VM 状态依赖。
 /// </summary>
 internal static class ImageTranslateRenderer
 {
-    // 超采样（Super-sampling）参数：小图放大渲染以保证译文矢量绘制的清晰度。
-    private const double SupersampleMinDimension = 1000;
-    private const double SupersampleMaxScale = 4.0;
-    private const double SupersampleMinScale = 2.0;
-
     /// <summary>
-    /// 生成带有翻译文本覆盖的图像。
+    /// 生成与原图像素坐标一致的矢量译文覆盖文档。
     /// </summary>
     /// <param name="layoutBlocks">包含翻译后文本的布局块</param>
-    /// <param name="image">原始图像</param>
     /// <param name="overlayTheme">覆盖层主题（明/暗）</param>
-    /// <returns>覆盖翻译文本后的图像及可选中的译文词集合</returns>
-    internal static TranslatedImageRenderResult GenerateTranslatedImage(
+    /// <returns>矢量绘制项及原图坐标系中的可选译文字符</returns>
+    internal static ImageTranslateOverlayDocument CreateTranslatedOverlay(
         IReadOnlyList<OcrLayoutBlock> layoutBlocks,
-        BitmapSource image,
         ImageTranslateOverlayTheme overlayTheme)
     {
-        ArgumentNullException.ThrowIfNull(image);
-
-        // 没有位置信息的话返回原图
         if (layoutBlocks.Count == 0 ||
             layoutBlocks.All(x => x.BoxPoints.Count == 0))
         {
-            return new TranslatedImageRenderResult(image, []);
+            return ImageTranslateOverlayDocument.Empty;
         }
 
-        // 获取源图像的 DPI 和缩放比例
-        double dpiX = image.DpiX > 0 ? image.DpiX : 96;
-        double dpiY = image.DpiY > 0 ? image.DpiY : 96;
-        double pixelsPerDip = dpiX / 96.0;
-
-        // ---------------------------------------------------------
-        // 修复：针对小图进行超采样渲染 (Super-sampling)
-        // 如果图片较小，强制放大渲染尺寸，以保证文字矢量绘制的清晰度
-        // ---------------------------------------------------------
-        double scaleFactor = 1.0;
-        double minDimension = Math.Min(image.PixelWidth, image.PixelHeight);
-
-        // 最小边小于阈值时按比例放大，但限制在 [MinScale, MaxScale] 区间
-        if (minDimension < SupersampleMinDimension)
-        {
-            scaleFactor = Math.Min(SupersampleMaxScale, SupersampleMinDimension / minDimension);
-            // 确保至少放大 MinScale 倍以获得较好的抗锯齿效果
-            scaleFactor = Math.Max(scaleFactor, SupersampleMinScale);
-        }
-
-        // 计算渲染目标尺寸
-        int renderWidth = (int)(image.PixelWidth * scaleFactor);
-        int renderHeight = (int)(image.PixelHeight * scaleFactor);
-
+        const double pixelsPerDip = 1.0;
         var measureTextBrush = new SolidColorBrush(Colors.Black);
         measureTextBrush.Freeze();
         var overlays = layoutBlocks
@@ -72,63 +38,19 @@ internal static class ImageTranslateRenderer
             .Select(item => item!)
             .ToList();
 
-        var selectableWords = OcrWordBuilder.CreateIndexedCollection(
-            overlays.SelectMany(overlay =>
+        // 独立覆盖块可能恰好等高，分组可避免双击时把它们误判为同一视觉行。
+        var selectableWords = OcrWordBuilder.CreateIndexedCollectionFromGroups(
+            overlays.Select(overlay =>
                 OcrWordBuilder.CreateFromFormattedText(
                     overlay.Text,
                     overlay.FormattedText,
                     overlay.TextPosition,
                     overlay.Plan.TextClipRect,
-                    scaleFactor)),
-            preserveOrder: true);
+                    scaleFactor: 1)));
 
-        var drawingVisual = new DrawingVisual();
-
-        using (var drawingContext = drawingVisual.RenderOpen())
-        {
-            // 关键修复：应用缩放变换
-            // 1. pixelsPerDip: 抵消 WPF DPI 缩放，回归物理像素坐标
-            // 2. scaleFactor: 应用超采样缩放
-            double totalScale = scaleFactor / pixelsPerDip;
-            drawingContext.PushTransform(new ScaleTransform(totalScale, totalScale));
-
-            // 绘制原始图像
-            drawingContext.DrawImage(image, new Rect(0, 0, image.PixelWidth, image.PixelHeight));
-
-            // 先统一绘制覆盖背景，再绘制译文，避免后续背景覆盖前面已经画好的译文。
-            foreach (var overlay in overlays)
-            {
-                var backgroundBrush = new SolidColorBrush(overlay.Plan.OverlayBackgroundColor);
-                backgroundBrush.Freeze();
-
-                drawingContext.DrawRoundedRectangle(
-                    backgroundBrush,
-                    null,
-                    overlay.Plan.OverlayRect,
-                    overlay.Plan.CornerRadius,
-                    overlay.Plan.CornerRadius);
-            }
-
-            foreach (var overlay in overlays)
-                DrawTranslatedTextOverlay(drawingContext, overlay);
-
-            // 恢复变换
-            drawingContext.Pop();
-        }
-
-        // 关键修复：使用源图像的 DPI，但尺寸是放大后的
-        var renderBitmap = new RenderTargetBitmap(
-            renderWidth,
-            renderHeight,
-            dpiX,
-            dpiY,
-            PixelFormats.Pbgra32
-        );
-
-        renderBitmap.Render(drawingVisual);
-        renderBitmap.Freeze();
-
-        return new TranslatedImageRenderResult(renderBitmap, selectableWords);
+        return new ImageTranslateOverlayDocument(
+            overlays.ToArray(),
+            selectableWords.ToArray());
     }
 
     /// <summary>
@@ -189,7 +111,7 @@ internal static class ImageTranslateRenderer
     /// <param name="overlayTheme">覆盖层主题</param>
     /// <param name="pixelsPerDip">DPI缩放比例</param>
     /// <param name="measureTextBrush">测量文本用的画刷</param>
-    private static TranslatedTextOverlay? CreateTranslatedTextOverlay(
+    private static ImageTranslateOverlayItem? CreateTranslatedTextOverlay(
         OcrLayoutBlock content,
         ImageTranslateOverlayTheme overlayTheme,
         double pixelsPerDip,
@@ -216,7 +138,11 @@ internal static class ImageTranslateRenderer
         textBrush.Freeze();
         var shadowBrush = new SolidColorBrush(CreateTextShadowColor(plan.ForegroundColor));
         shadowBrush.Freeze();
+        var backgroundBrush = new SolidColorBrush(plan.OverlayBackgroundColor);
+        backgroundBrush.Freeze();
 
+        // Display 模式在大字号 CJK 文本叠加裁剪/缩放时可能不输出 glyph；
+        // 使用 Ideal 保持矢量缩放稳定，并与测量、选择框构建使用的 metrics 一致。
         var formattedText = CreateFormattedText(
             content.Text,
             plan.FontSize,
@@ -226,7 +152,8 @@ internal static class ImageTranslateRenderer
             plan.LineHeight,
             plan.ShouldTrim || !plan.IsMultiLine,
             pixelsPerDip,
-            plan.MaxLineCount);
+            plan.MaxLineCount,
+            TextFormattingMode.Ideal);
         var shadowText = CreateFormattedText(
             content.Text,
             plan.FontSize,
@@ -236,7 +163,8 @@ internal static class ImageTranslateRenderer
             plan.LineHeight,
             plan.ShouldTrim || !plan.IsMultiLine,
             pixelsPerDip,
-            plan.MaxLineCount);
+            plan.MaxLineCount,
+            TextFormattingMode.Ideal);
 
         var textPosition = new Point(
             plan.TextRect.Left,
@@ -245,17 +173,13 @@ internal static class ImageTranslateRenderer
                 : plan.TextClipRect.Top + Math.Max(0, (plan.TextClipRect.Height - formattedText.Height) / 2)
         );
 
-        return new TranslatedTextOverlay(content.Text, plan, shadowText, formattedText, textPosition);
-    }
-
-    private static void DrawTranslatedTextOverlay(DrawingContext drawingContext, TranslatedTextOverlay overlay)
-    {
-        drawingContext.PushClip(new RectangleGeometry(overlay.Plan.TextClipRect));
-        drawingContext.DrawText(
-            overlay.ShadowText,
-            new Point(overlay.TextPosition.X + 0.75, overlay.TextPosition.Y + 0.75));
-        drawingContext.DrawText(overlay.FormattedText, overlay.TextPosition);
-        drawingContext.Pop();
+        return new ImageTranslateOverlayItem(
+            content.Text,
+            plan,
+            backgroundBrush,
+            shadowText,
+            formattedText,
+            textPosition);
     }
 
     /// <summary>
@@ -299,7 +223,8 @@ internal static class ImageTranslateRenderer
         double lineHeight,
         bool shouldTrim,
         double pixelsPerDip,
-        int maxLineCount = 0)
+        int maxLineCount = 0,
+        TextFormattingMode textFormattingMode = TextFormattingMode.Ideal)
     {
         var formattedText = new FormattedText(
             text,
@@ -308,7 +233,9 @@ internal static class ImageTranslateRenderer
             new Typeface("Microsoft YaHei, Arial, SimSun"),
             fontSize,
             textBrush,
-            pixelsPerDip); // 关键修复：使用正确的缩放比例，而不是硬编码的 96
+            numberSubstitution: null,
+            textFormattingMode,
+            pixelsPerDip);
 
         formattedText.MaxTextWidth = maxWidth;
         if (!double.IsPositiveInfinity(maxHeight))
@@ -334,13 +261,6 @@ internal static class ImageTranslateRenderer
     private static double GetMeasuredTextWidth(FormattedText formattedText) =>
         Math.Max(formattedText.Width, formattedText.WidthIncludingTrailingWhitespace);
 
-    private sealed record TranslatedTextOverlay(
-        string Text,
-        ImageTranslateTextOverlayPlan Plan,
-        FormattedText ShadowText,
-        FormattedText FormattedText,
-        Point TextPosition);
-
     private static Color CreateTextShadowColor(Color foregroundColor) =>
         IsLightColor(foregroundColor)
             ? Color.FromArgb(120, 0, 0, 0)
@@ -365,7 +285,3 @@ internal static class ImageTranslateRenderer
         return geometry;
     }
 }
-
-internal sealed record TranslatedImageRenderResult(
-    BitmapSource Image,
-    ObservableCollection<OcrWord> SelectableWords);

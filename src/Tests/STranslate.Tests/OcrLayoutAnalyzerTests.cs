@@ -256,6 +256,75 @@ public class OcrLayoutAnalyzerTests
         Assert.Equal("- Second item", result[1].Text);
     }
 
+    /// <summary>
+    /// 验证 OCR 将整个编号列表装入单个文本框时，Smart 仍按连续编号恢复独立条目。
+    /// </summary>
+    [Fact]
+    public void SmartSplitsEmbeddedNumberedListItems()
+    {
+        var result = AnalyzeSmart(
+            Box(
+                """
+                1. add filesharehelper.peekdata for back host to read flatness wfm
+                   without deleting the shared file
+                2. compute flatnessresult in host.back calculate alongside ntresults
+                3. remove local flatnessresult call from front host calculate
+                4. merge flatnessresult in calculateprocessor and switch match key
+                   from metrorecipeid to metrorecipename
+                5. set metrorecipename explicitly on both sides to fix the merge match
+                   that also affected ntresults
+                """,
+                0,
+                0,
+                510,
+                160));
+
+        Assert.Equal(5, result.Count);
+        Assert.Equal(
+            "1. add filesharehelper.peekdata for back host to read flatness wfm without deleting the shared file",
+            result[0].Text);
+        Assert.Equal(
+            "2. compute flatnessresult in host.back calculate alongside ntresults",
+            result[1].Text);
+        Assert.Equal(
+            "3. remove local flatnessresult call from front host calculate",
+            result[2].Text);
+        Assert.Equal(
+            "4. merge flatnessresult in calculateprocessor and switch match key from metrorecipeid to metrorecipename",
+            result[3].Text);
+        Assert.Equal(
+            "5. set metrorecipename explicitly on both sides to fix the merge match that also affected ntresults",
+            result[4].Text);
+    }
+
+    /// <summary>
+    /// 验证普通多行 OCR 块不会因块内换行被激进拆分。
+    /// </summary>
+    [Fact]
+    public void SmartKeepsOrdinaryMultilineOcrBlockIntact()
+    {
+        const string text = "A regular paragraph starts here\nand continues inside one OCR block.";
+
+        var result = AnalyzeSmart(Box(text, 0, 0, 420, 48));
+
+        Assert.Single(result);
+        Assert.Equal(text, result[0].Text);
+    }
+
+    /// <summary>
+    /// 验证不连续的数字行不会被误判为明确的有序列表。
+    /// </summary>
+    [Fact]
+    public void SmartKeepsNonSequentialNumberedLinesIntact()
+    {
+        const string text = "2024. Previous release summary\n2026. Current release outlook";
+
+        var result = AnalyzeSmart(Box(text, 0, 0, 360, 48));
+
+        Assert.Single(result);
+        Assert.Equal(text, result[0].Text);
+    }
+
     [Fact]
     public void SmartAddsSpacesForLatinWordLevelOcr()
     {

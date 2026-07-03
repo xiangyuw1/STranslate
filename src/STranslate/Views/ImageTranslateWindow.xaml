@@ -118,6 +118,7 @@
                             MaxZoomRatio="5.0"
                             MinZoomRatio="0.1"
                             OcrWords="{Binding OcrWords}"
+                            OverlayDocument="{Binding DisplayOverlayDocument}"
                             Source="{Binding DisplayImage}">
                             <control:ImageZoom.InputBindings>
                                 <KeyBinding
