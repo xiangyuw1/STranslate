@@ -2,7 +2,7 @@
 
 ## 模块职责
 - 提供截图翻译、静默 OCR 和 OCR 窗口三条图像文本识别链路。
-- 管理普通 OCR 服务选择、OCR 语言、标注图和文本输出。
+- 管理普通 OCR 服务选择、截图/静默 OCR 语言、独立 OCR 窗口语言、标注图和文本输出。
 - 将截图翻译和静默 OCR 结果接入统一取词文本后处理。
 - 图片翻译已拆到独立文档：[flow-image-translation.md](flow-image-translation.md)。
 
@@ -42,7 +42,7 @@
 ### OCR 窗口执行
 1. `OcrWindowViewModel.ExecuteAsync(bitmap)` 设置执行态并清理旧结果。
 2. 调用当前启用的 OCR 服务：
-   `RecognizeAsync(new OcrRequest(data, Settings.OcrLanguage, bitmap.Width, bitmap.Height))`。
+   `RecognizeAsync(new OcrRequest(data, Settings.OcrWindowOcrLanguage, bitmap.Width, bitmap.Height))`。
 3. OCR 返回后调用 `Utilities.PrepareOcrResult()`；如果插件只填充结构化 `Regions`，宿主会投影出兼容的 `OcrContents`。
 4. 生成原图/标注图、`OcrWords` 和 `Result` 文本。
 5. `Settings.IsOcrShowingAnnotated` 决定显示原图还是标注图。
@@ -56,7 +56,8 @@
 结构化 OCR 和图片翻译分段逻辑的细节见 [flow-image-translation.md](flow-image-translation.md)。
 
 ## 配置
-- `Settings.OcrLanguage`：OCR 语言。
+- `Settings.ScreenshotOcrLanguage`：截图翻译和静默 OCR 使用的 OCR 语言。
+- `Settings.OcrWindowOcrLanguage`：独立 OCR 窗口使用的 OCR 语言。
 - `Settings.CopyAfterOcr`：OCR 后是否复制识别文本。
 - `Settings.IsOcrShowingAnnotated`：OCR 窗口默认显示标注图还是原图。
 - `Settings.FocusInputAfterScreenshotTranslate`：截图翻译完成后的主窗口焦点策略。

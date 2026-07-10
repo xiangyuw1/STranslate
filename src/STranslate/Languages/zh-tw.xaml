@@ -323,6 +323,10 @@
     <sys:String x:Key="Standalone_ImTranShowTextControlDescription">顯示／隱藏右側文字框。</sys:String>
     <sys:String x:Key="Standalone_ImTranWindowModeHeader">圖片翻譯視窗模式</sys:String>
     <sys:String x:Key="Standalone_ImTranWindowModeDescription">選擇圖片翻譯結果使用獨立視窗或精簡懸浮視窗顯示。</sys:String>
+    <sys:String x:Key="Standalone_ImTranOcrLanguageHeader">圖片翻譯 OCR 辨識語言</sys:String>
+    <sys:String x:Key="Standalone_ImTranOcrLanguageDescription">圖片翻譯 OCR 階段使用的辨識語言。</sys:String>
+    <sys:String x:Key="Standalone_ImTranCompactOcrLanguageHeader">精簡視窗顯示辨識語言</sys:String>
+    <sys:String x:Key="Standalone_ImTranCompactOcrLanguageDescription">在圖片翻譯精簡視窗底部工具列顯示 OCR 辨識語言選框。</sys:String>
     <sys:String x:Key="Standalone_LayoutAnalysisHeader">分段邏輯設定</sys:String>
     <sys:String x:Key="Standalone_LayoutAnalysisDescription">設定辨識結果的分段與合併方式。</sys:String>
     <sys:String x:Key="Standalone_ImTranLanguageDetector">圖片翻譯語言檢測器</sys:String>
@@ -760,6 +764,8 @@
     <sys:String x:Key="OcrSettingsToolTip" xml:space="preserve">直接滑鼠左擊->獨立視窗配置&#10;Ctrl+滑鼠左擊->文字識別配置</sys:String>
 
     <sys:String x:Key="RecognizeLanguage">辨識語言</sys:String>
+    <sys:String x:Key="General_ScreenshotOcrLanguageHeader">截圖／靜默 OCR 辨識語言</sys:String>
+    <sys:String x:Key="General_ScreenshotOcrLanguageDescription">截圖翻譯和靜默 OCR 使用的 OCR 辨識語言。</sys:String>
     <sys:String x:Key="TranslateLanguage">翻譯語言</sys:String>
     <sys:String x:Key="ImageTranslateLanguageIndependentToolTip">圖片翻譯視窗的翻譯語言與主視窗相互獨立，修改這裡不會影響主視窗。</sys:String>
     <sys:String x:Key="ImageTranslateLayoutAnalysisToolTip">選擇圖片翻譯 OCR 結果的分段與合併方式，重新執行圖片翻譯後生效。</sys:String>

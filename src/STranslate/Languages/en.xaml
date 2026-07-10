@@ -323,6 +323,10 @@
     <sys:String x:Key="Standalone_ImTranShowTextControlDescription">Show or hide the text panel on the right side.</sys:String>
     <sys:String x:Key="Standalone_ImTranWindowModeHeader">Image Translation Window Mode</sys:String>
     <sys:String x:Key="Standalone_ImTranWindowModeDescription">Choose whether image translation results open in the standalone window or compact floating window.</sys:String>
+    <sys:String x:Key="Standalone_ImTranOcrLanguageHeader">Image Translation OCR Language</sys:String>
+    <sys:String x:Key="Standalone_ImTranOcrLanguageDescription">Recognition language used during image translation OCR.</sys:String>
+    <sys:String x:Key="Standalone_ImTranCompactOcrLanguageHeader">Show Recognition Language in Compact Window</sys:String>
+    <sys:String x:Key="Standalone_ImTranCompactOcrLanguageDescription">Show the OCR recognition language selector in the compact image translation toolbar.</sys:String>
     <sys:String x:Key="Standalone_LayoutAnalysisHeader">Text Segmentation Settings</sys:String>
     <sys:String x:Key="Standalone_LayoutAnalysisDescription">Configure how recognized text blocks are segmented and merged.</sys:String>
     <sys:String x:Key="Standalone_ImTranLanguageDetector">Image Translate Language Detector</sys:String>
@@ -757,6 +761,8 @@
     <sys:String x:Key="OcrSettingsToolTip" xml:space="preserve">Left Click -> Standalone Window Settings&#10;Ctrl+Left Click -> Text Recognition Settings</sys:String>
 
     <sys:String x:Key="RecognizeLanguage">Recognize Language</sys:String>
+    <sys:String x:Key="General_ScreenshotOcrLanguageHeader">Screenshot/Silent OCR Language</sys:String>
+    <sys:String x:Key="General_ScreenshotOcrLanguageDescription">OCR recognition language used by screenshot translation and silent OCR.</sys:String>
     <sys:String x:Key="TranslateLanguage">Translate Language</sys:String>
     <sys:String x:Key="ImageTranslateLanguageIndependentToolTip">The translation language in the image translation window is independent from the main window. Changes here will not affect the main window.</sys:String>
     <sys:String x:Key="ImageTranslateLayoutAnalysisToolTip">Choose how image translation groups and merges OCR text. Rerun image translation to apply it.</sys:String>

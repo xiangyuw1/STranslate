@@ -39,7 +39,7 @@
 4. `Settings.ImageTranslateWindowMode` 决定使用 `ImageTranslateWindow` 还是 `ImageTranslateCompactWindow` 承载同一个 `ImageTranslateWindowViewModel`。
 5. `ImageTranslateWindowViewModel.ExecuteAsync(bitmap)` 清空旧状态，缓存 `_sourceImage` 并显示原图。
 6. 获取图片翻译专用 OCR：`OcrService.GetImageTranslateOcrSvcOrDefault()`。候选服务必须实现 `IOcrPlugin`，并让 `SupportBoxPoints()` 返回 `true`。
-7. 宿主用真实图片尺寸构造 `OcrRequest(data, Settings.OcrLanguage, bitmap.Width, bitmap.Height)`，插件必须返回图片像素坐标 `BoxPoints`。
+7. 宿主用真实图片尺寸构造 `OcrRequest(data, Settings.ImageTranslateOcrLanguage, bitmap.Width, bitmap.Height)`，插件必须返回图片像素坐标 `BoxPoints`。
 8. OCR 返回后调用 `Utilities.PrepareOcrResult()`；如果插件只填充结构化 `Regions`，宿主会投影出兼容的 `OcrContents`。
 9. 原始 OCR 结果用于图片文本选中：`OcrWordBuilder.CreateFromOcrContents(_lastOcrResult.OcrContents)` 生成原文选中块。
 10. `ApplyLayoutAnalysis()` 生成 `OcrLayoutBlock`，并把分析后的块投影回 `OcrResult.OcrContents`，供标注图、复制和结果文本复用。
@@ -122,6 +122,8 @@
 - `Settings.LayoutAnalysisMode` 是分段模式配置，默认 `Auto`，序列化支持 `auto`、`provider`、`smart`、`noMerge`；旧未知值归一为 `Auto`。
 - `Settings.IsImTranShowingAnnotated` 控制标注图/原图加矢量译文 Overlay 显示。
 - `Settings.IsImTranShowingTextControl` 控制图片翻译窗口文本区域显示。
+- `Settings.ImageTranslateOcrLanguage` 控制图片翻译 OCR 识别语言，独立于截图翻译、静默 OCR 和 OCR 窗口。
+- `Settings.IsImageTranslateCompactOcrLanguageVisible` 控制精简窗口底部工具条是否显示图片翻译 OCR 识别语言选框，默认隐藏。
 - `Settings.ImageTranslateSourceLang` / `ImageTranslateTargetLang` 控制图片翻译语言。
 - `Settings.ShowImageTranslateItemInNotifyIconMenu` 控制托盘菜单是否显示图片翻译入口。
 

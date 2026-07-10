@@ -392,6 +392,16 @@
                             OffContent="{DynamicResource Disable}"
                             OnContent="{DynamicResource Enable}" />
                     </ui:SettingsCard>
+                    <ui:SettingsCard Description="{DynamicResource General_ScreenshotOcrLanguageDescription}" Header="{DynamicResource General_ScreenshotOcrLanguageHeader}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ScanType_20_Regular}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox
+                            DisplayMemberPath="Display"
+                            ItemsSource="{Binding DataProvider.LangEnums}"
+                            SelectedValue="{Binding Settings.ScreenshotOcrLanguage}"
+                            SelectedValuePath="Value" />
+                    </ui:SettingsCard>
                     <ui:SettingsCard Description="{DynamicResource General_FocusInputAfterScreenshotTranslateDescription}" Header="{DynamicResource General_FocusInputAfterScreenshotTranslate}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.CursorHover_20_Regular}" />

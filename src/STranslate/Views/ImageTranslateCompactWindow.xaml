@@ -202,10 +202,21 @@
                     DropDownOpened="OnToolbarComboBoxDropDownOpened"
                     ItemTemplate="{StaticResource CompactToolbarDropdownDataComboBoxItemTemplate}"
                     ItemsSource="{Binding DataProvider.LangEnums}"
+                    SelectedValue="{Binding Settings.ImageTranslateOcrLanguage}"
+                    SelectedValuePath="Value"
+                    Style="{StaticResource CompactToolbarComboBoxStyle}"
+                    ToolTip="{DynamicResource RecognizeLanguage}"
+                    Visibility="{Binding Settings.IsImageTranslateCompactOcrLanguageVisible, Converter={cnvt:BoolToVisibilityConverter}}" />
+                <ComboBox
+                    MaxWidth="100"
+                    DropDownClosed="OnToolbarComboBoxDropDownClosed"
+                    DropDownOpened="OnToolbarComboBoxDropDownOpened"
+                    ItemTemplate="{StaticResource CompactToolbarDropdownDataComboBoxItemTemplate}"
+                    ItemsSource="{Binding DataProvider.LangEnums}"
                     SelectedValue="{Binding Settings.ImageTranslateSourceLang}"
                     SelectedValuePath="Value"
                     Style="{StaticResource CompactToolbarComboBoxStyle}"
-                    ToolTip="{DynamicResource RecognizeLanguage}" />
+                    ToolTip="{DynamicResource ImageTranslateLanguageIndependentToolTip}" />
                 <TextBlock
                     VerticalAlignment="Center"
                     FontSize="{DynamicResource STControlFontSize14}"

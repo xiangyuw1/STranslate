@@ -315,6 +315,10 @@
     <sys:String x:Key="Standalone_ImTranShowTextControlDescription">右側のテキストボックスの表示/非表示</sys:String>
     <sys:String x:Key="Standalone_ImTranWindowModeHeader">画像翻訳ウィンドウモード</sys:String>
     <sys:String x:Key="Standalone_ImTranWindowModeDescription">画像翻訳結果を独立ウィンドウまたはコンパクトなフローティングウィンドウで表示します。</sys:String>
+    <sys:String x:Key="Standalone_ImTranOcrLanguageHeader">画像翻訳 OCR 認識言語</sys:String>
+    <sys:String x:Key="Standalone_ImTranOcrLanguageDescription">画像翻訳の OCR 段階で使用する認識言語です。</sys:String>
+    <sys:String x:Key="Standalone_ImTranCompactOcrLanguageHeader">コンパクトウィンドウに認識言語を表示</sys:String>
+    <sys:String x:Key="Standalone_ImTranCompactOcrLanguageDescription">画像翻訳コンパクトウィンドウの下部ツールバーに OCR 認識言語の選択を表示します。</sys:String>
     <sys:String x:Key="Standalone_LayoutAnalysisHeader">テキスト分割設定</sys:String>
     <sys:String x:Key="Standalone_LayoutAnalysisDescription">認識結果の分割と結合方法を設定します。</sys:String>
     <sys:String x:Key="Standalone_ImTranLanguageDetector">画像翻訳言語検出器</sys:String>
@@ -738,6 +742,8 @@
     <sys:String x:Key="OcrSettingsToolTip" xml:space="preserve">左クリック -> 独立設定画面&#10;Ctrl+左クリック -> 文字認識設定</sys:String>
 
     <sys:String x:Key="RecognizeLanguage">認識言語</sys:String>
+    <sys:String x:Key="General_ScreenshotOcrLanguageHeader">スクリーンショット/サイレント OCR 認識言語</sys:String>
+    <sys:String x:Key="General_ScreenshotOcrLanguageDescription">スクリーンショット翻訳とサイレント OCR で使用する OCR 認識言語です。</sys:String>
     <sys:String x:Key="TranslateLanguage">翻訳言語</sys:String>
     <sys:String x:Key="ImageTranslateLanguageIndependentToolTip">画像翻訳ウィンドウの翻訳言語はメインウィンドウとは独立しています。ここで変更してもメインウィンドウには影響しません。</sys:String>
     <sys:String x:Key="ImageTranslateLayoutAnalysisToolTip">画像翻訳の OCR テキストの分割・結合方法を選択します。再実行後に反映されます。</sys:String>

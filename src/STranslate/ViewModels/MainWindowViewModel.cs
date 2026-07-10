@@ -1077,7 +1077,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             CursorHelper.Execute();
             var data = Utilities.ToBytes(bitmap, Settings.GetImageFormat());
             var result = await ocrPlugin.RecognizeAsync(
-                new OcrRequest(data, LangEnum.Auto, bitmap.Width, bitmap.Height),
+                new OcrRequest(data, Settings.ScreenshotOcrLanguage, bitmap.Width, bitmap.Height),
                 cancellationToken);
             Utilities.PrepareOcrResult(result);
 
@@ -1225,7 +1225,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             CursorHelper.Execute();
             var data = Utilities.ToBytes(bitmap, Settings.GetImageFormat());
             var result = await ocrPlugin.RecognizeAsync(
-                new OcrRequest(data, LangEnum.Auto, bitmap.Width, bitmap.Height),
+                new OcrRequest(data, Settings.ScreenshotOcrLanguage, bitmap.Width, bitmap.Height),
                 cancellationToken);
             Utilities.PrepareOcrResult(result);
             if (result.IsSuccess && !string.IsNullOrEmpty(result.Text))

@@ -93,6 +93,7 @@
 - OCR 插件如果希望参与图片翻译，override `SupportBoxPoints()` 返回 `true` 并为 OCR 内容返回图片像素坐标 `BoxPoints`。
 
 ### 官方内置插件维护要点
+- 通用登记要求：新增官方内置或预装插件时，必须将其 `plugin.json` 中的 `PluginID` 添加到 `STranslate/Core/Constant.cs` 的 `PrePluginIDs`；该列表用于判断插件是否安装到预装目录，普通社区插件无需登记。
 - Microsoft 内置翻译：
   - `Settings.RequestMode` 支持 `Default` 与 `EdgeToken` 两种请求方案。
   - `EdgeToken` 模式会缓存授权 Token，并在过期前刷新。
@@ -125,6 +126,7 @@
   2. 实现目标接口或基类。
   3. 提供 `plugin.json` 与图标。
   4. 在 `Init` 中加载配置并在设置 UI 中可编辑。
+  5. 如果属于官方内置或预装插件，将 `plugin.json` 中的 `PluginID` 添加到 `STranslate/Core/Constant.cs` 的 `PrePluginIDs`。
 - 增加插件能力参数：先扩展插件 `Settings` 模型，再在 `GetSettingUI()` 对应 VM 中读写并调用 `SaveSettingStorage`。
 - 处理长任务取消：所有 `TranslateAsync` / `RecognizeAsync` / `SaveAsync` 应尊重 `CancellationToken`。
 - 兼容升级：保持 `PluginID` 稳定，升级仅提升 `Version`，避免被识别为新插件。

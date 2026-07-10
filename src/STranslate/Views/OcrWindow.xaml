@@ -311,7 +311,7 @@
                         HorizontalContentAlignment="Center"
                         DisplayMemberPath="Display"
                         ItemsSource="{Binding DataProvider.LangEnums}"
-                        SelectedValue="{Binding Settings.OcrLanguage}"
+                        SelectedValue="{Binding Settings.OcrWindowOcrLanguage}"
                         SelectedValuePath="Value" />
                     <Button Command="{Binding ToggleTextControlCommand}">
                         <Button.Style>

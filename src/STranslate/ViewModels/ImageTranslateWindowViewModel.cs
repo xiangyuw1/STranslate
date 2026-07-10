@@ -183,7 +183,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
             var data = Utilities.ToBytes(bitmap, Settings.GetImageFormat());
             _lastOcrResult = await ocrSvc.RecognizeAsync(
-                new OcrRequest(data, Settings.OcrLanguage, bitmap.Width, bitmap.Height),
+                new OcrRequest(data, Settings.ImageTranslateOcrLanguage, bitmap.Width, bitmap.Height),
                 cancellationToken);
             Utilities.PrepareOcrResult(_lastOcrResult);
 

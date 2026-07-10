@@ -164,7 +164,7 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
             }
 
             _lastOcrResult = await ocrSvc.RecognizeAsync(
-                new OcrRequest(data, Settings.OcrLanguage, bitmap.Width, bitmap.Height),
+                new OcrRequest(data, Settings.OcrWindowOcrLanguage, bitmap.Width, bitmap.Height),
                 cancellationToken);
             Utilities.PrepareOcrResult(_lastOcrResult);
 

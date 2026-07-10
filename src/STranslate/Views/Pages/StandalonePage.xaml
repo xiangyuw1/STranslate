@@ -90,6 +90,17 @@
                         OffContent="{DynamicResource Disable}"
                         OnContent="{DynamicResource Enable}" />
                 </ui:SettingsCard>
+
+                <ui:SettingsCard Description="{DynamicResource Standalone_OcrLanguageDescription}" Header="{DynamicResource Standalone_OcrLanguageHeader}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ScanType_20_Regular}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ComboBox
+                        DisplayMemberPath="Display"
+                        ItemsSource="{Binding DataProvider.LangEnums}"
+                        SelectedValue="{Binding Settings.OcrWindowOcrLanguage}"
+                        SelectedValuePath="Value" />
+                </ui:SettingsCard>
                 <!--#endregion-->
 
                 <!--#region 图片翻译-->
@@ -107,6 +118,27 @@
                         ItemsSource="{Binding DataProvider.ImageTranslateWindowModes}"
                         SelectedValue="{Binding Settings.ImageTranslateWindowMode}"
                         SelectedValuePath="Value" />
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Description="{DynamicResource Standalone_ImTranOcrLanguageDescription}" Header="{DynamicResource Standalone_ImTranOcrLanguageHeader}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ScanType_20_Regular}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ComboBox
+                        DisplayMemberPath="Display"
+                        ItemsSource="{Binding DataProvider.LangEnums}"
+                        SelectedValue="{Binding Settings.ImageTranslateOcrLanguage}"
+                        SelectedValuePath="Value" />
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Description="{DynamicResource Standalone_ImTranCompactOcrLanguageDescription}" Header="{DynamicResource Standalone_ImTranCompactOcrLanguageHeader}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.TranslateAuto_20_Regular}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ui:ToggleSwitch
+                        IsOn="{Binding Settings.IsImageTranslateCompactOcrLanguageVisible}"
+                        OffContent="{DynamicResource Hide}"
+                        OnContent="{DynamicResource Show}" />
                 </ui:SettingsCard>
 
                 <ui:SettingsCard Description="{DynamicResource Standalone_ImTranShowAnnotatedDescription}" Header="{DynamicResource Standalone_ImTranShowAnnotatedHeader}">

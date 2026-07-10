@@ -89,6 +89,8 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool FocusInputAfterScreenshotTranslate { get; set; } = true;
 
+    [ObservableProperty] public partial LangEnum ScreenshotOcrLanguage { get; set; } = LangEnum.Auto;
+
     [ObservableProperty] public partial int HttpTimeout { get; set; } = 30;
 
     [ObservableProperty] public partial LangEnum SourceLang { get; set; } = LangEnum.Auto;
@@ -229,7 +231,7 @@ public partial class Settings : ObservableObject
 
     #region OCR Settings
 
-    [ObservableProperty] public partial LangEnum OcrLanguage { get; set; } = LangEnum.Auto;
+    [ObservableProperty] public partial LangEnum OcrWindowOcrLanguage { get; set; } = LangEnum.Auto;
     [ObservableProperty] public partial bool IsOcrShowingAnnotated { get; set; } = false;
     [ObservableProperty] public partial bool IsOcrShowingTextControl { get; set; } = false;
     [ObservableProperty] public partial double OcrWindowWidth { get; set; } = 600;
@@ -268,6 +270,8 @@ public partial class Settings : ObservableObject
     [ObservableProperty] public partial ImageTranslateWindowMode ImageTranslateWindowMode { get; set; } = ImageTranslateWindowMode.Standalone;
     [ObservableProperty] public partial bool IsImTranShowingAnnotated { get; set; } = false;
     [ObservableProperty] public partial bool IsImTranShowingTextControl { get; set; } = false;
+    [ObservableProperty] public partial LangEnum ImageTranslateOcrLanguage { get; set; } = LangEnum.Auto;
+    [ObservableProperty] public partial bool IsImageTranslateCompactOcrLanguageVisible { get; set; } = false;
     [ObservableProperty] public partial LangEnum ImageTranslateSourceLang { get; set; } = LangEnum.Auto;
     [ObservableProperty] public partial LangEnum ImageTranslateTargetLang { get; set; } = LangEnum.Auto;
 
