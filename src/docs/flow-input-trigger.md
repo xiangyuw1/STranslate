@@ -59,9 +59,9 @@
 
 ### 触发后的窗口置前
 - 全局热键由 STranslate 接收并不代表 STranslate 已是前台应用；触发时浏览器、编辑器或 Explorer 通常仍持有前台窗口。
-- `ExecuteTranslate()`、`InputClear()` 及其他显示入口最终统一调用 `Win32Helper.SetForegroundWindow()`，再执行 WPF `Activate()` / `Focus()`。
-- 不区分“用户手动触发”和“后台或外部调用”，也不在 ViewModel、热键回调和窗口打开器之间传递激活模式。这样可避免 Windows 前台锁导致 `Ctrl+C+C` 或自定义划词热键已执行但主窗口未置前。
-- `Win32Helper.SetForegroundWindow()` 采用两阶段策略：先直接尝试，失败后再通过 `AttachThreadInput` 强制。后台触发（如鼠标划词、剪贴板监听）通常没有前台权限，直接调用会失败，从而避免强制抢夺焦点、打断 Explorer 文件重命名等文本编辑操作；快捷键/托盘等主动触发场景则通常能稳定置前。
+- `ExecuteTranslate()`、`InputClear()` 及其他显示入口最终统一调用 `Win32Helper.ActivateForegroundWindow()`，再执行 WPF `Activate()` / `Focus()`。
+- 热键、托盘、Ctrl+C+C、鼠标划词、剪贴板监听和第二实例唤醒均处于默认 `Normal` 上下文，只调用 Win32 `SetForegroundWindow`；普通调用失败时不会升级为 `AttachThreadInput`，避免打断 Explorer 文件重命名等文本编辑操作。
+- HTTP `ExternalCallService` 会为完整 action 压入 `ForceForeground` 上下文；相同的显示入口会自动改用线程挂接强制置前，无需在 ViewModel、热键回调或窗口打开器之间传递激活参数。
 - 主窗口失焦时按 `HideWhenDeactivated` 自动隐藏；置顶窗口不受此逻辑影响。
 
 ### 从入口到结果：取词超时、后处理与失败回退
@@ -136,4 +136,4 @@
 - 调整全屏忽略策略：统一改 `HotkeyMapper.ShouldSkipHotkey()` 与 `HotkeySettings.WithFullscreenCheck()`。
 - 新增模拟复制类取词入口：必须接入 `SelectedTextFetchTimeoutMs` 并明确 `TextSeparatorHandleScope`，避免新增入口与现有入口处理不一致。
 - 新增输入翻译入口：优先复用 `InputClear()`，确保隐藏输入框时仍会临时显示输入区并正确聚焦。
-- 调整触发后的窗口激活：保持所有显示入口统一置前；需要弱化后台触发的焦点抢夺时，统一修改 `Win32Helper.SetForegroundWindow()` 的两阶段策略，不在热键回调中增加激活分支。
+- 调整触发后的窗口激活：保持所有显示入口调用 `ActivateForegroundWindow()`；普通/强制策略由 `WindowActivationContext` 统一选择，不在热键回调中增加激活分支。

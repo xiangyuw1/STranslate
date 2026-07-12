@@ -1767,7 +1767,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         UpdatePosition();
         UpdateMainWindowMaxHeightConstraint();
 
-        Win32Helper.SetForegroundWindow(MainWindow);
+        Win32Helper.ActivateForegroundWindow(MainWindow);
 
         MainWindow.Activate();
 

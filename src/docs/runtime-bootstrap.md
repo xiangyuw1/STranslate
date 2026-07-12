@@ -18,7 +18,11 @@
 - `STranslate/Views/SettingsWindow.xaml.cs`
   - `Navigate()`：设置页导航入口与导航状态同步。
 - `STranslate/Helpers/Win32Helper.cs`
-  - `SetForegroundWindow()`：统一的窗口置前入口。先按系统前台规则直接尝试；失败后再通过 `AttachThreadInput` 强制置前，兼顾后台触发场景的兼容性与主动触发场景的稳定性。
+  - `ActivateForegroundWindow()`：统一的窗口置前入口，根据 `WindowActivationContext` 选择普通或强制激活。
+  - `SetForegroundWindow()`：只调用 Win32 `SetForegroundWindow`，遵循系统前台权限规则，不自动升级为线程挂接。
+  - `ForceSetForegroundWindow()`：临时通过 `AttachThreadInput` 挂接前台线程后强制置前，仅供外部调用上下文使用。
+- `STranslate/Helpers/WindowActivationContext.cs`
+  - 使用 `AsyncLocal` 保存当前激活模式；默认普通，HTTP 外部调用期间切换为强制模式。
 - `STranslate/Helpers/SingletonWindowOpener.cs`
   - `Open()` / `OpenAsync()` / `OpenPreparedAsync()`：新建或复用单实例窗口，并统一恢复、显示、置前和聚焦。
 - `STranslate/Views/WelcomeSetupWindow.xaml.cs`
@@ -68,10 +72,12 @@
 ### 从入口到结果：窗口显示与前台激活
 1. 主窗口显示统一进入 `MainWindowViewModel.Show()`；设置、历史、OCR、图片翻译及手动欢迎向导等单实例窗口统一经 `SingletonWindowOpener` 新建或复用；启动期欢迎向导与临时 MessageBox owner 直接显示后也使用同一前台帮助方法。
 2. `SingletonWindowOpener` 先恢复最小化窗口，必要时设置主题并调用 `Show()`；主窗口则先恢复可见性、布局约束与位置。
-3. 两条路径都统一调用 `Win32Helper.SetForegroundWindow()`，不区分手动热键、后台服务或外部调用来源，也不传递激活模式参数。
-4. `SetForegroundWindow()` 采用两阶段策略：首先直接调用 Win32 `SetForegroundWindow`，尊重 Windows 前台权限规则；若失败且目标窗口与前台窗口属于不同线程，则临时挂接前台线程输入队列后再次尝试，最后恢复最小化窗口并在仍失败时用 `BringWindowToTop` 兜底。
-5. Win32 置前后继续调用 WPF `Activate()`；单实例窗口还会调用 `Focus()`，保证新建窗口和已存在窗口使用相同的前台语义。
-6. 主窗口 `OnDeactivated()` 按 `HideWhenDeactivated` 决定是否自动隐藏；置顶窗口不受此逻辑影响。
+3. 两条路径都统一调用 `Win32Helper.ActivateForegroundWindow()`；调用方不传递激活参数，由 `WindowActivationContext` 决定实际策略。
+4. 默认上下文使用普通 `SetForegroundWindow()`，适用于热键、托盘、鼠标划词、剪贴板监听和第二实例唤醒；普通调用失败时不会升级为线程挂接，避免强制抢夺其他应用的编辑焦点。
+5. `ExternalCallService` 执行 HTTP action 时压入 `ForceForeground` 上下文，整个异步调用链内产生的主窗口、设置、历史、OCR、图片翻译窗口及异常提示都改用 `ForceSetForegroundWindow()`。
+6. 强制策略只在前台线程与当前 UI 线程不同时尝试 `AttachThreadInput`，并在 `finally` 中解除成功建立的挂接；同时保留最小化恢复和 `BringWindowToTop` 兜底。
+7. Win32 置前后继续调用 WPF `Activate()`；单实例窗口还会调用 `Focus()`，保证新建窗口和已存在窗口使用相同的前台语义。
+8. 主窗口 `OnDeactivated()` 按 `HideWhenDeactivated` 决定是否自动隐藏；置顶窗口不受此逻辑影响。
 
 ### 窗口生命周期要点
 - `MainWindow`：
@@ -79,9 +85,10 @@
   - `OnContentRendered()` 决定首次显示或隐藏。
   - `OnDeactivated()` 可按 `HideWhenDeactivated` 自动隐藏，避免 Alt-Tab 残留。
   - 前台激活与失焦隐藏是两条独立链路；`HideWhenDeactivated` 决定是否隐藏，置顶窗口不会触发隐藏。
-  - `Win32Helper.SetForegroundWindow()` 的两阶段策略可在多数后台触发场景（如鼠标划词）下避免强制抢夺焦点，从而减少打断 Explorer 文件重命名等文本编辑操作的概率，但无法在所有场景下完全避免。
+  - 非 HTTP 入口只使用普通 `SetForegroundWindow()`，即使受 Windows 前台锁限制而置前失败，也不会挂接前台线程强抢焦点；HTTP 外部调用则通过独立上下文保证其派生窗口能够强制置前。
 - `SettingsWindow`：
   - `Navigate(tag)` 根据页面类型从 DI 取页实例并注入到 `RootFrame.Content`；页面及页面 VM 为 `Scoped` 注册，统一从窗口独有的 `IServiceScope` 解析。
+  - 页面切换、`OnClosing` 模板拆除和 `OnClosed` 视觉树释放统一通过导航保护执行，确保 WPF 清空 `PasswordBox` 时不会把框架行为误判为用户清空密码；保护状态支持嵌套，并在异常路径恢复。
   - `Ctrl+F` 由 `OnKeyDown` 路由到当前页面的搜索框。
   - 窗口构造时 `Ioc.Default.CreateScope()` 建立独立 scope；`OnClosed` 先解绑导航事件、清空 `RootFrame.Content`，再经 `ModernWindowLifecycle.Release(this, _serviceScope.Dispose)` 拆除视觉树并释放 scope，触发已解析页面 VM（如 `HistoryViewModel`）的 `Dispose()` 取消全局订阅，避免 root scope 长期跟踪导致泄漏。
   - `OnClosing` 通过 `ModernWindowLifecycle.DetachModernWindowStyle()` 解除 iNKORE titlebar 的属性描述符监听；`OnClosed` 清空 `DataContext` 和内容树。
@@ -106,6 +113,8 @@
 - `StartMode`：普通启动、提权启动、计划任务启动。
 - `HotkeySettings`：全局热键、软件内热键、增量翻译键、Ctrl+CC 配置。
 - `ServiceSettings`：服务实例列表与特殊服务 ID（替换翻译、图片翻译）。
+- `WindowActivationMode`：`Normal` / `ForceForeground` 两种窗口激活策略。
+- `WindowActivationContext`：基于 `AsyncLocal` 的激活模式作用域，支持嵌套、异步传播和退出恢复。
 - `DataLocation`：便携/漫游目录选择、日志/缓存/配置路径、`InfoFilePath` 与 `BackupFilePath`。
 
 ## 关键文件
@@ -114,6 +123,7 @@
 - `STranslate/Views/MainWindow.xaml.cs`
 - `STranslate/Views/SettingsWindow.xaml.cs`
 - `STranslate/Helpers/Win32Helper.cs`
+- `STranslate/Helpers/WindowActivationContext.cs`
 - `STranslate/Helpers/SingletonWindowOpener.cs`
 - `STranslate/Helpers/ModernWindowLifecycle.cs`
 - `STranslate/Core/AppMessageBox.cs`
@@ -125,7 +135,7 @@
 - 新增启动期服务：在 `App()` 的 `ConfigureServices` 注册，并在 `OnStartup()` 明确初始化顺序。
 - 增加全局异常策略：优先放到 `RegisterDispatcherUnhandledException` / `RegisterTaskSchedulerUnhandledException`。
 - 调整窗口初始行为：优先改 `MainWindow.OnContentRendered()` 与 `MainWindowViewModel.UpdatePosition()` 配合逻辑。
-- 调整窗口置前行为：统一修改 `Win32Helper.SetForegroundWindow()` 或调用方的显示时序；不要重新引入按触发来源区分的激活模式。
+- 调整窗口置前行为：普通/强制 Win32 细节统一修改 `Win32Helper`；来源边界统一修改 `WindowActivationContext` 与 `ExternalCallService`，不要在具体热键或窗口命令中增加来源分支。
 - 调整主窗口失焦自动隐藏：同步检查 `MainWindowViewModel.Show()`、`MainWindow.OnDeactivated()` 与 `HideWhenDeactivated`。
 - 调整首次向导：优先改 `App` 中启动前配置文件存在性判断、主窗口创建时机和 `WelcomeSetupWindow`，避免用额外设置项控制是否已完成。
 - 设置页新增导航项：同步修改 `SettingsWindow.xaml` 菜单与 `SettingsWindow.xaml.cs` 的 `Navigate` 映射。

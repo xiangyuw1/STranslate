@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.ViewModels;
@@ -7,8 +6,6 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.UI.Accessibility;
 using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace STranslate.Views;
@@ -23,18 +20,13 @@ public partial class MainWindow : IDisposable
 
     private readonly MainWindowViewModel _viewModel;
     private readonly Settings _settings;
-    private readonly ILogger<MainWindow> _logger;
-    private readonly WINEVENTPROC _foregroundChangedProc;
     private bool _disposed = false;
     private HwndSource? _hwndSource;
-    private HWINEVENTHOOK _foregroundChangedHook;
 
     public MainWindow()
     {
         _viewModel = Ioc.Default.GetRequiredService<MainWindowViewModel>();
         _settings = Ioc.Default.GetRequiredService<Settings>();
-        _logger = Ioc.Default.GetRequiredService<ILogger<MainWindow>>();
-        _foregroundChangedProc = OnForegroundChanged;
 
         DataContext = _viewModel;
 
@@ -49,7 +41,6 @@ public partial class MainWindow : IDisposable
         _viewModel.UpdatePosition(_settings.HideOnStartup);
 
         _hwndSource = Win32Helper.AddWndProcHook(this, WndProc);
-        RegisterForegroundChangedHook();
     }
 
 
@@ -62,7 +53,7 @@ public partial class MainWindow : IDisposable
         else
         {
             _viewModel.Show();
-            Win32Helper.SetForegroundWindow(this);
+            Win32Helper.ActivateForegroundWindow(this);
         }
 
         base.OnContentRendered(e);
@@ -82,7 +73,6 @@ public partial class MainWindow : IDisposable
 
     private void OnClosed(object sender, EventArgs e)
     {
-        UnregisterForegroundChangedHook();
         _hwndSource?.RemoveHook(WndProc);
         _hwndSource = null;
     }
@@ -101,63 +91,6 @@ public partial class MainWindow : IDisposable
         }
 
         return IntPtr.Zero;
-    }
-
-    private void RegisterForegroundChangedHook()
-    {
-        if (!_foregroundChangedHook.IsNull)
-            return;
-
-        _foregroundChangedHook = PInvoke.SetWinEventHook(
-            PInvoke.EVENT_SYSTEM_FOREGROUND,
-            PInvoke.EVENT_SYSTEM_FOREGROUND,
-            HMODULE.Null,
-            _foregroundChangedProc,
-            0,
-            0,
-            PInvoke.WINEVENT_OUTOFCONTEXT);
-
-        if (_foregroundChangedHook.IsNull)
-        {
-            _logger.LogWarning("Failed to register foreground changed hook.");
-        }
-    }
-
-    private void UnregisterForegroundChangedHook()
-    {
-        if (_foregroundChangedHook.IsNull)
-            return;
-
-        if (!PInvoke.UnhookWinEvent(_foregroundChangedHook))
-            _logger.LogWarning("Failed to unregister foreground changed hook.");
-
-        _foregroundChangedHook = HWINEVENTHOOK.Null;
-    }
-
-    private void OnForegroundChanged(
-        HWINEVENTHOOK hWinEventHook,
-        uint eventType,
-        HWND hwnd,
-        int idObject,
-        int idChild,
-        uint dwEventThread,
-        uint dwmsEventTime)
-    {
-        Dispatcher.BeginInvoke(() => HandleForegroundChanged((nint)hwnd), DispatcherPriority.Background);
-    }
-
-    private void HandleForegroundChanged(nint foregroundWindowHandle)
-    {
-        var mainWindowHandle = new WindowInteropHelper(this).Handle;
-        if (!MainWindowAutoHidePolicy.ShouldHideOnForegroundChanged(
-                _settings.HideWhenDeactivated,
-                _viewModel.IsTopmost,
-                Visibility == Visibility.Visible,
-                mainWindowHandle,
-                foregroundWindowHandle))
-            return;
-
-        _viewModel.Hide();
     }
 
     private bool TryHandleHorizontalResizeHitTest(IntPtr lParam, out IntPtr hitTestResult)

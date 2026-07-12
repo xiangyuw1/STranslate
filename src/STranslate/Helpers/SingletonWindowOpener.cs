@@ -83,7 +83,7 @@ public static class SingletonWindowOpener
             window.Show();
         }
 
-        Win32Helper.SetForegroundWindow(window);
+        Win32Helper.ActivateForegroundWindow(window);
 
         window.Activate();
         window.Focus();

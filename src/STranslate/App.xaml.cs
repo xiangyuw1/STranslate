@@ -320,7 +320,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
             ThemeManager.SetRequestedTheme(welcomeWindow, _settings.NonNull().ColorScheme);
             welcomeWindow.ContentRendered += (_, _) =>
             {
-                Win32Helper.SetForegroundWindow(welcomeWindow);
+                Win32Helper.ActivateForegroundWindow(welcomeWindow);
                 welcomeWindow.Activate();
             };
             welcomeWindow.ShowDialog();
@@ -501,7 +501,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         var welcomeWindow = Current.Windows.OfType<WelcomeSetupWindow>().FirstOrDefault();
         if (welcomeWindow != null)
         {
-            Win32Helper.SetForegroundWindow(welcomeWindow);
+            Win32Helper.ActivateForegroundWindow(welcomeWindow);
             welcomeWindow.Activate();
             return;
         }
