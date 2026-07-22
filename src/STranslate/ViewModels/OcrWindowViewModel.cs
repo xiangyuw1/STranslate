@@ -336,7 +336,8 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void SaveImage()
     {
-        if (_sourceImage is null)
+        var displayImage = DisplayImage;
+        if (displayImage is null)
         {
             _snackbar.ShowWarning(_i18n.GetTranslation("NoImageToSave"));
             return;
@@ -357,7 +358,7 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
         try
         {
             var encoder = CreateBitmapEncoder(saveFileDialog.FileName);
-            encoder.Frames.Add(BitmapFrame.Create(_sourceImage));
+            encoder.Frames.Add(BitmapFrame.Create(displayImage));
 
             using var fs = new FileStream(saveFileDialog.FileName, FileMode.Create);
             encoder.Save(fs);

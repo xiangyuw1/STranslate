@@ -46,6 +46,7 @@
 3. OCR 返回后调用 `Utilities.PrepareOcrResult()`；如果插件只填充结构化 `Regions`，宿主会投影出兼容的 `OcrContents`。
 4. 生成原图/标注图、`OcrWords` 和 `Result` 文本。
 5. `Settings.IsOcrShowingAnnotated` 决定显示原图还是标注图。
+6. “保存图片”捕获命令触发时的 `DisplayImage`，因此原图模式保存原图，标注模式保存当前 OCR 标注图；窗口缩放和文字选择高亮不会进入结果。
 
 ## OCR 结果模型
 - `OcrResult.OcrContents`：兼容旧插件的扁平 OCR 文本块列表。

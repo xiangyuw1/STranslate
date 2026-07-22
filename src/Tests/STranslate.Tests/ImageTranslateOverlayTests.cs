@@ -116,6 +116,68 @@ public class ImageTranslateOverlayTests
         });
     }
 
+    [Fact]
+    public void RenderDisplayImageWithoutOverlayReturnsCurrentDisplayImage()
+    {
+        RunOnStaThread(() =>
+        {
+            var displayImage = CreateSolidBitmap(240, 120, Colors.CornflowerBlue);
+
+            var withoutDocument = ImageTranslateRenderer.RenderDisplayImage(displayImage, null);
+            var withEmptyDocument = ImageTranslateRenderer.RenderDisplayImage(
+                displayImage,
+                ImageTranslateOverlayDocument.Empty);
+
+            Assert.Same(displayImage, withoutDocument);
+            Assert.Same(displayImage, withEmptyDocument);
+        });
+    }
+
+    [Fact]
+    public void RenderDisplayImageComposesOverlayAtOriginalResolution()
+    {
+        RunOnStaThread(() =>
+        {
+            var source = CreateSolidBitmap(240, 120, Colors.CornflowerBlue);
+            var document = ImageTranslateRenderer.CreateTranslatedOverlay(
+                [CreateBlock("Translated", left: 30, top: 25, width: 160, height: 50)],
+                ImageTranslateOverlayTheme.Light);
+
+            var result = ImageTranslateRenderer.RenderDisplayImage(source, document);
+
+            Assert.Equal(source.PixelWidth, result.PixelWidth);
+            Assert.Equal(source.PixelHeight, result.PixelHeight);
+            Assert.Equal(ReadPixel(source, 5, 5), ReadPixel(result, 5, 5));
+            Assert.False(ReadPixels(source).SequenceEqual(ReadPixels(result)));
+            Assert.True(result.IsFrozen);
+        });
+    }
+
+    [Fact]
+    public void RenderDisplayImageSupportsLargeDarkChineseOverlay()
+    {
+        RunOnStaThread(() =>
+        {
+            var source = CreateSolidBitmap(1920, 240, Colors.White);
+            var document = ImageTranslateRenderer.CreateTranslatedOverlay(
+                [
+                    CreateBlock(
+                        "我们穿越荆棘和玫瑰的旅程",
+                        left: 149.648468,
+                        top: 85.732590,
+                        width: 1568.743286,
+                        height: 78.889755)
+                ],
+                ImageTranslateOverlayTheme.Dark);
+
+            var result = ImageTranslateRenderer.RenderDisplayImage(source, document);
+
+            Assert.Equal(1920, result.PixelWidth);
+            Assert.Equal(240, result.PixelHeight);
+            Assert.True(RenderHasDarkPixels(result));
+        });
+    }
+
     private static bool RenderHasVisiblePixels(FrameworkElement element, int width, int height)
     {
         var pixels = RenderPixels(element, width, height);
@@ -124,7 +186,14 @@ public class ImageTranslateOverlayTests
 
     private static bool RenderHasDarkPixels(FrameworkElement element, int width, int height)
     {
-        var pixels = RenderPixels(element, width, height);
+        return HasDarkPixels(RenderPixels(element, width, height));
+    }
+
+    private static bool RenderHasDarkPixels(BitmapSource bitmap) =>
+        HasDarkPixels(ReadPixels(bitmap));
+
+    private static bool HasDarkPixels(byte[] pixels)
+    {
         for (var index = 0; index < pixels.Length; index += 4)
         {
             var blue = pixels[index];
@@ -150,6 +219,50 @@ public class ImageTranslateOverlayTests
         var pixels = new byte[width * height * 4];
         bitmap.CopyPixels(pixels, width * 4, 0);
         return pixels;
+    }
+
+    private static BitmapSource CreateSolidBitmap(int width, int height, Color color)
+    {
+        var stride = width * 4;
+        var pixels = new byte[stride * height];
+        for (var index = 0; index < pixels.Length; index += 4)
+        {
+            pixels[index] = color.B;
+            pixels[index + 1] = color.G;
+            pixels[index + 2] = color.R;
+            pixels[index + 3] = color.A;
+        }
+
+        var bitmap = BitmapSource.Create(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            pixels,
+            stride);
+        bitmap.Freeze();
+        return bitmap;
+    }
+
+    private static byte[] ReadPixels(BitmapSource bitmap)
+    {
+        var stride = bitmap.PixelWidth * 4;
+        var pixels = new byte[stride * bitmap.PixelHeight];
+        bitmap.CopyPixels(pixels, stride, 0);
+        return pixels;
+    }
+
+    private static Color ReadPixel(BitmapSource bitmap, int x, int y)
+    {
+        var pixels = ReadPixels(bitmap);
+        var index = (y * bitmap.PixelWidth + x) * 4;
+        return Color.FromArgb(
+            pixels[index + 3],
+            pixels[index + 2],
+            pixels[index + 1],
+            pixels[index]);
     }
 
     private static OcrLayoutBlock CreateBlock(

@@ -1,4 +1,5 @@
 using STranslate.Core;
+using STranslate.Helpers;
 using System.Windows;
 using System.Windows.Media;
 
@@ -29,25 +30,6 @@ public sealed class ImageTranslateOverlay : FrameworkElement
         if (Document is not { IsEmpty: false } document)
             return;
 
-        // 先统一绘制背景，避免后一个块的背景覆盖前一个块的译文。
-        foreach (var item in document.Items)
-        {
-            drawingContext.DrawRoundedRectangle(
-                item.BackgroundBrush,
-                null,
-                item.Plan.OverlayRect,
-                item.Plan.CornerRadius,
-                item.Plan.CornerRadius);
-        }
-
-        foreach (var item in document.Items)
-        {
-            drawingContext.PushClip(new RectangleGeometry(item.Plan.TextClipRect));
-            drawingContext.DrawText(
-                item.ShadowText,
-                new Point(item.TextPosition.X + 0.75, item.TextPosition.Y + 0.75));
-            drawingContext.DrawText(item.FormattedText, item.TextPosition);
-            drawingContext.Pop();
-        }
+        ImageTranslateRenderer.DrawTranslatedOverlay(drawingContext, document);
     }
 }

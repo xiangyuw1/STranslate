@@ -91,6 +91,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     private readonly ISnackbar _snackbar;
     private readonly INotification _notification;
     private bool _disposed;
+    internal bool IsSaveDialogOpen { get; private set; }
     // 显示/隐藏右侧文本面板时窗口宽度的换算：显示时翻倍再减去边距，隐藏时反向还原。
     private const double WidthMultiplier = 2;
     private const double WidthAdjustment = 12;
@@ -397,7 +398,9 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     [RelayCommand]
     private void SaveImage()
     {
-        if (_sourceImage is null)
+        var displayImage = DisplayImage;
+        var overlayDocument = DisplayOverlayDocument;
+        if (displayImage is null)
         {
             _snackbar.ShowWarning(_i18n.GetTranslation("NoImageToSave"));
             return;
@@ -412,15 +415,24 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             AddToRecent = true
         };
 
-        if (saveFileDialog.ShowDialog() != true)
-            return;
+        IsSaveDialogOpen = true;
+        try
+        {
+            if (saveFileDialog.ShowDialog() != true)
+                return;
+        }
+        finally
+        {
+            IsSaveDialogOpen = false;
+        }
 
         try
         {
             BitmapEncoder encoder = saveFileDialog.FileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
                         ? new PngBitmapEncoder()
                         : new JpegBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(_sourceImage));
+            var imageToSave = ImageTranslateRenderer.RenderDisplayImage(displayImage, overlayDocument);
+            encoder.Frames.Add(BitmapFrame.Create(imageToSave));
 
             using var fs = new FileStream(saveFileDialog.FileName, FileMode.Create);
             encoder.Save(fs);

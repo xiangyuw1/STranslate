@@ -45,6 +45,12 @@ public partial class ImageTranslateCompactWindow
     private CompactWindowLayout? _layout;
     private DrawingRectangle? _pendingPhysicalBounds;
 
+    private bool ShouldSuppressAutoClose =>
+        _isContextMenuOpen ||
+        _isToolbarDropDownOpen ||
+        _viewModel.IsSaveDialogOpen ||
+        _isClosing;
+
     public ImageTranslateCompactWindow()
     {
         _serviceScope = Ioc.Default.CreateScope();
@@ -81,12 +87,12 @@ public partial class ImageTranslateCompactWindow
     {
         base.OnDeactivated(e);
 
-        if (_isContextMenuOpen || _isToolbarDropDownOpen || _isClosing)
+        if (ShouldSuppressAutoClose)
             return;
 
         Dispatcher.BeginInvoke(() =>
         {
-            if (!_isContextMenuOpen && !_isToolbarDropDownOpen && !_isClosing && IsVisible && !IsActive)
+            if (!ShouldSuppressAutoClose && IsVisible && !IsActive)
                 Close();
         }, DispatcherPriority.Background);
     }
@@ -318,7 +324,8 @@ public partial class ImageTranslateCompactWindow
     private void OnImageContextMenuClosed(object sender, RoutedEventArgs e)
     {
         _isContextMenuOpen = false;
-        Activate();
+        if (!_viewModel.IsSaveDialogOpen)
+            Activate();
     }
 
     private void OnToolbarComboBoxDropDownOpened(object sender, EventArgs e) => _isToolbarDropDownOpen = true;

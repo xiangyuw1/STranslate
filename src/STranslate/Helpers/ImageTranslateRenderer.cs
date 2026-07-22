@@ -13,6 +13,70 @@ namespace STranslate.Helpers;
 internal static class ImageTranslateRenderer
 {
     /// <summary>
+    /// 按原图像素尺寸生成当前图片显示内容，供保存等一次性导出场景使用。
+    /// </summary>
+    internal static BitmapSource RenderDisplayImage(
+        BitmapSource image,
+        ImageTranslateOverlayDocument? overlayDocument)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+
+        if (overlayDocument is not { IsEmpty: false })
+            return image;
+
+        var drawingVisual = new DrawingVisual();
+        using (var drawingContext = drawingVisual.RenderOpen())
+        {
+            drawingContext.DrawImage(image, new Rect(0, 0, image.PixelWidth, image.PixelHeight));
+            DrawTranslatedOverlay(drawingContext, overlayDocument);
+        }
+
+        // Overlay 使用原图像素坐标，96 DPI 可保持一个绘制单位对应一个输出像素。
+        var renderBitmap = new RenderTargetBitmap(
+            image.PixelWidth,
+            image.PixelHeight,
+            96,
+            96,
+            PixelFormats.Pbgra32);
+        renderBitmap.Render(drawingVisual);
+        renderBitmap.Freeze();
+
+        return renderBitmap;
+    }
+
+    /// <summary>
+    /// 绘制译文覆盖层，确保屏幕显示与离屏导出使用完全相同的绘制顺序。
+    /// </summary>
+    internal static void DrawTranslatedOverlay(
+        DrawingContext drawingContext,
+        ImageTranslateOverlayDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(drawingContext);
+        ArgumentNullException.ThrowIfNull(document);
+
+        // 先统一绘制背景，避免后一个块的背景覆盖前一个块的译文。
+        foreach (var item in document.Items)
+        {
+            drawingContext.DrawRoundedRectangle(
+                item.BackgroundBrush,
+                null,
+                item.Plan.OverlayRect,
+                item.Plan.CornerRadius,
+                item.Plan.CornerRadius);
+        }
+
+        foreach (var item in document.Items)
+        {
+            drawingContext.PushClip(new RectangleGeometry(item.Plan.TextClipRect));
+            drawingContext.DrawText(
+                item.ShadowText,
+                new Point(item.TextPosition.X + 0.75, item.TextPosition.Y + 0.75));
+            drawingContext.DrawText(item.FormattedText, item.TextPosition);
+            drawingContext.Pop();
+        }
+    }
+
+    /// <summary>
     /// 生成与原图像素坐标一致的矢量译文覆盖文档。
     /// </summary>
     /// <param name="layoutBlocks">包含翻译后文本的布局块</param>

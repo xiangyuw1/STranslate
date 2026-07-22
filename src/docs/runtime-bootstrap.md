@@ -20,9 +20,9 @@
 - `STranslate/Helpers/Win32Helper.cs`
   - `ActivateForegroundWindow()`：统一的窗口置前入口，根据 `WindowActivationContext` 选择普通或强制激活。
   - `SetForegroundWindow()`：只调用 Win32 `SetForegroundWindow`，遵循系统前台权限规则，不自动升级为线程挂接。
-  - `ForceSetForegroundWindow()`：临时通过 `AttachThreadInput` 挂接前台线程后强制置前，仅供外部调用上下文使用。
+  - `ForceSetForegroundWindow()`：临时通过 `AttachThreadInput` 挂接前台线程后强制置前，仅供强制激活上下文使用。
 - `STranslate/Helpers/WindowActivationContext.cs`
-  - 使用 `AsyncLocal` 保存当前激活模式；默认普通，HTTP 外部调用期间切换为强制模式。
+  - 使用 `AsyncLocal` 保存当前激活模式；默认普通，HTTP 外部调用和 `Ctrl+C+C` UI 回调期间切换为强制模式。
 - `STranslate/Helpers/SingletonWindowOpener.cs`
   - `Open()` / `OpenAsync()` / `OpenPreparedAsync()`：新建或复用单实例窗口，并统一恢复、显示、置前和聚焦。
 - `STranslate/Views/WelcomeSetupWindow.xaml.cs`
@@ -74,7 +74,7 @@
 2. `SingletonWindowOpener` 先恢复最小化窗口，必要时设置主题并调用 `Show()`；主窗口则先恢复可见性、布局约束与位置。
 3. 两条路径都统一调用 `Win32Helper.ActivateForegroundWindow()`；调用方不传递激活参数，由 `WindowActivationContext` 决定实际策略。
 4. 默认上下文使用普通 `SetForegroundWindow()`，适用于热键、托盘、鼠标划词、剪贴板监听和第二实例唤醒；普通调用失败时不会升级为线程挂接，避免强制抢夺其他应用的编辑焦点。
-5. `ExternalCallService` 执行 HTTP action 时压入 `ForceForeground` 上下文，整个异步调用链内产生的主窗口、设置、历史、OCR、图片翻译窗口及异常提示都改用 `ForceSetForegroundWindow()`。
+5. `Ctrl+C+C` 的 UI 调度回调和 `ExternalCallService` 的 HTTP action 会在各自触发源边界压入 `ForceForeground` 上下文；作用域内产生的窗口显示都改用 `ForceSetForegroundWindow()`。
 6. 强制策略只在前台线程与当前 UI 线程不同时尝试 `AttachThreadInput`，并在 `finally` 中解除成功建立的挂接；同时保留最小化恢复和 `BringWindowToTop` 兜底。
 7. Win32 置前后继续调用 WPF `Activate()`；单实例窗口还会调用 `Focus()`，保证新建窗口和已存在窗口使用相同的前台语义。
 8. 主窗口 `OnDeactivated()` 按 `HideWhenDeactivated` 决定是否自动隐藏；置顶窗口不受此逻辑影响。
@@ -85,7 +85,7 @@
   - `OnContentRendered()` 决定首次显示或隐藏。
   - `OnDeactivated()` 可按 `HideWhenDeactivated` 自动隐藏，避免 Alt-Tab 残留。
   - 前台激活与失焦隐藏是两条独立链路；`HideWhenDeactivated` 决定是否隐藏，置顶窗口不会触发隐藏。
-  - 非 HTTP 入口只使用普通 `SetForegroundWindow()`，即使受 Windows 前台锁限制而置前失败，也不会挂接前台线程强抢焦点；HTTP 外部调用则通过独立上下文保证其派生窗口能够强制置前。
+  - 除 `Ctrl+C+C` 和 HTTP 外部调用外的入口只使用普通 `SetForegroundWindow()`，即使受 Windows 前台锁限制而置前失败，也不会挂接前台线程强抢焦点；这两个强制显示入口通过独立上下文保证其派生窗口能够强制置前。
 - `SettingsWindow`：
   - `Navigate(tag)` 根据页面类型从 DI 取页实例并注入到 `RootFrame.Content`；页面及页面 VM 为 `Scoped` 注册，统一从窗口独有的 `IServiceScope` 解析。
   - 页面切换、`OnClosing` 模板拆除和 `OnClosed` 视觉树释放统一通过导航保护执行，确保 WPF 清空 `PasswordBox` 时不会把框架行为误判为用户清空密码；保护状态支持嵌套，并在异常路径恢复。
