@@ -304,8 +304,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             checkCacheFirst,
             forcedSourceLanguage);
 
-        operation.CancellationToken.ThrowIfCancellationRequested();
-        if (!operation.IsLatestAutomatic)
+        if (cancellationToken.IsCancellationRequested || !operation.IsLatestAutomatic)
             return;
 
         // 翻译后自动复制
@@ -738,7 +737,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 operation.Text,
                 operation.SourceLang.ToString(),
                 operation.TargetLang.ToString());
-            operation.CancellationToken.ThrowIfCancellationRequested();
+            if (operation.CancellationToken.IsCancellationRequested)
+                return null;
 
             if (history != null)
             {
@@ -887,7 +887,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var uncachedServices = new List<Service>();
         foreach (var service in services)
         {
-            operation.CancellationToken.ThrowIfCancellationRequested();
+            if (operation.CancellationToken.IsCancellationRequested)
+                return uncachedServices;
             if (history.GetData(service) is { } data)
             {
                 PopulateServiceResultFromData(service, data, operation);
