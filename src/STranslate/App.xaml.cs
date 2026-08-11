@@ -37,6 +37,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
     private PluginManager? _pluginManager;
     private Notification? _notification;
     private AutoUpdateCheckerService? _autoUpdateCheckerService;
+    private MouseSelectionService? _mouseSelectionService;
     private static bool _disposed;
 
     public bool IsNavigated { get; set; }
@@ -95,6 +96,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
                     services.AddSingleton(_settings.NonNull());
                     services.AddSingleton(_hotkeySettings.NonNull());
                     services.AddSingleton(_svcSettings.NonNull());
+                    services.AddSingleton<MouseSelectionIconWindow>();
 
                     // 注册核心服务
                     services.AddSingleton<PluginManager>();
@@ -105,6 +107,8 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
                     services.AddSingleton<TtsService>();
                     services.AddSingleton<VocabularyService>();
                     services.AddSingleton<Internationalization>();
+                    services.AddSingleton<MouseHookService>();
+                    services.AddSingleton<MouseSelectionService>();
 
                     // 注册HTTP客户端
                     services.AddHttpClient(Constant.HttpClientName, client =>
@@ -219,6 +223,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
 
     private void InitializeMainWindow()
     {
+        _mouseSelectionService = Ioc.Default.GetRequiredService<MouseSelectionService>();
         _mainWindowViewModel = Ioc.Default.GetRequiredService<MainWindowViewModel>();
         _autoUpdateCheckerService = Ioc.Default.GetRequiredService<AutoUpdateCheckerService>();
         _mainWindow = new MainWindow();
@@ -536,6 +541,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
             _autoUpdateCheckerService?.Dispose();
             _notification?.Uninstall();
             _mainWindowViewModel?.Dispose();
+            _mouseSelectionService?.Dispose();
             _mainWindow?.Dispatcher.Invoke(_mainWindow.Dispose);
             _pluginManager?.Dispose();
         }

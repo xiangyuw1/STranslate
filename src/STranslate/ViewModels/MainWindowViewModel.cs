@@ -33,6 +33,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly IScreenshot _screenshot;
     private readonly ISnackbar _snackbar;
     private readonly INotification _notification;
+    private readonly MouseSelectionService _mouseSelectionService;
+    private readonly MouseSelectionIconWindow _mouseSelectionIconWindow;
+    private bool _mouseSelectionTranslationHasTopmostLease;
+    private bool _incrementalHasTopmostLease;
+    private int _managedTopmostLeaseCount;
+    private bool _topmostBeforeManagedLeases;
+    private bool _isApplyingManagedTopmost;
     private double _cacheLeft;
     private double _cacheTop;
     private bool _isAdjustingWindowPositionForContent;
@@ -71,7 +78,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         VocabularyService vocabularyService,
         SqlService sqlService,
         Settings settings,
-        HotkeySettings hotkeySettings)
+        HotkeySettings hotkeySettings,
+        MouseSelectionService mouseSelectionService,
+        MouseSelectionIconWindow mouseSelectionIconWindow)
     {
         DataProvider = dataProvider;
         IdentifiedLanguageOptions = DataProvider.LangEnums
@@ -92,6 +101,15 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _sqlService = sqlService;
         Settings = settings;
         HotkeySettings = hotkeySettings;
+        _mouseSelectionService = mouseSelectionService;
+        _mouseSelectionIconWindow = mouseSelectionIconWindow;
+        _mouseSelectionService.TextSelected += OnMouseSelectionTextSelected;
+        _mouseSelectionService.IncrementalTextSelected += OnIncrementalMouseTextSelected;
+        _mouseSelectionService.SelectionStarted += OnMouseSelectionStarted;
+        _mouseSelectionService.IconRequested += OnMouseSelectionIconRequested;
+        _mouseSelectionService.IconDismissRequested += OnMouseSelectionIconDismissRequested;
+        _mouseSelectionService.StateChanged += OnMouseSelectionStateChanged;
+        _mouseSelectionIconWindow.TranslateRequested += OnMouseSelectionIconTranslateRequested;
 
         TranslateService.Services.CollectionChanged += OnQuickServiceCollectionChanged;
         OcrService.Services.CollectionChanged += OnQuickServiceCollectionChanged;
@@ -182,9 +200,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public partial string TrayToolTip { get; set; } = Constant.AppName;
 
     [ObservableProperty]
-    public partial bool IsMouseHook { get; set; } = false;
-
-    [ObservableProperty]
     public partial bool IsIdentifyProcessing { get; set; } = false;
 
     [ObservableProperty]
@@ -240,10 +255,19 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         get => field;
         set
         {
-            if (IsMouseHook && !value)
-                AppMessageBox.Show("监听鼠标划词时窗口必须置顶", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-            else
-                SetProperty(ref field, value);
+            if (Settings.IsMouseSelectionTranslationEnabled &&
+                !value &&
+                !_isApplyingManagedTopmost)
+            {
+                AppMessageBox.Show(
+                    _i18n.GetTranslation("MouseSelectionTranslationRequiresTopmost"),
+                    _i18n.GetTranslation("Prompt"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            SetProperty(ref field, value);
         }
     }
 
@@ -1202,7 +1226,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    private async Task ImageTranslateAsync()
+    private Task ImageTranslateAsync() => ImageTranslateInternalAsync(hideExistingWindows: true);
+
+    internal async Task ImageTranslateInternalAsync(bool hideExistingWindows)
     {
         var ocrPlugin = GetImageTranslateOcrSvcAndNotify();
         if (ocrPlugin == null)
@@ -1217,10 +1243,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var existingWindows = Application.Current.Windows
-            .OfType<Window>()
-            .Where(w => w is ImageTranslateWindow or ImageTranslateCompactWindow)
-            .ToList();
+        var existingWindows = hideExistingWindows
+            ? Application.Current.Windows
+                .OfType<Window>()
+                .Where(w => w is ImageTranslateWindow or ImageTranslateCompactWindow)
+                .ToList()
+            : [];
         var ocr = ocrPlugin;
         await ExecuteWithWindowsHiddenAsync(existingWindows, async () =>
         {
@@ -1256,12 +1284,16 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    private async Task OcrAsync()
+    private Task OcrAsync() => OcrInternalAsync(hideExistingWindow: true);
+
+    internal async Task OcrInternalAsync(bool hideExistingWindow)
     {
         if (GetOcrSvcAndNotify() == null)
             return;
 
-        var existingWindow = Application.Current.Windows.OfType<OcrWindow>().FirstOrDefault();
+        var existingWindow = hideExistingWindow
+            ? Application.Current.Windows.OfType<OcrWindow>().FirstOrDefault()
+            : null;
         await ExecuteWithWindowsHiddenAsync(existingWindow, async () =>
         {
             using var bitmap = await _screenshot.GetScreenshotAsync();
@@ -1632,7 +1664,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public void OnIncKeyPressed()
     {
         Show();
-        IsTopmost = true;
+        AcquireManagedTopmost(ref _incrementalHasTopmostLease);
 
         // 增量翻译触发时清空原本内容（默认开启），false 时保留旧逻辑不清空
         if (Settings.IncrementalClearInput)
@@ -1640,15 +1672,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         UpdateCacheText();
 
-        _ = MouseKeyHelper.StartMouseTextSelectionAsync(() => Settings.SelectedTextFetchTimeoutMs);
-        MouseKeyHelper.MouseTextSelected += OnMouseTextSelectedIncretemental;
+        _mouseSelectionService.StartIncrementalCapture();
     }
 
     public void OnIncKeyReleased()
     {
-        IsTopmost = false;
-        MouseKeyHelper.StopMouseTextSelection();
-        MouseKeyHelper.MouseTextSelected -= OnMouseTextSelectedIncretemental;
+        ReleaseManagedTopmost(ref _incrementalHasTopmostLease);
+        _mouseSelectionService.StopIncrementalCapture();
 
         if (string.IsNullOrWhiteSpace(InputText) || _oldText == InputText)
             return;
@@ -1668,7 +1698,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _oldText = InputText;
     }
 
-    private void OnMouseTextSelectedIncretemental(string text)
+    private void OnIncrementalMouseTextSelected(object? sender, string text)
     {
         _ = Application.Current.Dispatcher.InvokeAsync(() =>
         {
@@ -1678,36 +1708,113 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     #endregion
 
-    #region Mouse Hook Feature
+    #region Mouse Selection Feature
 
     [RelayCommand]
-    private void ToggleMouseHookTranslate() => IsMouseHook = !IsMouseHook;
+    private void ToggleMouseSelectionTranslation() =>
+        Settings.IsMouseSelectionTranslationEnabled = !Settings.IsMouseSelectionTranslationEnabled;
 
-    partial void OnIsMouseHookChanged(bool value) => _ = ToggleMouseHookAsync(value);
-
-    private async Task ToggleMouseHookAsync(bool enable)
+    private async void OnMouseSelectionIconRequested(object? sender, System.Drawing.Point drawingPoint)
     {
-        if (enable)
+        try
         {
-            Show();
-            IsTopmost = true;
-            await MouseKeyHelper.StartMouseTextSelectionAsync(() => Settings.SelectedTextFetchTimeoutMs);
-            MouseKeyHelper.MouseTextSelected += OnMouseTextSelected;
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                var point = new System.Windows.Point(drawingPoint.X, drawingPoint.Y);
+                _mouseSelectionIconWindow.ShowAt(point);
+            });
         }
-        else
+        catch (Exception ex)
         {
-            IsTopmost = false;
-            MouseKeyHelper.StopMouseTextSelection();
-            MouseKeyHelper.MouseTextSelected -= OnMouseTextSelected;
+            _logger.LogError(ex, "Failed to show the mouse selection icon.");
         }
     }
 
-    private void OnMouseTextSelected(string text)
+    private async void OnMouseSelectionStarted(object? sender, System.Drawing.Point point)
+    {
+        try
+        {
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                if (!_mouseSelectionIconWindow.ContainsPhysicalPoint(point))
+                    _mouseSelectionIconWindow.HideWindow();
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to process mouse selection start.");
+        }
+    }
+
+    private async void OnMouseSelectionIconTranslateRequested(object? sender, EventArgs e)
+    {
+        var text = await _mouseSelectionService.CaptureIconSelectedTextAsync();
+        if (!string.IsNullOrWhiteSpace(text))
+            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.MouseSelection));
+    }
+
+    private void OnMouseSelectionTextSelected(object? sender, string text)
     {
         _ = Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.MouseHook));
+            ExecuteTranslate(HandleCapturedText(text, TextSeparatorHandleScope.MouseSelection));
         });
+    }
+
+    private void OnMouseSelectionIconDismissRequested(object? sender, EventArgs e)
+        => _ = Application.Current.Dispatcher.InvokeAsync(_mouseSelectionIconWindow.HideWindow);
+
+    private void OnMouseSelectionStateChanged(object? sender, EventArgs e)
+        => _ = Application.Current.Dispatcher.InvokeAsync(ApplyMouseSelectionWindowMode);
+
+    private void ApplyMouseSelectionWindowMode()
+    {
+        var shouldForceTopmost = Settings.IsMouseSelectionTranslationEnabled;
+        if (shouldForceTopmost)
+        {
+            Show();
+            AcquireManagedTopmost(ref _mouseSelectionTranslationHasTopmostLease);
+            return;
+        }
+
+        ReleaseManagedTopmost(ref _mouseSelectionTranslationHasTopmostLease);
+    }
+
+    private void AcquireManagedTopmost(ref bool lease)
+    {
+        if (lease)
+            return;
+
+        if (_managedTopmostLeaseCount == 0)
+            _topmostBeforeManagedLeases = IsTopmost;
+
+        lease = true;
+        _managedTopmostLeaseCount++;
+        SetTopmostInternally(true);
+    }
+
+    private void ReleaseManagedTopmost(ref bool lease)
+    {
+        if (!lease)
+            return;
+
+        lease = false;
+        _managedTopmostLeaseCount--;
+        if (_managedTopmostLeaseCount == 0)
+            SetTopmostInternally(_topmostBeforeManagedLeases);
+    }
+
+    private void SetTopmostInternally(bool value)
+    {
+        _isApplyingManagedTopmost = true;
+        try
+        {
+            IsTopmost = value;
+        }
+        finally
+        {
+            _isApplyingManagedTopmost = false;
+        }
     }
 
     [RelayCommand]
@@ -1900,8 +2007,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             case DoubleClickTrayFunction.OpenSettingsWindow:
                 OpenSettingsCommand.Execute(null);
                 break;
-            case DoubleClickTrayFunction.ToggleMouseHook:
-                ToggleMouseHookTranslateCommand.Execute(null);
+            case DoubleClickTrayFunction.ToggleMouseSelectionTranslation:
+                ToggleMouseSelectionTranslationCommand.Execute(null);
                 break;
             case DoubleClickTrayFunction.ToggleGlobalHotkeys:
                 ToggleGlobalHotkey();
@@ -1936,7 +2043,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void Cancel(Window window)
     {
-        if (!IsMouseHook)
+        if (!Settings.IsMouseSelectionTranslationEnabled)
         {
             if (IsTopmost) IsTopmost = false;
             ExitInputTranslateMode();
@@ -2803,8 +2910,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         if (disposing)
         {
-            MouseKeyHelper.MouseTextSelected -= OnMouseTextSelected;
-            MouseKeyHelper.MouseTextSelected -= OnMouseTextSelectedIncretemental;
+            _mouseSelectionService.TextSelected -= OnMouseSelectionTextSelected;
+            _mouseSelectionService.IncrementalTextSelected -= OnIncrementalMouseTextSelected;
+            _mouseSelectionService.SelectionStarted -= OnMouseSelectionStarted;
+            _mouseSelectionService.IconRequested -= OnMouseSelectionIconRequested;
+            _mouseSelectionService.IconDismissRequested -= OnMouseSelectionIconDismissRequested;
+            _mouseSelectionService.StateChanged -= OnMouseSelectionStateChanged;
+            _mouseSelectionIconWindow.TranslateRequested -= OnMouseSelectionIconTranslateRequested;
             _clipboardMonitor?.OnClipboardTextChanged -= OnClipboardTextChanged;
             Settings.PropertyChanged -= OnSettingsPropertyChanged;
             TranslateService.Services.CollectionChanged -= OnQuickServiceCollectionChanged;
