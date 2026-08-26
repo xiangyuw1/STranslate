@@ -40,6 +40,7 @@ GetDesktopWindow
 GetClassName
 FindWindowEx
 GetSystemMetrics
+GetDoubleClickTime
 MonitorFromWindow
 EnumDisplayMonitors
 GetCursorPos
@@ -82,3 +83,5 @@ ShowWindow
 BringWindowToTop
 
 RegisterWindowMessage
+DwmSetWindowAttribute
+DwmFlush

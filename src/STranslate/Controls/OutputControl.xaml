@@ -237,7 +237,14 @@
                             IsReadOnly="True"
                             Text="{Binding Plugin.DictionaryResult.Text}"
                             TextWrapping="Wrap"
-                            Visibility="{Binding Plugin.DictionaryResult.ResultType, Converter={cnvt:DictionaryResultTypeVisibilityConverter}, ConverterParameter=Error}" />
+                            Visibility="{Binding Plugin.DictionaryResult.ResultType, Converter={cnvt:DictionaryResultTypeVisibilityConverter}, ConverterParameter=Error}">
+                            <TextBox.FlowDirection>
+                                <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
+                                    <Binding Path="Plugin.DictionaryResult.Text" />
+                                    <Binding RelativeSource="{RelativeSource AncestorType=control:OutputControl}" Path="TargetLanguage" />
+                                </MultiBinding>
+                            </TextBox.FlowDirection>
+                        </TextBox>
                         <StackPanel Margin="8,8,8,4" Visibility="{Binding Plugin.DictionaryResult.ResultType, Converter={cnvt:DictionaryResultTypeVisibilityConverter}, ConverterParameter=Success}">
                             <!--  单词显示  -->
                             <TextBox
@@ -248,7 +255,14 @@
                                 IsReadOnly="True"
                                 Style="{DynamicResource TextBlockSimilarStyle}"
                                 Text="{Binding Plugin.DictionaryResult.Text}"
-                                TextWrapping="Wrap" />
+                                TextWrapping="Wrap">
+                                <TextBox.FlowDirection>
+                                    <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
+                                        <Binding Path="Plugin.DictionaryResult.Text" />
+                                        <Binding RelativeSource="{RelativeSource AncestorType=control:OutputControl}" Path="TargetLanguage" />
+                                    </MultiBinding>
+                                </TextBox.FlowDirection>
+                            </TextBox>
 
                             <!--  音标显示  -->
                             <ItemsControl
@@ -324,7 +338,14 @@
                                                 IsReadOnly="True"
                                                 Style="{DynamicResource TextBlockSimilarStyle}"
                                                 Text="{Binding Means, Converter={cnvt:CollectionToStringConverter}, ConverterParameter=；}"
-                                                TextWrapping="Wrap" />
+                                                TextWrapping="Wrap">
+                                                <TextBox.FlowDirection>
+                                                    <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
+                                                        <Binding Path="Means" Converter="{cnvt:CollectionToStringConverter}" ConverterParameter="；" />
+                                                        <Binding RelativeSource="{RelativeSource AncestorType=control:OutputControl}" Path="TargetLanguage" />
+                                                    </MultiBinding>
+                                                </TextBox.FlowDirection>
+                                            </TextBox>
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -397,7 +418,14 @@
                                             <TextBlock
                                                 FontStyle="Italic"
                                                 Text="{Binding}"
-                                                TextWrapping="Wrap" />
+                                                TextWrapping="Wrap">
+                                                <TextBlock.FlowDirection>
+                                                    <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
+                                                        <Binding />
+                                                        <Binding RelativeSource="{RelativeSource AncestorType=control:OutputControl}" Path="TargetLanguage" />
+                                                    </MultiBinding>
+                                                </TextBlock.FlowDirection>
+                                            </TextBlock>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -683,6 +711,12 @@
                                 SnapsToDevicePixels="True"
                                 Text="{Binding Plugin.TransResult.Text}"
                                 TextWrapping="Wrap">
+                                <TextBox.FlowDirection>
+                                    <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
+                                        <Binding Path="Plugin.TransResult.Text" />
+                                        <Binding RelativeSource="{RelativeSource AncestorType=control:OutputControl}" Path="TargetLanguage" />
+                                    </MultiBinding>
+                                </TextBox.FlowDirection>
                                 <TextBox.Style>
                                     <Style TargetType="TextBox">
                                         <Setter Property="Visibility" Value="Visible" />
@@ -807,6 +841,13 @@
                                     IsReadOnly="True"
                                     Text="{Binding Plugin.TransBackResult.Text}"
                                     TextWrapping="Wrap">
+                                    <TextBox.FlowDirection>
+                                        <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
+                                            <Binding Path="Plugin.TransBackResult.Text" />
+                                            <Binding RelativeSource="{RelativeSource AncestorType=control:OutputControl}" Path="SourceLanguage" />
+                                            <Binding RelativeSource="{RelativeSource AncestorType=control:OutputControl}" Path="DetectedSourceLanguage" />
+                                        </MultiBinding>
+                                    </TextBox.FlowDirection>
                                     <TextBox.Style>
                                         <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
                                             <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />

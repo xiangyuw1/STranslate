@@ -151,6 +151,7 @@
                     SelectLanguageDetectorCommand="{Binding SelectLanguageDetectorCommand}"
                     SelectedIdentifiedLanguage="{Binding SelectedIdentifiedLanguage}"
                     SelectedLanguageDetector="{Binding Settings.LanguageDetector, Mode=TwoWay}"
+                    SourceLanguage="{Binding Settings.SourceLang}"
                     Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
                     TranslateOnPaste="{Binding Settings.TranslateOnPaste}"
                     Visibility="{Binding IsInputBoxVisible, Converter={cnvt:BoolToVisibilityConverter}}" />
@@ -265,6 +266,7 @@
                     CopyCommand="{Binding CopyCommand}"
                     CopyPascalCaseCommand="{Binding CopyPascalCaseCommand}"
                     CopySnakeCaseCommand="{Binding CopySnakeCaseCommand}"
+                    DetectedSourceLanguage="{Binding SelectedIdentifiedLanguage}"
                     ExplainCommand="{Binding ExplainCommand}"
                     HasActivedVocabulary="{Binding VocabularyService.HasActivedVocabulary}"
                     InsertCommand="{Binding InsertCommand}"
@@ -281,6 +283,8 @@
                     ShowPascalCase="{Binding Settings.ShowPascalCase}"
                     ShowPrompt="{Binding Settings.ShowPromptButton}"
                     ShowSnakeCase="{Binding Settings.ShowSnakeCase}"
+                    SourceLanguage="{Binding Settings.SourceLang}"
+                    TargetLanguage="{Binding Settings.TargetLang}"
                     TransBackCommand="{Binding SingleTransBackCommand}" />
             </StackPanel>
         </ui:ScrollViewerEx>
