@@ -275,6 +275,51 @@ public static class Win32Helper
         }
     }
 
+    /// <summary>把独立预览提升到最上层，但不激活窗口。</summary>
+    internal static void RaiseWindowWithoutActivation(Window window, bool showWindow = true)
+    {
+        const nint topMost = -1; // HWND_TOPMOST
+        uint flags = 0x0001 | 0x0002 | 0x0010; // NOSIZE | NOMOVE | NOACTIVATE
+        if (showWindow) flags |= 0x0040; // SHOWWINDOW
+        if (!SetWindowPos(new WindowInteropHelper(window).Handle, topMost,
+                0, 0, 0, 0, flags))
+            throw new Win32Exception(Marshal.GetLastPInvokeError());
+    }
+
+    internal static bool IsWindowLayered(Window window) =>
+        (GetWindowStyle(GetWindowHandle(window), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE) &
+         (nint)WINDOW_EX_STYLE.WS_EX_LAYERED) != 0;
+
+    internal static bool PreserveWindowLayeredStyle(int message, nint wParam, nint lParam)
+    {
+        if (message != 0x007C || (int)wParam != (int)WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE) return false;
+        var styles = Marshal.PtrToStructure<WindowStyleChange>(lParam);
+        styles.NewStyle |= (uint)WINDOW_EX_STYLE.WS_EX_LAYERED;
+        Marshal.StructureToPtr(styles, lParam, false);
+        return true;
+    }
+
+    internal static void SetWindowLayered(Window window, bool layered)
+    {
+        var hwnd = GetWindowHandle(window);
+        var style = GetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+        var flag = (nint)WINDOW_EX_STYLE.WS_EX_LAYERED;
+        SetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, layered ? style | flag : style & ~flag);
+    }
+
+    internal static bool SetWindowAlpha(Window window, byte alpha) =>
+        PInvoke.SetLayeredWindowAttributes(GetWindowHandle(window), default, alpha,
+            LAYERED_WINDOW_ATTRIBUTES_FLAGS.LWA_ALPHA);
+
+    /// <summary>预览层在跨屏、DPI 变化和鼠标操作时都不能成为活动窗口。</summary>
+    internal static void DisableWindowActivation(Window window)
+    {
+        var hwnd = GetWindowHandle(window);
+        var style = GetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+        SetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE,
+            style | (nint)WINDOW_EX_STYLE.WS_EX_NOACTIVATE);
+    }
+
     internal static unsafe bool SetWindowCloaked(Window window, bool cloaked)
     {
         var value = cloaked ? 1 : 0;

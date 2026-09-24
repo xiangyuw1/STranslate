@@ -15,7 +15,9 @@ internal sealed class TopEdgeAutoHideController : IDisposable
     private const double StripHeight = 6;
     private readonly Window _window;
     private readonly Func<bool> _enabled;
+    private readonly Func<int> _hideDelayMs;
     private readonly Action? _onExpanded;
+    private readonly Func<bool>? _isShowing;
     private readonly DispatcherTimer _timer;
     private TopEdgeSlideAnimation? _animation;
     private Window? _strip;
@@ -30,11 +32,14 @@ internal sealed class TopEdgeAutoHideController : IDisposable
     public bool IsCollapsed { get; private set; }
     internal bool IsAnimating => _animation is not null;
 
-    public TopEdgeAutoHideController(Window window, Func<bool> enabled, Action? onExpanded = null)
+    public TopEdgeAutoHideController(Window window, Func<bool> enabled, Action? onExpanded = null,
+        Func<int>? hideDelayMs = null, Func<bool>? isShowing = null)
     {
         _window = window;
         _enabled = enabled;
+        _hideDelayMs = hideDelayMs ?? (() => 600);
         _onExpanded = onExpanded;
+        _isShowing = isShowing;
         _window.IsVisibleChanged += OnVisibilityChanged;
         _window.PreviewKeyDown += OnKeyDown;
         _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background,
@@ -55,6 +60,12 @@ internal sealed class TopEdgeAutoHideController : IDisposable
         if (_window.Visibility == Visibility.Collapsed)
         {
             Undock(restoreWindow: false);
+            return;
+        }
+        // 普通唤出结束后再吸附，避免上浮的临时位置触发贴顶。
+        if (_isShowing?.Invoke() == true)
+        {
+            _leaveTime = 0;
             return;
         }
         if (!_enabled() || _window.WindowState != WindowState.Normal)
@@ -115,7 +126,7 @@ internal sealed class TopEdgeAutoHideController : IDisposable
                 return;
             }
             if (_leaveTime == 0) _leaveTime = Environment.TickCount64;
-            if (Environment.TickCount64 - _leaveTime >= 600) Collapse();
+            if (Environment.TickCount64 - _leaveTime >= Math.Clamp(_hideDelayMs(), 100, 10000)) Collapse();
         }
     }
 
@@ -170,6 +181,8 @@ internal sealed class TopEdgeAutoHideController : IDisposable
             UseLayoutRounding = true,
             SnapsToDevicePixels = true
         };
+        // 感应条是辅助窗口，在首次显示前将其从 Alt+Tab 切换列表中排除。
+        strip.SourceInitialized += (_, _) => Win32Helper.HideFromAltTab(strip);
 
         // 感应条在启动主题初始化之后才创建，需要主动加载主题资源，否则画刷会解析为空。
         ThemeManager.SetRequestedTheme(strip, ThemeManager.GetActualTheme(_window) == ElementTheme.Dark

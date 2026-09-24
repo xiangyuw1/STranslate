@@ -1963,6 +1963,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public void Show()
     {
+        MainWindow.PrepareShowAnimation();
         var expandedFromTopEdge = MainWindow.ExpandFromTopEdge();
         if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
         {
@@ -1974,6 +1975,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (!expandedFromTopEdge) UpdatePosition();
         UpdateMainWindowMaxHeightConstraint();
 
+        MainWindow.StartShowAnimation(ActivateMainWindow);
+    }
+
+    private void ActivateMainWindow()
+    {
         Win32Helper.ActivateForegroundWindow(MainWindow);
 
         MainWindow.Activate();
@@ -1989,6 +1995,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         ExitInputTranslateMode();
         MainWindow.Visibility = Visibility.Collapsed;
+        MainWindow.StopShowAnimation();
     }
 
     [RelayCommand]
