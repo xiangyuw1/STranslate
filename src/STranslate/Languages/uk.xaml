@@ -87,6 +87,8 @@
     <sys:String x:Key="General_SelectedTextFetchTimeout">Тайм-аут отримання тексту</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Скільки чекати на появу нового тексту в буфері обміну після емуляції копіювання, у мілісекундах. Щойно текст оновиться, очікування припиняється; для повільних PDF-програм значення варто збільшити.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmup">Прогрів відтворення (мс)</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmupDescription">Перед звуком відтворюється тиша, щоб зменшити втрату початку під час запуску пристрою виведення. 0 вимикає прогрів; за потреби спробуйте 500–2000 мс. Кожне відтворення починатиметься із затримкою.</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTarget">Якщо не вдалося отримати виділений текст</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTargetDescription">Виберіть, що робити, якщо отримати виділений текст не вдалося: перейти до перекладу з поля введення чи лише показати головне вікно.</sys:String>
     <sys:String x:Key="General_ImageQuality">Якість зображення</sys:String>
@@ -186,6 +188,7 @@
     <sys:String x:Key="Hotkey_CrosswordTranslateByCtrlSameCDescription">Виділіть текст мишею та швидко натисніть Ctrl+C+C, щоб перекласти його.</sys:String>
     <sys:String x:Key="CrosswordTranslateFetchFailed">Не вдалося отримати виділений текст — відкрито поле введення для перекладу.</sys:String>
     <sys:String x:Key="CrosswordTranslateFetchFailedShowWindow">Не вдалося отримати виділений текст — показано головне вікно.</sys:String>
+    <sys:String x:Key="CrosswordTranslateFetchFailedNotifyOnly">Не вдалося отримати виділений текст. Виділіть текст і повторіть спробу.</sys:String>
     <sys:String x:Key="Hotkey_MouseSelectionTranslation">Переклад за виділенням мишею</sys:String>
     <sys:String x:Key="Hotkey_MouseSelectionTranslationDescription">Увімкнути або вимкнути негайний переклад тексту, виділеного мишею.</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslate">Переклад із заміною</sys:String>
@@ -224,6 +227,7 @@
     <sys:String x:Key="Hotkey_ReExecuteOcr">Повторити розпізнавання тексту | переклад зображення</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">Перемкнути зображення (результат/розмітка)</sys:String>
     <sys:String x:Key="Hotkey_SwitchImageDescription">Також дає змогу перемикатися між оригінальним зображенням і перекладом у закріплених вікнах.</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">Закріпити переклад зображення (компактне вікно)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">Розпізнати QR-код</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">Працює лише у вікні розпізнавання тексту</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">Накопичувальний переклад</sys:String>
@@ -624,6 +628,7 @@
     <sys:String x:Key="TextSeparatorHandleScopeSilentOcr">Фонове розпізнавання</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetInputTranslate">Переклад із поля введення</sys:String>
     <sys:String x:Key="CrosswordFetchFailedFallbackTargetShowWindow">Показати головне вікно</sys:String>
+    <sys:String x:Key="CrosswordFetchFailedFallbackTargetNotifyOnly">Лише сповіщення</sys:String>
 
     <sys:String x:Key="PluginTypeAll">Усі плагіни</sys:String>
     <sys:String x:Key="PluginTypeTranslate">Переклад</sys:String>
@@ -873,4 +878,15 @@
     <sys:String x:Key="EditPrompt_Content">Змінити</sys:String>
     <sys:String x:Key="Temperature">Температура</sys:String>
     <sys:String x:Key="Temperature_Description">Керує випадковістю відповідей моделі</sys:String>
+    <sys:String x:Key="ImageTranslatePin">Закріпити</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">Не вдалося закріпити результат</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">Копіювати весь текст</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">Показати оригінал</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">Показати переклад</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnOcrServiceChanged">Переклад зображення: одразу перекладати після зміни сервісу OCR</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnTranslateServiceChanged">Переклад зображення: одразу перекладати після зміни сервісу перекладу</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnLanguageChanged">Переклад зображення: одразу перекладати після зміни мови</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnLayoutChanged">Переклад зображення: одразу перекладати після зміни розбиття тексту</sys:String>
+    <sys:String x:Key="General_OcrOnServiceChanged">Вікно OCR: одразу розпізнавати текст після зміни сервісу</sys:String>
+    <sys:String x:Key="General_OcrOnLanguageChanged">Вікно OCR: одразу розпізнавати текст після зміни мови</sys:String>
 </ResourceDictionary>
