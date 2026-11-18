@@ -14,6 +14,10 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <!--// App.xaml 只作为普通 Page 参与编译，程序入口由 App.xaml.cs 中的 Main 提供； //-->
+        <!--// 必须关闭默认 ApplicationDefinition：否则 WPF 临时工程(_wpftmp)会把 App.xaml 重新当作应用定义， //-->
+        <!--// 生成带 Main 的 App.g.cs。在 ArtifactsPath 共用中间目录时会覆盖主工程的同名文件，导致 CS0111(重复定义 Main) //-->
+        <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -46,7 +50,6 @@
 
     <ItemGroup>
         <ApplicationDefinition Remove="App.xaml" />
-        <Page Include="App.xaml" />
     </ItemGroup>
 
     <ItemGroup>
