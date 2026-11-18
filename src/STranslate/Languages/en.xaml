@@ -94,7 +94,7 @@
     <sys:String x:Key="General_ImageQuality">Image Quality</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">Adjust the quality when processing images. Online OCR services may limit image size.</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">Double-Click Tray Function</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">Selecting any action other than "None" will disable the tray single-click toggle main window display function.</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">When a double-click action is enabled, a single click waits for the double-click interval before showing or hiding the main window. A double click only runs the selected action.</sys:String>
     <sys:String x:Key="General_Language">Language</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">Screenshot Translation</sys:String>
     <sys:String x:Key="General_ImageTranslate">Image Translation</sys:String>
@@ -234,6 +234,28 @@
     <sys:String x:Key="Hotkey_IncrementalTranslateDescription" xml:space="preserve">Hold down the hotkey and select text to continuously append content. Release the mouse to translate immediately.&#10;Only supports single keys, excludes Win/Alt/Ctrl/Shift</sys:String>
     <!--  // Translation Page //  -->
     <sys:String x:Key="ReplaceService">Replace Trans</sys:String>
+    <sys:String x:Key="General_TextPreprocessing">Translation replacements</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">Replace text before main-window translation, dictionary lookups, replace translation, and image translation.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">Applies to automatic/manual translation and dictionary lookups in the main window (including text captured by screenshots, text selection and clipboard monitoring), and replace translation. Image translation processes each text block separately. Only outgoing text is replaced; the original input is kept. OCR recognition, back translation, text-to-speech, vocabulary saving, and viewing history do not run these rules. History shows the request snapshot saved at the time.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingManage">Manage rules</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEnable">Enable translation replacements</sys:String>
+    <sys:String x:Key="General_TextPreprocessingMode">Mode</sys:String>
+    <sys:String x:Key="General_TextPreprocessingPlainText">Plain text</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegex">Regex</sys:String>
+    <sys:String x:Key="General_TextPreprocessingFind">Find</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHelp">Rules run from top to bottom. An empty replacement deletes matches. Plain text is literal; regex supports $1, ${name}, and inline options such as (?m) and (?s).</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">Replacement text</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">Move rule up</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">Move rule down</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">Ignore case</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">Translation pre-processing rule failed: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">Translation pre-processing produced no translatable text.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">The replacement configuration is invalid. Correct it in Settings before translating.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">Replacement rule timed out: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">Replacement output exceeded the length limit: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} image blocks could not be processed. Their original content was kept.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">Rule {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">Position {0}.</sys:String>
     <sys:String x:Key="ImTranService">Image Trans</sys:String>
     <sys:String x:Key="NoServiceEnabled">No Service Enabled</sys:String>
     <sys:String x:Key="SpecialServiceInfo">Drag services from the left here, or right-click to select and enable.</sys:String>
@@ -887,6 +909,25 @@
     <sys:String x:Key="General_ImageTranslateOnLayoutChanged">Image translation: translate on segmentation change</sys:String>
     <sys:String x:Key="General_OcrOnServiceChanged">OCR window: recognize on service change</sys:String>
     <sys:String x:Key="General_OcrOnLanguageChanged">OCR window: recognize on language change</sys:String>
-
+    <sys:String x:Key="General_TextPreprocessingRuleName">Rule name</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">Edit selected rule (multiline)</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">Test rules</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">Enter sample text; hover over highlights to inspect replacements</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">Run test</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">{0} rules changed the text.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">This content was deleted</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">Text sent to the service</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">Copy sent text</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">Enabled · {0} rules</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">Disabled</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">Export sent text and languages</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">Check parentheses, escapes, and capture groups.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">A closing parenthesis is missing.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">A character class is missing its closing bracket.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">An escape sequence is invalid.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">Unchanged</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">Request text was not recorded</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">Replace outgoing text while keeping the original.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">Scope</sys:String>
     <sys:String x:Key="MarkdownRender">MD Render</sys:String>
 </ResourceDictionary>

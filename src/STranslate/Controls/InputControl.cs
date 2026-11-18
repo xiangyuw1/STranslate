@@ -147,6 +147,15 @@ public class InputControl : Control
                 LanguageDetectorType.Local,
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
+    public IReadOnlyList<TextReplacementRequest>? PreparedRequests
+    {
+        get => (IReadOnlyList<TextReplacementRequest>?)GetValue(PreparedRequestsProperty);
+        set => SetValue(PreparedRequestsProperty, value);
+    }
+
+    public static readonly DependencyProperty PreparedRequestsProperty = DependencyProperty.Register(
+        nameof(PreparedRequests), typeof(IReadOnlyList<TextReplacementRequest>), typeof(InputControl), new PropertyMetadata(null));
+
     public bool IsIdentify
     {
         get => (bool)GetValue(IsIdentifyProperty);
@@ -384,6 +393,7 @@ public class InputControl : Control
 
         if (_languageDetectorComboBox != null)
             _languageDetectorComboBox.SelectionChanged += OnLanguageDetectorComboBoxSelectionChanged;
+
     }
 
     /// <summary>

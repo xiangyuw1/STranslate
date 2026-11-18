@@ -131,8 +131,9 @@
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" MinHeight="30" />
                             </Grid.RowDefinitions>
-                            <TextBox
+                            <control:ReplacementTextBox
                                 x:Name="PART_TextBox"
+                                Requests="{TemplateBinding PreparedRequests}"
                                 MinHeight="{TemplateBinding MinHeight}"
                                 MaxHeight="{TemplateBinding MaxHeight}"
                                 Margin="{TemplateBinding Margin}"
@@ -143,22 +144,22 @@
                                 BorderThickness="0"
                                 Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Text, UpdateSourceTrigger=PropertyChanged}"
                                 TextWrapping="Wrap">
-                                <TextBox.FlowDirection>
+                                <control:ReplacementTextBox.FlowDirection>
                                     <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
                                         <Binding RelativeSource="{RelativeSource Mode=TemplatedParent}" Path="Text" />
                                         <Binding RelativeSource="{RelativeSource Mode=TemplatedParent}" Path="SourceLanguage" />
                                         <Binding RelativeSource="{RelativeSource Mode=TemplatedParent}" Path="SelectedIdentifiedLanguage" />
                                     </MultiBinding>
-                                </TextBox.FlowDirection>
-                                <TextBox.InputBindings>
+                                </control:ReplacementTextBox.FlowDirection>
+                                <control:ReplacementTextBox.InputBindings>
                                     <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ExecuteCommand}" />
                                     <KeyBinding
                                         Key="Enter"
                                         Command="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ForceExecuteCommand}"
                                         CommandParameter="force"
                                         Modifiers="Ctrl" />
-                                </TextBox.InputBindings>
-                            </TextBox>
+                                </control:ReplacementTextBox.InputBindings>
+                            </control:ReplacementTextBox>
 
                             <ikw:SimpleStackPanel
                                 Grid.Row="1"

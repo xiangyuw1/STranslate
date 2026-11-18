@@ -47,8 +47,8 @@
 9. 原始 OCR 结果用于图片文本选中：`OcrWordBuilder.CreateFromOcrContents(_lastOcrResult.OcrContents)` 生成原文选中块。
 10. `ApplyLayoutAnalysis()` 生成 `OcrLayoutBlock`，并把分析后的块投影回 `OcrResult.OcrContents`，供标注图、复制和结果文本复用。
 11. 获取 `TranslateService.ImageTranslateService`，该服务必须是 `ITranslatePlugin`，词典类服务不会进入图片翻译翻译列表。
-12. 对每个 `OcrLayoutBlock.Text` 并发执行语言检测和翻译；翻译成功后用 `ImageTranslateTextOverlayLayout.NormalizeOverlayText()` 收敛空白，再回写到对应 block。
-13. 使用翻译后的分段块生成 `ImageTranslateOverlayDocument`：每个绘制项保存覆盖背景、裁剪范围、阴影和 `FormattedText`；选择框保持原图像素坐标，不再创建超采样结果位图。
+12. 整张图片在 OCR 请求前固定规则、源/目标语言和检测配置快照。布局分块后经 `DirectTranslationRunner` 各自后台替换，检查非空，再把同一请求文本交给语言检测和翻译插件；规则不会跨布局块匹配，也不会修改已经发给 OCR 的图片。语言识别失败时使用配置的回退语种继续翻译，与替换翻译入口一致，关闭前置替换时也遵循此策略。成功译文经 `ImageTranslateTextOverlayLayout.NormalizeOverlayText()` 收敛空白后回写对应 block。
+13. `CreateTranslationResult()` 只绘制成功块的译文覆盖，但独立合并全部块的选择数据：成功块使用译文坐标，预处理错误、空结果或插件失败的块保留 OCR 原文和原始坐标，全部失败仍可选择原文。顺序和全文索引统一重建，精简窗口和贴图的复制全文也保留失败块。失败在结束后汇总提示一次；预处理错误按规则 ID 和错误类型去重，并附一条稳定选取的本地化规则名称及具体原因（如超时、输出超限或正则位置）。每个绘制项保存覆盖背景、裁剪范围、阴影和 `FormattedText`；选择框保持原图像素坐标，不再创建超采样结果位图。
 14. `ImageZoom` 在同一个 Viewbox 内按“原图 → 矢量译文 Overlay → 文字选择高亮”绘制，图片缩放、拖动和 DPI 变换会同步作用于三层。
 15. `Settings.IsImTranShowingAnnotated` 控制显示标注图还是原图加译文 Overlay；图片文本选中同步切换为原文块或译文块。
 16. Compact 结果完成后可通过贴图按钮或可选窗口快捷键创建静态贴图；创建成功后关闭 Compact，后续截图翻译使用新的窗口和执行链路。
@@ -57,8 +57,8 @@
 - 设置 → 通用 → 立即翻译提供独立开关：切换图片翻译 OCR 服务、翻译服务、语言和分段后立即重新翻译，默认开启，关闭后沿用手动重新执行的行为。
 - 语言开关覆盖 `ImageTranslateOcrLanguage`、`ImageTranslateSourceLang` 和 `ImageTranslateTargetLang`；分段开关对应 `LayoutAnalysisMode`。独立窗口与精简窗口共用 ViewModel，因此都适用。
 - 自动重新执行复用当前原图，重新完成 OCR、分段与翻译；没有图片、正在执行或 ViewModel 已释放时不触发。切换标注/译文显示不触发请求。
-- `Standalone` 是默认模式，保留当前可缩放、可调整大小的独立窗口。
-- `Compact` 使用无标题、不可缩放、非任务栏、**完全透明**窗口，窗口本身无背景色；屏幕上只看到截图内容 + 悬浮按钮条（按钮条自带半透明胶囊背景）。
+- `Standalone` 保留可缩放、可调整大小的独立窗口，可在设置中选择。
+- `Compact` 是默认模式，使用无标题、不可缩放、非任务栏、**完全透明**窗口，窗口本身无背景色；屏幕上只看到截图内容 + 悬浮按钮条（按钮条自带半透明胶囊背景）。
 - 精简窗口的图片始终钉在截图选区的物理屏幕位置（贴图位置不变铁律）；按钮条作为悬浮额外内容，根据空间自动选择位置：
   - 横向：按钮条窄于选区时居中；宽于选区时贴左缘向右延展，右边放不下则镜像向左延展。
   - 纵向：默认在图片下方；下方放不下翻上方；上下都放不下则叠加在图片底部之上（按钮条 ZIndex 高于图片）。
@@ -134,7 +134,7 @@
 - OCR 专用绑定：`ServiceSettings.ImageTranslateOcrSvcID`，由图片翻译窗口的 OCR 选择写入。
 - 翻译专用绑定：`ServiceSettings.ImageTranslateSvcID`，由图片翻译窗口的翻译服务选择写入。
 - 服务缺失或插件被删除时，启动加载会重置失效的图片翻译服务 ID。
-- `Settings.ImageTranslateWindowMode` 控制图片翻译结果使用独立窗口或精简窗口，默认 `Standalone`。
+- `Settings.ImageTranslateWindowMode` 控制图片翻译结果使用独立窗口或精简窗口，默认 `Compact`；已有配置继续使用已保存的模式。
 - `Settings.LayoutAnalysisMode` 是分段模式配置，默认 `Auto`，序列化支持 `auto`、`provider`、`smart`、`noMerge`；旧未知值归一为 `Auto`。
 - `Settings.IsImTranShowingAnnotated` 控制标注图/原图加矢量译文 Overlay 显示。
 - `Settings.IsImTranShowingTextControl` 控制图片翻译窗口文本区域显示。

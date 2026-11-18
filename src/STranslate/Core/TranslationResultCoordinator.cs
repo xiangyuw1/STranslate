@@ -1,4 +1,5 @@
 using STranslate.Plugin;
+using STranslate.Helpers;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -14,11 +15,27 @@ internal sealed class TranslationResultCoordinator
     private readonly object _automaticSideEffectsChannel = new();
     private readonly object _identifiedLanguageChannel = new();
     private readonly Func<string, string> _getTranslation;
+    private readonly TextPreprocessingService? _preprocessingService;
+    private readonly Settings? _settings;
     private long _lastOperationId;
+    internal event Action? ProcessingStateChanged;
+    internal event Action? RequestContextChanged;
+
+    internal void NotifyProcessingStateChanged() => ProcessingStateChanged?.Invoke();
 
     internal TranslationResultCoordinator(Func<string, string> getTranslation)
     {
         _getTranslation = getTranslation;
+    }
+
+    internal TranslationResultCoordinator(
+        Func<string, string> getTranslation,
+        TextPreprocessingService preprocessingService,
+        Settings settings)
+        : this(getTranslation)
+    {
+        _preprocessingService = preprocessingService;
+        _settings = settings;
     }
 
     internal TranslationOperation BeginOperation(
@@ -28,6 +45,10 @@ internal sealed class TranslationResultCoordinator
         CancellationToken cancellationToken)
     {
         var operationId = Interlocked.Increment(ref _lastOperationId);
+        var snapshot = _settings?.TextPreprocessing?.Clone();
+        var detectionOptions = _settings is null ? null : new LangDetectOptions(
+            _settings.LanguageDetector, _settings.LocalDetectorRate, _settings.SourceLangIfAuto,
+            _settings.FirstLanguage, _settings.SecondLanguage);
         return new TranslationOperation(
             this,
             _getTranslation,
@@ -35,7 +56,62 @@ internal sealed class TranslationResultCoordinator
             text,
             sourceLang,
             targetLang,
-            cancellationToken);
+            cancellationToken,
+            prepareInput: _preprocessingService is null ? null :
+                () => _preprocessingService.PrepareAsync(text, snapshot, cancellationToken),
+            detectionOptions: detectionOptions);
+    }
+
+    internal TranslationOperation BeginBackOperation(TranslationResultContext context, CancellationToken cancellationToken) =>
+        new(this, _getTranslation, Interlocked.Increment(ref _lastOperationId),
+            context.Input.OriginalText, context.SourceLang, context.TargetLang, cancellationToken, context.Input);
+
+    internal TranslationResultContext? GetResultContext(TranslateResult result)
+    {
+        var state = _channels.GetOrCreateValue(result);
+        lock (state.SyncRoot)
+            return state.Context;
+    }
+
+    internal void BindResultContext(TranslateResult result, long operationId, TranslationResultContext context)
+    {
+        if (TryPublish(result, operationId, () =>
+        {
+            var state = _channels.GetOrCreateValue(result);
+            state.Context = context;
+            state.PreparedInput = context.Input;
+        })) RequestContextChanged?.Invoke();
+    }
+
+    internal void BindPreparedInput(object channel, long operationId, PreparedTranslationInput input)
+    {
+        if (TryPublish(channel, operationId, () => _channels.GetOrCreateValue(channel).PreparedInput = input))
+            RequestContextChanged?.Invoke();
+    }
+
+    internal IReadOnlyList<TextReplacementRequest> GetPreparedRequests(IEnumerable<Service> services, string originalText)
+    {
+        var requests = new List<TextReplacementRequest>();
+        foreach (var service in services.Where(service => service.IsEnabled &&
+            (service.Options?.ExecMode != ExecutionMode.Pinned || service.Options.TemporaryDisplay)))
+        {
+            object? channel = service.Plugin switch
+            {
+                ITranslatePlugin plugin => plugin.TransResult,
+                IDictionaryPlugin plugin => plugin.DictionaryResult,
+                _ => null
+            };
+            if (channel is null) continue;
+            var state = _channels.GetOrCreateValue(channel);
+            lock (state.SyncRoot)
+            {
+                if (state.PreparedInput is { } input && input.OriginalText == originalText)
+                    requests.Add(new(input.RequestText, service.DisplayName));
+            }
+        }
+        return requests.GroupBy(request => request.RequestText, StringComparer.Ordinal)
+            .Select(group => new TextReplacementRequest(group.Key,
+                string.Join(" / ", group.Select(request => request.ServiceNames).Distinct()))).ToArray();
     }
 
     internal TranslationOperation BeginAutomaticOperation(
@@ -58,8 +134,7 @@ internal sealed class TranslationResultCoordinator
     }
 
     internal bool TryResetDictionary(DictionaryResult result, long operationId) =>
-        Application.Current.Dispatcher.Invoke(
-            () => TryReset(result, operationId));
+        InvokeOnDispatcher(() => TryReset(result, operationId));
 
     internal bool IsLatestAutomatic(long operationId) =>
         IsCurrent(_automaticSideEffectsChannel, operationId);
@@ -76,11 +151,28 @@ internal sealed class TranslationResultCoordinator
     internal bool TryActivate(object channel, long operationId) =>
         TryActivate(channel, operationId, static () => { });
 
-    internal bool TryReset(TranslateResult result, long operationId) =>
-        TryActivate(result, operationId, () => Reset(result));
+    internal bool TryReset(TranslateResult result, long operationId)
+    {
+        var reset = TryActivate(result, operationId, () =>
+        {
+            _channels.GetOrCreateValue(result).Context = null;
+            _channels.GetOrCreateValue(result).PreparedInput = null;
+            Reset(result);
+        });
+        if (reset) { NotifyProcessingStateChanged(); RequestContextChanged?.Invoke(); }
+        return reset;
+    }
 
-    internal bool TryReset(DictionaryResult result, long operationId) =>
-        TryActivate(result, operationId, () => Reset(result));
+    internal bool TryReset(DictionaryResult result, long operationId)
+    {
+        var reset = TryActivate(result, operationId, () =>
+        {
+            _channels.GetOrCreateValue(result).PreparedInput = null;
+            Reset(result);
+        });
+        if (reset) { NotifyProcessingStateChanged(); RequestContextChanged?.Invoke(); }
+        return reset;
+    }
 
     internal IDisposable Forward(
         TranslateResult source,
@@ -89,10 +181,12 @@ internal sealed class TranslationResultCoordinator
     {
         PropertyChangedEventHandler handler = (_, args) =>
         {
-            TryPublish(
+            var published = TryPublish(
                 target,
                 operationId,
                 () => CopyProperty(source, target, args.PropertyName));
+            if (published && args.PropertyName == nameof(TranslateResult.IsProcessing))
+                NotifyProcessingStateChanged();
         };
 
         source.PropertyChanged += handler;
@@ -108,9 +202,19 @@ internal sealed class TranslationResultCoordinator
     internal void PublishDictionary(
         DictionaryResult source,
         DictionaryResult target,
-        long operationId) =>
-        Application.Current.Dispatcher.Invoke(
-            () => TryPublish(source, target, operationId));
+        long operationId)
+    {
+        if (InvokeOnDispatcher(() => TryPublish(source, target, operationId)))
+            NotifyProcessingStateChanged();
+    }
+
+    private static T InvokeOnDispatcher<T>(Func<T> callback)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        return dispatcher is null || dispatcher.CheckAccess()
+            ? callback()
+            : dispatcher.Invoke(callback);
+    }
 
     internal bool TryPublish(object channel, long operationId, Action publish)
     {
@@ -227,6 +331,8 @@ internal sealed class TranslationResultCoordinator
     {
         internal object SyncRoot { get; } = new();
         internal long OperationId { get; set; }
+        internal TranslationResultContext? Context { get; set; }
+        internal PreparedTranslationInput? PreparedInput { get; set; }
     }
 
     private sealed class PropertyChangedSubscription(
